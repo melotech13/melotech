@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Simple Locations - MeloTech</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2E8B57;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2C3E50;
+        }
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.2s;
+        }
+        select:focus {
+            outline: none;
+            border-color: #2E8B57;
+            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+        }
+        select:disabled {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        .loading { background: #fff3cd; border: 1px solid #ffeaa7; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Simple Locations Test</h1>
+        <p>Testing the simplified preloaded locations system.</p>
+        
+        <div class="form-group">
+            <label for="province">Province:</label>
+            <select id="province">
+                <option value="">Initializing...</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="city_municipality">Municipality/City:</label>
+            <select id="city_municipality">
+                <option value="">Select Province first</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="barangay">Barangay:</label>
+            <select id="barangay">
+                <option value="">Select Municipality first</option>
+            </select>
+        </div>
+        
+        <div id="status" class="status loading">
+            🔄 Initializing locations system...
+        </div>
+    </div>
+    
+    <!-- Load the simple locations script -->
+    <script src="/js/locations-simple.js"></script>
+    
+    <script>
+        // Monitor the initialization
+        const statusDiv = document.getElementById('status');
+        
+        // Override console.log to show status
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            
+            const message = args.join(' ');
+            if (message.includes('✅ Locations data loaded')) {
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '✅ SUCCESS: Locations loaded successfully!';
+            } else if (message.includes('❌')) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ ERROR: ' + message;
+            } else if (message.includes('📡 Fetching')) {
+                statusDiv.className = 'status loading';
+                statusDiv.innerHTML = '📡 Loading locations data...';
+            }
+        };
+        
+        // Also monitor for errors
+        window.addEventListener('error', function(e) {
+            statusDiv.className = 'status error';
+            statusDiv.innerHTML = '❌ JavaScript Error: ' + e.message;
+        });
+        
+        // Check if locations are loaded after 5 seconds
+        setTimeout(() => {
+            const provinceSelect = document.getElementById('province');
+            if (provinceSelect.options.length <= 1 || provinceSelect.options[0].text.includes('Loading')) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '⏰ TIMEOUT: Locations failed to load within 5 seconds';
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
+
+

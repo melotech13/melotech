@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Locations Test</title>
+</head>
+<body>
+    <h1>Simple Locations Test</h1>
+    
+    <select id="province">
+        <option value="">Loading provinces...</option>
+    </select>
+    
+    <select id="city_municipality">
+        <option value="">Select Province first</option>
+    </select>
+    
+    <select id="barangay">
+        <option value="">Select Municipality first</option>
+    </select>
+    
+    <div id="status">Initializing...</div>
+    
+    <script src="/js/locations-simple.js"></script>
+    <script>
+        console.log('Simple test started');
+        document.getElementById('status').innerHTML = 'Locations system should auto-initialize...';
+        
+        // The locations-simple.js should auto-initialize
+        // Check console for debugging information
+    </script>
+</body>
+</html>

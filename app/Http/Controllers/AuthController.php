@@ -131,6 +131,12 @@ class AuthController extends Controller
         auth()->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
+        
+        // Check if it's an AJAX request (automatic logout)
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['message' => 'Logged out successfully']);
+        }
+        
+        return redirect()->route('home');
     }
 }

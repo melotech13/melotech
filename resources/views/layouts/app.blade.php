@@ -24,20 +24,25 @@
     <!-- Custom Styles -->
     <style>
         :root {
-            --primary-color: #28a745;
-            --secondary-color: #ffc107;
-            --accent-color: #fd7e14;
-            --dark-color: #343a40;
-            --light-color: #f8f9fa;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --info-color: #17a2b8;
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --dark-color: #2d3748;
+            --light-color: #f7fafc;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --danger-color: #f56565;
+            --info-color: #4299e1;
+            --text-dark: #2d3748;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --shadow-light: rgba(0, 0, 0, 0.08);
+            --shadow-medium: rgba(0, 0, 0, 0.12);
         }
 
         body {
             font-family: 'Instrument Sans', sans-serif;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
             min-height: 100vh;
         }
 
@@ -53,7 +58,7 @@
 
         .navbar-brand:hover {
             transform: translateY(-1px);
-            color: #1e7e34 !important;
+            color: #5a67d8 !important;
         }
 
         .navbar-brand img {
@@ -98,7 +103,7 @@
 
         .navbar-nav .nav-link:hover {
             color: var(--primary-color) !important;
-            background: rgba(40, 167, 69, 0.1);
+            background: rgba(102, 126, 234, 0.1);
             transform: translateY(-1px);
         }
 
@@ -106,28 +111,43 @@
             transform: translateY(0);
         }
 
-        .nav-link-register {
-            background: linear-gradient(45deg, var(--primary-color), #20c997);
+        .nav-link {
+            background: rgba(59, 130, 246, 0.8);
             color: white !important;
             border: none;
-            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(59, 130, 246, 0.9) !important;
+            color: white !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .nav-link-register {
+            background: rgba(34, 197, 94, 0.8);
+            color: white !important;
+            border: none;
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
         }
 
         .nav-link-register:hover {
-            background: linear-gradient(45deg, #218838, #1e7e34) !important;
+            background: rgba(34, 197, 94, 0.9) !important;
             color: white !important;
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
         }
 
         .user-dropdown {
-            background: rgba(40, 167, 69, 0.1);
+            background: rgba(102, 126, 234, 0.1);
             border-radius: 8px;
             padding: 0.75rem 1.25rem !important;
         }
 
         .user-dropdown:hover {
-            background: rgba(40, 167, 69, 0.15) !important;
+            background: rgba(102, 126, 234, 0.15) !important;
         }
 
         .dropdown-menu {
@@ -148,7 +168,7 @@
         }
 
         .dropdown-item:hover {
-            background: rgba(40, 167, 69, 0.1);
+            background: rgba(102, 126, 234, 0.1);
             color: var(--primary-color);
             transform: translateX(5px);
         }
@@ -166,15 +186,15 @@
         }
 
         .custom-toggler:hover {
-            background: rgba(40, 167, 69, 0.1);
+            background: rgba(102, 126, 234, 0.1);
         }
 
         .custom-toggler:focus {
-            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
 
         .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(40, 167, 69, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(102, 126, 234, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
         }
 
         .btn-primary {
@@ -183,8 +203,8 @@
         }
 
         .btn-primary:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
+            background-color: #5a67d8;
+            border-color: #5a67d8;
         }
 
         .card {
@@ -206,7 +226,7 @@
 
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
 
         .alert {
@@ -219,7 +239,7 @@
         }
 
         .hero-section {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #20c997 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             padding: 4rem 0;
         }
@@ -267,7 +287,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-lg">
         <div class="container">
-            <a class="navbar-brand" href="{{ url('/') }}">
+            <a class="navbar-brand" href="{{ Auth::check() ? route('dashboard') : route('home') }}">
                 <img src="{{ asset('images/melotech.png') }}" alt="MeloTech Logo" height="60" class="me-2">
                 MeloTech
             </a>
@@ -293,11 +313,11 @@
                         </li>
                     @else
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle user-dropdown" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle user-dropdown" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">
                                 <i class="fas fa-user-circle me-1"></i>
                                 {{ Auth::user()->name }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="{{ route('dashboard') }}">
                                     <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                                 </a></li>
@@ -360,32 +380,56 @@
             }
         });
 
-        // Smooth dropdown animations
+        // Bootstrap dropdown initialization
         document.addEventListener('DOMContentLoaded', function() {
-            const dropdowns = document.querySelectorAll('.dropdown-toggle');
-            dropdowns.forEach(dropdown => {
-                dropdown.addEventListener('mouseenter', function() {
-                    const menu = this.nextElementSibling;
-                    if (menu && menu.classList.contains('dropdown-menu')) {
-                        menu.style.display = 'block';
-                        menu.style.opacity = '0';
-                        setTimeout(() => {
-                            menu.style.opacity = '1';
-                        }, 10);
-                    }
-                });
-            });
-
-            // Close dropdowns when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.dropdown')) {
-                    const openDropdowns = document.querySelectorAll('.dropdown-menu.show');
-                    openDropdowns.forEach(dropdown => {
-                        dropdown.classList.remove('show');
-                    });
-                }
+            // Initialize Bootstrap dropdowns
+            const dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+            const dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl);
             });
         });
+
+        // Auto logout functionality
+        @if(Auth::check())
+        // Set up session timeout and auto logout
+        let sessionTimeout;
+        
+        function resetSessionTimeout() {
+            clearTimeout(sessionTimeout);
+            // Set timeout to 30 minutes (1800000 ms)
+            sessionTimeout = setTimeout(function() {
+                // Auto logout after 30 minutes of inactivity
+                fetch('{{ route("logout") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                    },
+                }).then(() => {
+                    window.location.href = '{{ route("home") }}';
+                });
+            }, 1800000);
+        }
+
+        // Reset timeout on user activity
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(function(event) {
+            document.addEventListener(event, resetSessionTimeout, true);
+        });
+
+        // Reset timeout on page focus
+        window.addEventListener('focus', resetSessionTimeout);
+        
+        // Initialize timeout
+        resetSessionTimeout();
+
+        // Handle page unload (browser close/refresh)
+        window.addEventListener('beforeunload', function() {
+            // Send logout request when page is closed/refreshed
+            navigator.sendBeacon('{{ route("logout") }}', JSON.stringify({
+                '_token': '{{ csrf_token() }}'
+            }));
+        });
+        @endif
     </script>
 </body>
 </html>

@@ -45,6 +45,12 @@
             font-family: 'Instrument Sans', sans-serif;
             background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
             min-height: 100vh;
+            padding-top: 0; /* Ensure no body padding */
+            margin: 0; /* Ensure no body margin */
+        }
+
+        html {
+            scroll-padding-top: 160px; /* Ensure smooth scrolling with navbar */
         }
 
         .navbar-brand {
@@ -329,12 +335,20 @@
             width: 100%;
             background: white;
             height: auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .navbar {
             position: relative;
             z-index: 1000;
             min-height: 80px;
+            height: auto;
+        }
+
+        /* Ensure navbar container has proper height */
+        .navbar-container {
+            height: auto;
+            min-height: 100px;
         }
 
         /* Ensure main content is properly positioned */
@@ -342,8 +356,8 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            margin-top: 120px; /* Fallback for older browsers */
-            margin-top: var(--navbar-height); /* Use CSS variable for navbar height */
+            margin-top: 140px !important; /* Force proper spacing */
+            padding-top: 2rem; /* Additional padding for better spacing */
         }
 
         /* Ensure the navbar doesn't cover content */
@@ -354,8 +368,10 @@
         /* Specific styling for crop growth pages */
         .crop-growth-container,
         .crop-tracking-container {
-            margin-top: 0;
-            padding-top: 2rem;
+            margin-top: 2rem !important; /* Force additional top margin */
+            padding-top: 2rem; /* Increased padding for better spacing */
+            position: relative;
+            z-index: 1;
         }
 
         /* Ensure proper spacing for crop growth content */
@@ -365,6 +381,37 @@
             z-index: 1;
         }
 
+        /* Additional spacing for crop growth page headers */
+        .crop-growth-container .header-section,
+        .crop-tracking-container .header-section {
+            margin-top: 2rem !important; /* Force additional top margin */
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Ensure content is not hidden behind navbar */
+        .crop-growth-container,
+        .crop-tracking-container {
+            position: relative;
+            z-index: 1;
+            background: transparent;
+            min-height: calc(100vh - 200px); /* Ensure minimum height */
+        }
+
+        /* Add some breathing room at the very top */
+        .crop-growth-container > *:first-child,
+        .crop-tracking-container > *:first-child {
+            margin-top: 1rem !important; /* Force margin */
+        }
+
+        /* Additional safety spacing */
+        .crop-growth-container::before,
+        .crop-tracking-container::before {
+            content: '';
+            display: block;
+            height: 2rem;
+            width: 100%;
+        }
 
         @media (max-width: 768px) {
             .hero-section {
@@ -377,7 +424,15 @@
             
             /* Ensure proper spacing on mobile */
             main {
-                margin-top: 100px !important; /* Smaller margin on mobile */
+                margin-top: 120px !important; /* Adequate margin on mobile */
+                padding-top: 1.5rem !important; /* Adequate padding on mobile */
+            }
+
+            /* Mobile-specific container spacing */
+            .crop-growth-container,
+            .crop-tracking-container {
+                margin-top: 1.5rem !important;
+                padding-top: 1.5rem;
             }
             
             .navbar {
@@ -551,6 +606,10 @@
                 const navbarHeight = navbar.offsetHeight;
                 main.style.marginTop = navbarHeight + 'px';
                 document.documentElement.style.setProperty('--navbar-height', navbarHeight + 'px');
+                
+                // Add additional spacing for better visual separation
+                const additionalSpacing = 20; // 20px additional spacing
+                main.style.paddingTop = (additionalSpacing / 16) + 'rem';
             }
         }
 

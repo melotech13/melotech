@@ -30,4 +30,23 @@ class Farm extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function cropGrowth()
+    {
+        return $this->hasOne(CropGrowth::class);
+    }
+
+    public function getOrCreateCropGrowth()
+    {
+        if (!$this->cropGrowth) {
+            $this->cropGrowth()->create([
+                'current_stage' => 'seedling',
+                'stage_progress' => 0,
+                'overall_progress' => 0,
+                'last_updated' => now(),
+            ]);
+            $this->refresh();
+        }
+        return $this->cropGrowth;
+    }
 }

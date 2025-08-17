@@ -30,6 +30,8 @@
         </div>
     </div>
 
+
+
     <!-- Farm Information -->
     @if(Auth::user()->farms->count() > 0)
         @foreach(Auth::user()->farms as $farm)
@@ -3376,6 +3378,8 @@ function displayHistoricalWeather(container, data) {
         gap: 0.5rem;
     }
 }
+
+
 
 /* Enhanced Weather Cards with Better Visual Hierarchy - Compact Size */
 .weather-card {

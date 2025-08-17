@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\CropGrowthController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -43,8 +44,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/weather/historical/{farmId}', [App\Http\Controllers\WeatherController::class, 'getHistoricalWeather'])->name('weather.historical');
     Route::get('/weather/test-connection', [App\Http\Controllers\WeatherController::class, 'testConnection'])->name('weather.test');
     
+    // Crop Growth routes
+    Route::get('/crop-growth', [CropGrowthController::class, 'index'])->name('crop-growth.index');
+    Route::get('/crop-growth/farm/{farm}', [CropGrowthController::class, 'show'])->name('crop-growth.show');
+    Route::post('/crop-growth/farm/{farm}/progress', [CropGrowthController::class, 'updateProgress'])->name('crop-growth.progress');
+    Route::post('/crop-growth/farm/{farm}/advance', [CropGrowthController::class, 'advanceStage'])->name('crop-growth.advance');
+    Route::post('/crop-growth/farm/{farm}/quick-update', [CropGrowthController::class, 'quickUpdate'])->name('crop-growth.quick-update');
+    
     // Debug route (only in debug mode)
     if (config('app.debug')) {
         Route::get('/weather/debug/geocoding', [App\Http\Controllers\WeatherController::class, 'debugGeocoding'])->name('weather.debug.geocoding');
+        
     }
 });

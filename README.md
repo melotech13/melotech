@@ -7,6 +7,27 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+# MeloTech - AI-Powered Watermelon Farming Platform
+
+MeloTech is a comprehensive web application designed to help watermelon farmers manage their crops with AI-powered insights and real-time weather data.
+
+## Features
+
+- **Farm Management**: Register and manage watermelon farms with detailed information
+- **AI Analysis**: Upload crop photos for AI-powered health assessment and growth predictions
+- **Real-time Weather**: Get current weather conditions and 5-day forecasts for farm locations
+- **Growth Tracking**: Monitor crop progress with visual progress bars and growth stages
+- **Location-based Services**: Integrated with Philippine PSGC data for accurate location management
+
+## Weather Feature
+
+The dashboard includes a comprehensive weather widget that provides:
+- Current weather conditions (temperature, humidity, wind, visibility)
+- 5-day weather forecast for planning farm activities
+- Location-specific weather data based on farm registration
+- Auto-refresh every 30 minutes with manual refresh option
+- Caching system to optimize API usage
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

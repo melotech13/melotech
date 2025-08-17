@@ -35,4 +35,16 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    
+    // Weather routes
+    Route::get('/weather/farm/{farmId}', [App\Http\Controllers\WeatherController::class, 'getFarmWeather'])->name('weather.farm');
+    Route::get('/weather/user-farm', [App\Http\Controllers\WeatherController::class, 'getUserFarmWeather'])->name('weather.user-farm');
+    Route::post('/weather/refresh/{farmId}', [App\Http\Controllers\WeatherController::class, 'refreshWeather'])->name('weather.refresh');
+    Route::get('/weather/historical/{farmId}', [App\Http\Controllers\WeatherController::class, 'getHistoricalWeather'])->name('weather.historical');
+    Route::get('/weather/test-connection', [App\Http\Controllers\WeatherController::class, 'testConnection'])->name('weather.test');
+    
+    // Debug route (only in debug mode)
+    if (config('app.debug')) {
+        Route::get('/weather/debug/geocoding', [App\Http\Controllers\WeatherController::class, 'debugGeocoding'])->name('weather.debug.geocoding');
+    }
 });

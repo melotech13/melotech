@@ -5,8 +5,28 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Farm;
 
-
+/**
+ * Class User
+ * 
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string $password
+ * @property string|null $phone
+ * @property bool $terms_accepted
+ * @property \Carbon\Carbon|null $email_verified_at
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * 
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Farm[] $farms
+ * 
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany farms()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereEmail($value)
+ */
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
@@ -48,6 +68,11 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Get the farms for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function farms()
     {
         return $this->hasMany(Farm::class);

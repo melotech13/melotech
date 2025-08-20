@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\CropGrowthController;
+use App\Models\User;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -50,6 +51,105 @@ Route::middleware('auth')->group(function () {
     Route::post('/crop-growth/farm/{farm}/progress', [CropGrowthController::class, 'updateProgress'])->name('crop-growth.progress');
     Route::post('/crop-growth/farm/{farm}/advance', [CropGrowthController::class, 'advanceStage'])->name('crop-growth.advance');
     Route::post('/crop-growth/farm/{farm}/quick-update', [CropGrowthController::class, 'quickUpdate'])->name('crop-growth.quick-update');
+    Route::get('/crop-growth/dashboard-data', [CropGrowthController::class, 'getDashboardData'])->name('crop-growth.dashboard-data');
+    Route::post('/crop-growth/farm/{farm}/force-update', [CropGrowthController::class, 'forceUpdateProgress'])->name('crop-growth.force-update');
+    
+    // Debug route for testing crop data
+    Route::get('/debug/crop-data', function() {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated']);
+        }
+        
+        $farms = $user->farms()->with('cropGrowth')->get();
+        $debugData = [];
+        
+        foreach ($farms as $farm) {
+            $cropGrowth = $farm->getOrCreateCropGrowth();
+            $debugData[] = [
+                'farm_id' => $farm->id,
+                'farm_name' => $farm->farm_name,
+                'planting_date' => $farm->planting_date,
+                'crop_growth_id' => $cropGrowth->id,
+                'current_stage' => $cropGrowth->current_stage,
+                'stage_progress' => $cropGrowth->stage_progress,
+                'overall_progress' => $cropGrowth->overall_progress,
+                'has_nutrient_predictions' => method_exists(app(CropGrowthController::class), 'getNutrientPredictions'),
+                'has_harvest_countdown' => method_exists(app(CropGrowthController::class), 'getHarvestCountdown'),
+            ];
+        }
+        
+        return response()->json([
+            'success' => true,
+            'debug_data' => $debugData,
+            'user_id' => $user->id,
+            'farms_count' => $farms->count()
+        ]);
+    })->name('debug.crop-data');
+    
+    // Test the dashboard data endpoint directly
+    Route::get('/test/dashboard-data', function() {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated']);
+        }
+        
+        try {
+            $controller = app(CropGrowthController::class);
+            $response = $controller->getDashboardData();
+            return $response;
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Exception occurred',
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    })->name('test.dashboard-data');
+    
+    // Simple test endpoint for crop insights
+    Route::get('/test/crop-insights', function() {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated']);
+        }
+        
+        $farms = $user->farms()->with('cropGrowth')->first();
+        if (!$farms) {
+            return response()->json(['error' => 'No farms found']);
+        }
+        
+        $cropGrowth = $farms->getOrCreateCropGrowth();
+        
+        // Test basic data structure
+        $testData = [
+            'farm_id' => $farms->id,
+            'farm_name' => $farms->farm_name,
+            'current_stage' => $cropGrowth->current_stage,
+            'stage_name' => 'Test Stage',
+            'nutrient_predictions' => [
+                'nitrogen' => 'Test Nitrogen',
+                'phosphorus' => 'Test Phosphorus',
+                'potassium' => 'Test Potassium',
+                'recommendations' => ['Test recommendation']
+            ],
+            'harvest_countdown' => [
+                'status' => 'test',
+                'message' => 'Test message',
+                'days' => 10,
+                'color' => 'primary',
+                'icon' => 'fas fa-test'
+            ]
+        ];
+        
+        return response()->json([
+            'success' => true,
+            'test_data' => $testData
+        ]);
+    })->name('test.crop-insights');
     
     // Debug route (only in debug mode)
     if (config('app.debug')) {

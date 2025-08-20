@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <title>{{ config('app.name', 'MeloTech') }} - @yield('title', 'Watermelon Farming Technology')</title>
 
@@ -13,10 +17,29 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Heroicons for Weather -->
+    <style>
+    .heroicon-sun::before { content: '☀️'; }
+    .heroicon-moon::before { content: '🌙'; }
+    .heroicon-cloud::before { content: '☁️'; }
+    .heroicon-cloud-sun::before { content: '⛅'; }
+    .heroicon-cloud-rain::before { content: '🌧️'; }
+    .heroicon-bolt::before { content: '⚡'; }
+    .heroicon-snowflake::before { content: '❄️'; }
+    .heroicon-eye-slash::before { content: '🌫️'; }
+    
+    .heroicon-sun, .heroicon-moon, .heroicon-cloud, .heroicon-cloud-sun, 
+    .heroicon-cloud-rain, .heroicon-bolt, .heroicon-snowflake, .heroicon-eye-slash {
+        font-style: normal;
+        font-size: 1.2em;
+        line-height: 1;
+    }
+    </style>
+
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
@@ -38,7 +61,7 @@
             --border-color: #e2e8f0;
             --shadow-light: rgba(0, 0, 0, 0.08);
             --shadow-medium: rgba(0, 0, 0, 0.12);
-            --navbar-height: 120px;
+            --navbar-height: 140px;
         }
 
         body {
@@ -76,7 +99,7 @@
         /* Enhanced Navbar Styling */
         .navbar {
             background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-            border-bottom: 1px solid rgba(0,0,0,0.08);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
             padding: 0.75rem 0;
             transition: all 0.3s ease;
         }
@@ -84,7 +107,7 @@
         .navbar.scrolled {
             background: rgba(255, 255, 255, 0.95) !important;
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
         }
 
         .navbar-nav .nav-item {
@@ -151,7 +174,7 @@
                 margin-right: 0;
                 text-align: center;
             }
-            
+
             .navbar-nav .nav-item .nav-link {
                 margin-right: 0;
                 margin-bottom: 0.25rem;
@@ -200,7 +223,7 @@
         .dropdown-menu {
             border: none;
             border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             padding: 0.5rem 0;
             margin-top: 0.5rem;
             min-width: 200px;
@@ -222,7 +245,7 @@
 
         .dropdown-divider {
             margin: 0.5rem 0;
-            border-color: rgba(0,0,0,0.08);
+            border-color: rgba(0, 0, 0, 0.08);
         }
 
         .custom-toggler {
@@ -265,13 +288,15 @@
             transform: translateY(-2px);
         }
 
-        .form-control, .form-select {
+        .form-control,
+        .form-select {
             border-radius: 10px;
             border: 2px solid #e9ecef;
             transition: border-color 0.2s ease-in-out;
         }
 
-        .form-control:focus, .form-select:focus {
+        .form-control:focus,
+        .form-select:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
@@ -342,8 +367,10 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            margin-top: 120px; /* Fallback for older browsers */
-            margin-top: var(--navbar-height); /* Use CSS variable for navbar height */
+            margin-top: 140px;
+            /* Fallback for older browsers */
+            margin-top: var(--navbar-height);
+            /* Use CSS variable for navbar height */
         }
 
         /* Ensure the navbar doesn't cover content */
@@ -351,43 +378,32 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        /* Specific styling for crop growth pages */
-        .crop-growth-container,
-        .crop-tracking-container {
-            margin-top: 0;
-            padding-top: 2rem;
-        }
-
-        /* Ensure proper spacing for crop growth content */
-        main .crop-growth-container,
-        main .crop-tracking-container {
-            position: relative;
-            z-index: 1;
-        }
 
 
         @media (max-width: 768px) {
             .hero-section {
                 padding: 2rem 0;
             }
-            
+
             .feature-card {
                 margin-bottom: 1rem;
             }
-            
+
             /* Ensure proper spacing on mobile */
             main {
-                margin-top: 100px !important; /* Smaller margin on mobile */
+                margin-top: 120px !important;
+                /* Smaller margin on mobile */
             }
-            
+
             .navbar {
-                min-height: 60px;
+                min-height: 70px;
             }
         }
     </style>
 
     @stack('styles')
 </head>
+
 <body class="d-flex flex-column">
     <!-- Navigation -->
     <header class="navbar-container">
@@ -397,69 +413,71 @@
                     <img src="{{ asset('images/melotech.png') }}" alt="MeloTech Logo" height="60" class="me-2">
                     MeloTech
                 </a>
-                
+
                 <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                
+
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         @guest
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('login') }}">
-                                    <i class="fas fa-sign-in-alt me-1"></i>
-                                    Login
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link nav-link-register" href="{{ route('register') }}">
-                                    <i class="fas fa-user-plus me-1"></i>
-                                    Register
-                                </a>
-                            </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i>
+                                Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-register" href="{{ route('register') }}">
+                                <i class="fas fa-user-plus me-1"></i>
+                                Register
+                            </a>
+                        </li>
                         @else
-                            @php
-                                $currentRoute = request()->route()->getName();
-                                $showNavTabs = !in_array($currentRoute, ['home', 'login', 'register']);
-                            @endphp
-                            
-                            @if($showNavTabs)
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('dashboard') }}">
-                                        <i class="fas fa-tachometer-alt me-1"></i>
-                                        Dashboard
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('crop-growth.index') }}">
-                                        <i class="fas fa-seedling me-1"></i>
-                                        Track Growth
-                                    </a>
-                                </li>
-                            @endif
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle user-dropdown" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">
-                                    <i class="fas fa-user-circle me-1"></i>
-                                    {{ Auth::user()->name }}
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="{{ route('dashboard') }}">
+                        @php
+                        $currentRoute = request()->route()->getName();
+                        $showNavTabs = !in_array($currentRoute, ['home', 'login', 'register']);
+                        @endphp
+
+                        @if($showNavTabs)
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard') }}">
+                                <i class="fas fa-tachometer-alt me-1"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('crop-growth.index') }}">
+                                <i class="fas fa-seedling me-1"></i>
+                                Track Growth
+                            </a>
+                        </li>
+                        @endif
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle user-dropdown" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">
+                                <i class="fas fa-user-circle me-1"></i>
+                                {{ Auth::user()->name }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ route('dashboard') }}">
                                         <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                                     </a></li>
-                                    <li><a class="dropdown-item" href="{{ route('crop-growth.index') }}">
+                                <li><a class="dropdown-item" href="{{ route('crop-growth.index') }}">
                                         <i class="fas fa-seedling me-2"></i>Track Growth
                                     </a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form method="POST" action="{{ route('logout') }}">
-                                            @csrf
-                                            <button type="submit" class="dropdown-item">
-                                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
                         @endguest
                     </ul>
                 </div>
@@ -489,15 +507,15 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
-    
+
     @stack('scripts')
-    
+
     <script>
         // Navbar scroll effect
         window.addEventListener('scroll', function() {
@@ -513,10 +531,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize Bootstrap dropdowns
             const dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-            const dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+            const dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
                 return new bootstrap.Dropdown(dropdownToggleEl);
             });
-            
+
             // Highlight active navigation tab if tabs are present
             const navTabs = document.querySelectorAll('.navbar-nav .nav-item:not(:last-child) .nav-link');
             if (navTabs.length > 0) {
@@ -528,12 +546,12 @@
         function highlightActiveNavTab() {
             const currentPath = window.location.pathname;
             const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
-            
+
             navLinks.forEach(link => {
                 const href = link.getAttribute('href');
                 if (href) {
                     // Check if current path matches the route
-                    if (currentPath === href || 
+                    if (currentPath === href ||
                         (href !== '/' && currentPath.startsWith(href))) {
                         link.classList.add('active');
                     } else {
@@ -557,48 +575,70 @@
         // Call on page load and resize
         window.addEventListener('load', adjustContentMargin);
         window.addEventListener('resize', adjustContentMargin);
+    </script>
 
+    <!-- Global data for JavaScript -->
+    <div id="app-data" 
+         data-authenticated="{{ Auth::check() ? 'true' : 'false' }}"
+         data-logout-url="{{ route('logout') }}"
+         data-home-url="{{ route('home') }}"
+         data-csrf-token="{{ csrf_token() }}"
+         style="display: none;">
+    </div>
+    
+    <script type="text/javascript">
+        // Global variables for JavaScript
+        const appData = document.getElementById('app-data');
+        window.isAuthenticated = appData.dataset.authenticated === 'true';
+        window.logoutUrl = appData.dataset.logoutUrl;
+        window.homeUrl = appData.dataset.homeUrl;
+        window.csrfToken = appData.dataset.csrfToken;
+    </script>
+
+
+    <script>
         // Auto logout functionality
-        @if(Auth::check())
-        // Set up session timeout and auto logout
-        let sessionTimeout;
-        
-        function resetSessionTimeout() {
-            clearTimeout(sessionTimeout);
-            // Set timeout to 30 minutes (1800000 ms)
-            sessionTimeout = setTimeout(function() {
-                // Auto logout after 30 minutes of inactivity
-                fetch('{{ route("logout") }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                    },
-                }).then(() => {
-                    window.location.href = '{{ route("home") }}';
-                });
-            }, 1800000);
+        if (window.isAuthenticated) {
+            // Set up session timeout and auto logout
+            let sessionTimeout;
+
+            function resetSessionTimeout() {
+                clearTimeout(sessionTimeout);
+                // Set timeout to 30 minutes (1800000 ms)
+                sessionTimeout = setTimeout(function() {
+                    // Auto logout after 30 minutes of inactivity
+                    fetch(window.logoutUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': window.csrfToken,
+                            'Content-Type': 'application/json',
+                        },
+                    }).then(() => {
+                        window.location.href = window.homeUrl;
+                    });
+                }, 1800000);
+            }
+
+            // Reset timeout on user activity
+            ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(function(event) {
+                document.addEventListener(event, resetSessionTimeout, true);
+            });
+
+            // Reset timeout on page focus
+            window.addEventListener('focus', resetSessionTimeout);
+
+            // Initialize timeout
+            resetSessionTimeout();
+
+            // Handle page unload (browser close/refresh)
+            window.addEventListener('beforeunload', function() {
+                // Send logout request when page is closed/refreshed
+                navigator.sendBeacon(window.logoutUrl, JSON.stringify({
+                    '_token': window.csrfToken
+                }));
+            });
         }
-
-        // Reset timeout on user activity
-        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(function(event) {
-            document.addEventListener(event, resetSessionTimeout, true);
-        });
-
-        // Reset timeout on page focus
-        window.addEventListener('focus', resetSessionTimeout);
-        
-        // Initialize timeout
-        resetSessionTimeout();
-
-        // Handle page unload (browser close/refresh)
-        window.addEventListener('beforeunload', function() {
-            // Send logout request when page is closed/refreshed
-            navigator.sendBeacon('{{ route("logout") }}', JSON.stringify({
-                '_token': '{{ csrf_token() }}'
-            }));
-        });
-        @endif
     </script>
 </body>
+
 </html>

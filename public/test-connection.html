@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .debug-info {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 MeloTech Connection Test</h1>
+        <p>This page will test the connection to your Laravel server and API endpoints.</p>
+        
+        <div id="results"></div>
+        
+        <button onclick="testConnection()">🔍 Test Connection</button>
+        <button onclick="testWithAuth()">🔐 Test with Auth (login first)</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
+        
+        <div id="debug-info" class="debug-info" style="display: none;"></div>
+        
+        <hr style="margin: 30px 0;">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Make sure Laravel server is running: <code>php artisan serve</code></li>
+            <li>Click "Test Connection" to test basic connectivity</li>
+            <li>If you need to test authenticated endpoints, first log in to MeloTech in another tab, then click "Test with Auth"</li>
+            <li>Check the browser console (F12) for detailed error information</li>
+        </ol>
+        
+        <div class="info">
+            <strong>Expected Server URL:</strong> http://localhost:8000<br>
+            <strong>Current Page URL:</strong> <span id="current-url"></span>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('current-url').textContent = window.location.href;
+        
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('debug-info').style.display = 'none';
+        }
+        
+        function showDebugInfo(info) {
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.textContent = info;
+            debugDiv.style.display = 'block';
+        }
+        
+        async function testConnection() {
+            addResult('🔄 Testing basic server connection...', 'info');
+            
+            try {
+                // Test basic server response
+                const response = await fetch('/');
+                
+                if (response.ok) {
+                    addResult('✅ Server is responding! Status: ' + response.status, 'success');
+                    
+                    // Test API endpoint (this will likely fail with 401, but that's expected)
+                    testApiEndpoint();
+                } else {
+                    addResult('❌ Server responded but with error status: ' + response.status, 'error');
+                }
+            } catch (error) {
+                addResult('❌ Connection failed: ' + error.message, 'error');
+                showDebugInfo('Connection Error Details:\n' + 
+                    'Error Name: ' + error.name + '\n' +
+                    'Error Message: ' + error.message + '\n' +
+                    'This usually means:\n' +
+                    '1. Laravel server is not running\n' +
+                    '2. Server is running on a different port\n' +
+                    '3. Firewall is blocking the connection\n\n' +
+                    'Solution: Run "php artisan serve" in your terminal');
+            }
+        }
+        
+        async function testApiEndpoint() {
+            addResult('🔄 Testing crop growth API endpoint...', 'info');
+            
+            try {
+                const response = await fetch('/crop-growth/dashboard-data', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+                
+                if (response.status === 401) {
+                    addResult('ℹ️ API endpoint is working but requires authentication (401 Unauthorized) - This is expected!', 'info');
+                } else if (response.ok) {
+                    addResult('✅ API endpoint is working and returned data!', 'success');
+                    const data = await response.json();
+                    showDebugInfo('API Response:\n' + JSON.stringify(data, null, 2));
+                } else {
+                    addResult('⚠️ API endpoint responded with status: ' + response.status, 'error');
+                }
+            } catch (error) {
+                addResult('❌ API test failed: ' + error.message, 'error');
+                console.error('API test error:', error);
+            }
+        }
+        
+        async function testWithAuth() {
+            addResult('🔄 Testing with authentication...', 'info');
+            
+            // Try to get CSRF token from meta tag (if available)
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            
+            if (!csrfToken) {
+                addResult('⚠️ No CSRF token found. Make sure you\'re logged in to MeloTech in another tab.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/crop-growth/dashboard-data', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+                
+                if (response.ok) {
+                    addResult('✅ Authenticated API call successful!', 'success');
+                    const data = await response.json();
+                    showDebugInfo('Authenticated API Response:\n' + JSON.stringify(data, null, 2));
+                } else if (response.status === 401) {
+                    addResult('❌ Still getting 401 Unauthorized. Please make sure you\'re logged in.', 'error');
+                } else {
+                    addResult('❌ API call failed with status: ' + response.status, 'error');
+                    const text = await response.text();
+                    showDebugInfo('Error Response:\n' + text);
+                }
+            } catch (error) {
+                addResult('❌ Authenticated test failed: ' + error.message, 'error');
+                console.error('Authenticated test error:', error);
+            }
+        }
+        
+        // Auto-run basic test on page load
+        window.addEventListener('load', () => {
+            setTimeout(testConnection, 500);
+        });
+    </script>
+</body>
+</html>

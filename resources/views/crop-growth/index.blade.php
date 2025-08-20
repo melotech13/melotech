@@ -67,7 +67,7 @@
                         $nextStageInfo = $nextStage ? $cropGrowth->getStageInfo($nextStage) : null;
                     @endphp
                     
-                    <div class="farm-card">
+                    <div class="farm-card" data-farm-id="{{ $farm->id }}">
                         <div class="farm-header">
                             <div class="farm-info">
                                 <h3 class="farm-name">{{ $farm->farm_name }}</h3>
@@ -87,7 +87,7 @@
                                     <span class="progress-percentage">{{ $cropGrowth->stage_progress }}%</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-fill" style="width: {{ $cropGrowth->stage_progress }}%"></div>
+                                    <div class="progress-fill" style="--progress-width: {{ $cropGrowth->stage_progress ?? 0 }}%; width: var(--progress-width);"></div>
                                 </div>
                             </div>
                             
@@ -97,7 +97,7 @@
                                     <span class="progress-percentage">{{ round($cropGrowth->overall_progress, 1) }}%</span>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-fill" style="width: {{ $cropGrowth->overall_progress }}%"></div>
+                                    <div class="progress-fill" style="--progress-width: {{ $cropGrowth->overall_progress ?? 0 }}%; width: var(--progress-width);"></div>
                                 </div>
                             </div>
                         </div>
@@ -135,6 +135,116 @@
                 @endforeach
             </div>
         </div>
+
+        <!-- Quick Health Check Section -->
+        @if($farms->count() > 0)
+            <div class="quick-actions-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-stethoscope section-icon"></i>
+                        Quick Health Check
+                    </h2>
+                    <p class="section-description">Answer simple questions to update your crops' progress</p>
+                </div>
+                
+                <div class="farms-health-grid">
+                    @foreach($farms as $farm)
+                        @php
+                            $cropGrowth = $farm->cropGrowth;
+                            if (!$cropGrowth) {
+                                $cropGrowth = $farm->getOrCreateCropGrowth();
+                            }
+                            $currentStageInfo = $cropGrowth->getStageInfo();
+                            $questions = isset($farmQuestions) && isset($farmQuestions[$farm->id]) ? $farmQuestions[$farm->id]['questions'] : [];
+                        @endphp
+                        
+                        <div class="farm-health-card">
+                            <div class="farm-health-header">
+                                <h3 class="farm-name">{{ $farm->farm_name }}</h3>
+                                <span class="status-badge {{ $cropGrowth->current_stage }}">
+                                    {{ $currentStageInfo['icon'] }} {{ $currentStageInfo['name'] }}
+                                </span>
+                            </div>
+                            
+                            <div class="questions-section">
+                                <div class="questions-grid">
+                                    @foreach($questions as $questionId => $question)
+                                        <div class="question-card" data-question-id="{{ $questionId }}" data-farm-id="{{ $farm->id }}">
+                                            <div class="question-content">
+                                                <h4 class="question-text">{{ $question['text'] }}</h4>
+                                                <div class="question-actions">
+                                                    <button class="answer-btn answer-yes" data-answer="true">
+                                                        <i class="fas fa-check"></i>
+                                                        <span>Yes</span>
+                                                    </button>
+                                                    <button class="answer-btn answer-no" data-answer="false">
+                                                        <i class="fas fa-times"></i>
+                                                        <span>No</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            
+            <!-- Manual Progress Update Section -->
+            <div class="manual-update-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-edit section-icon"></i>
+                        Manual Progress Update
+                    </h2>
+                    <p class="section-description">Set progress manually for your farms</p>
+                </div>
+                
+                <div class="farms-progress-grid">
+                    @foreach($farms as $farm)
+                        @php
+                            $cropGrowth = $farm->cropGrowth;
+                            if (!$cropGrowth) {
+                                $cropGrowth = $farm->getOrCreateCropGrowth();
+                            }
+                            $currentStageInfo = $cropGrowth->getStageInfo();
+                        @endphp
+                        
+                        <div class="farm-progress-card">
+                            <div class="farm-progress-header">
+                                <h3 class="farm-name">{{ $farm->farm_name }}</h3>
+                                <span class="status-badge {{ $cropGrowth->current_stage }}">
+                                    {{ $currentStageInfo['icon'] }} {{ $currentStageInfo['name'] }}
+                                </span>
+                            </div>
+                            
+                            <div class="manual-progress-section">
+                                <div class="progress-input-group">
+                                    <label for="progress-slider-{{ $farm->id }}">Stage Progress: <span id="progress-value-{{ $farm->id }}">{{ $cropGrowth->stage_progress }}%</span></label>
+                                    <input type="range" id="progress-slider-{{ $farm->id }}" min="0" max="100" value="{{ $cropGrowth->stage_progress }}" class="progress-slider" data-farm-id="{{ $farm->id }}">
+                                    <div class="slider-labels">
+                                        <span>0%</span>
+                                        <span>100%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="notes-section">
+                                    <label for="progress-notes-{{ $farm->id }}">Notes (optional):</label>
+                                    <textarea id="progress-notes-{{ $farm->id }}" placeholder="Add any notes about your crop's current condition..." class="notes-textarea"></textarea>
+                                </div>
+                                
+                                <button class="btn btn-primary update-progress-btn" data-farm-id="{{ $farm->id }}">
+                                    <i class="fas fa-save me-1"></i>
+                                    Update Progress
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     @else
         <!-- No Farms Message -->
         <div class="no-farms-section">
@@ -544,6 +654,259 @@
     line-height: 1.6;
 }
 
+/* Quick Actions Section */
+.quick-actions-section {
+    margin-bottom: 2.5rem;
+}
+
+.section-description {
+    color: #64748b;
+    margin-top: 0.5rem;
+    font-size: 1rem;
+}
+
+.farms-health-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 2rem;
+}
+
+.farm-health-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.farm-health-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+}
+
+.farm-health-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.farm-health-header .farm-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+/* Questions Section */
+.questions-section {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border-radius: 12px;
+    border: 1px solid #bbf7d0;
+}
+
+.questions-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.question-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 1px solid #bbf7d0;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+    transition: all 0.3s ease;
+}
+
+.question-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+}
+
+.question-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #166534;
+    margin: 0 0 1rem 0;
+    line-height: 1.4;
+}
+
+.question-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.answer-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.answer-btn.answer-yes {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.answer-btn.answer-yes:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.answer-btn.answer-no {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.answer-btn.answer-no:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+.answer-btn.answered {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Manual Update Section */
+.manual-update-section {
+    margin-bottom: 2.5rem;
+}
+
+.farms-progress-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.farm-progress-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.farm-progress-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+}
+
+.farm-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.farm-progress-header .farm-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+/* Manual Progress Section */
+.manual-progress-section {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.progress-input-group {
+    margin-bottom: 1.5rem;
+}
+
+.progress-input-group label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.progress-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: #e2e8f0;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    margin-bottom: 0.5rem;
+}
+
+.progress-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #10b981;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.progress-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #10b981;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.notes-section {
+    margin-bottom: 1.5rem;
+}
+
+.notes-section label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.notes-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    resize: vertical;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.notes-textarea:focus {
+    outline: none;
+    border-color: #10b981;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .crop-growth-container {
@@ -591,6 +954,22 @@
     .farm-actions {
         justify-content: center;
     }
+    
+    .farms-health-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .farms-progress-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .farm-health-header,
+    .farm-progress-header {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+        text-align: left;
+    }
 }
 </style>
 @endpush
@@ -603,6 +982,48 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             const farmId = this.dataset.farmId;
             advanceStage(farmId, this);
+        });
+    });
+    
+    // Initialize progress sliders
+    document.querySelectorAll('.progress-slider').forEach(slider => {
+        const farmId = slider.dataset.farmId;
+        const progressValue = document.getElementById(`progress-value-${farmId}`);
+        
+        if (progressValue) {
+            slider.addEventListener('input', function() {
+                progressValue.textContent = this.value + '%';
+            });
+        }
+    });
+    
+    // Handle question answers
+    document.querySelectorAll('.answer-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const questionCard = this.closest('.question-card');
+            const questionId = questionCard.dataset.questionId;
+            const farmId = questionCard.dataset.farmId;
+            const answer = this.classList.contains('answer-yes');
+            
+            // Disable all buttons in this question
+            questionCard.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('answered');
+            });
+            
+            // Send answer to server
+            submitAnswer(questionId, answer, questionCard, farmId);
+        });
+    });
+    
+    // Handle manual progress update
+    document.querySelectorAll('.update-progress-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const farmId = this.dataset.farmId;
+            const progress = document.getElementById(`progress-slider-${farmId}`).value;
+            const notes = document.getElementById(`progress-notes-${farmId}`).value;
+            
+            updateProgress(farmId, progress, notes, this);
         });
     });
     
@@ -681,6 +1102,136 @@ function advanceStage(farmId, button) {
         button.disabled = false;
         button.innerHTML = '<i class="fas fa-arrow-up me-1"></i>Advance Stage';
     });
+}
+
+function submitAnswer(questionId, answer, questionCard, farmId) {
+    fetch(`/crop-growth/farm/${farmId}/quick-update`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            question_id: questionId,
+            answer: answer
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showNotification(data.message, 'success');
+            
+            // Update progress display for this farm
+            updateFarmProgressDisplay(farmId, data.crop_growth);
+            
+            // Check if stage advanced
+            if (data.stage_advanced) {
+                showNotification(`Stage advanced to ${data.new_stage}!`, 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            }
+        } else {
+            showNotification(data.message, 'error');
+            // Re-enable buttons on error
+            questionCard.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('answered');
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('An error occurred while submitting your answer.', 'error');
+        // Re-enable buttons on error
+        questionCard.querySelectorAll('.answer-btn').forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('answered');
+        });
+    });
+}
+
+function updateProgress(farmId, progress, notes, button) {
+    // Disable button
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Updating...';
+    
+    fetch(`/crop-growth/farm/${farmId}/progress`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            stage_progress: progress,
+            notes: notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            
+            // Update progress display for this farm
+            updateFarmProgressDisplay(farmId, data.crop_growth);
+            
+            // Check if stage can be advanced
+            if (data.can_advance) {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }
+        } else {
+            showNotification(data.message, 'error');
+        }
+        
+        // Re-enable button
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-save me-1"></i>Update Progress';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('An error occurred while updating progress.', 'error');
+        
+        // Re-enable button
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-save me-1"></i>Update Progress';
+    });
+}
+
+function updateFarmProgressDisplay(farmId, cropGrowth) {
+    // Update the main farm card progress bars
+    const farmCard = document.querySelector(`.farm-card[data-farm-id="${farmId}"]`);
+    if (farmCard) {
+        const stageProgressBar = farmCard.querySelector('.stage-progress .progress-fill');
+        const overallProgressBar = farmCard.querySelector('.overall-progress .progress-fill');
+        const stageProgressText = farmCard.querySelector('.stage-progress .progress-percentage');
+        const overallProgressText = farmCard.querySelector('.overall-progress .progress-percentage');
+        
+        if (stageProgressBar) {
+            stageProgressBar.style.width = `${cropGrowth.stage_progress}%`;
+        }
+        if (overallProgressBar) {
+            overallProgressBar.style.width = `${cropGrowth.overall_progress}%`;
+        }
+        if (stageProgressText) {
+            stageProgressText.textContent = `${cropGrowth.stage_progress}%`;
+        }
+        if (overallProgressText) {
+            overallProgressText.textContent = `${Math.round(cropGrowth.overall_progress * 10) / 10}%`;
+        }
+    }
+    
+    // Update the manual progress slider if it exists
+    const progressSlider = document.getElementById(`progress-slider-${farmId}`);
+    const progressValue = document.getElementById(`progress-value-${farmId}`);
+    if (progressSlider) {
+        progressSlider.value = cropGrowth.stage_progress;
+    }
+    if (progressValue) {
+        progressValue.textContent = `${cropGrowth.stage_progress}%`;
+    }
 }
 
 function showNotification(message, type) {

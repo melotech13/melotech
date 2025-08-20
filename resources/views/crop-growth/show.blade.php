@@ -62,7 +62,7 @@
                             <div class="current-stage-progress">
                                 <span class="progress-text">{{ $cropGrowth->stage_progress }}% Complete</span>
                                 <div class="progress-bar">
-                                    <div class="progress-fill" style="width: {{ $cropGrowth->stage_progress }}%"></div>
+                                    <div class="progress-fill" data-progress="{{ $cropGrowth->stage_progress }}"></div>
                                 </div>
                             </div>
                         @endif
@@ -116,58 +116,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Quick Questions -->
-            <div class="questions-section">
-                <h3>Quick Health Check</h3>
-                <p class="questions-intro">Answer these simple questions to update your crop progress:</p>
-                
-                <div class="questions-grid">
-                    
-                    @foreach($questions as $questionId => $question)
-                        <div class="question-card" data-question-id="{{ $questionId }}">
-                            <div class="question-content">
-                                <h4 class="question-text">{{ $question['text'] }}</h4>
-                                <div class="question-actions">
-                                    <button class="answer-btn answer-yes" data-answer="true">
-                                        <i class="fas fa-check"></i>
-                                        <span>Yes</span>
-                                    </button>
-                                    <button class="answer-btn answer-no" data-answer="false">
-                                        <i class="fas fa-times"></i>
-                                        <span>No</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <!-- Manual Progress Update -->
-            <div class="manual-progress-section">
-                <h3>Manual Progress Update</h3>
-                <p>Or set your progress manually:</p>
-                
-                <div class="progress-input-group">
-                    <label for="progress-slider">Stage Progress: <span id="progress-value">{{ $cropGrowth->stage_progress }}%</span></label>
-                    <input type="range" id="progress-slider" min="0" max="100" value="{{ $cropGrowth->stage_progress }}" class="progress-slider">
-                    <div class="slider-labels">
-                        <span>0%</span>
-                        <span>100%</span>
-                    </div>
-                </div>
-                
-                <div class="notes-section">
-                    <label for="progress-notes">Notes (optional):</label>
-                    <textarea id="progress-notes" placeholder="Add any notes about your crop's current condition..." class="notes-textarea"></textarea>
-                </div>
-                
-                <button class="btn btn-primary update-progress-btn" data-farm-id="{{ $farm->id }}">
-                    <i class="fas fa-save me-1"></i>
-                    Update Progress
-                </button>
             </div>
         </div>
     </div>
@@ -566,194 +514,6 @@
     letter-spacing: 0.05em;
 }
 
-/* Questions Section */
-.questions-section {
-    padding: 2rem;
-    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-    border-radius: 16px;
-    border: 1px solid #bbf7d0;
-}
-
-.questions-section h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #166534;
-    margin: 0 0 0.5rem 0;
-}
-
-.questions-intro {
-    color: #166534;
-    margin: 0 0 1.5rem 0;
-    font-size: 1rem;
-}
-
-.questions-grid {
-    display: grid;
-    gap: 1rem;
-}
-
-.question-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    border: 1px solid #bbf7d0;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
-    transition: all 0.3s ease;
-}
-
-.question-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
-}
-
-.question-text {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #166534;
-    margin: 0 0 1rem 0;
-    line-height: 1.4;
-}
-
-.question-actions {
-    display: flex;
-    gap: 1rem;
-}
-
-.answer-btn {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.answer-btn.answer-yes {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-}
-
-.answer-btn.answer-yes:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
-}
-
-.answer-btn.answer-no {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-}
-
-.answer-btn.answer-no:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
-}
-
-.answer-btn.answered {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-/* Manual Progress Section */
-.manual-progress-section {
-    padding: 2rem;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
-}
-
-.manual-progress-section h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #1e293b;
-    margin: 0 0 0.5rem 0;
-}
-
-.manual-progress-section p {
-    color: #64748b;
-    margin: 0 0 1.5rem 0;
-}
-
-.progress-input-group {
-    margin-bottom: 1.5rem;
-}
-
-.progress-input-group label {
-    display: block;
-    font-weight: 600;
-    color: #475569;
-    margin-bottom: 0.5rem;
-}
-
-.progress-slider {
-    width: 100%;
-    height: 8px;
-    border-radius: 4px;
-    background: #e2e8f0;
-    outline: none;
-    -webkit-appearance: none;
-    margin-bottom: 0.5rem;
-}
-
-.progress-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #10b981;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-}
-
-.progress-slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #10b981;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-}
-
-.slider-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    color: #64748b;
-}
-
-.notes-section {
-    margin-bottom: 1.5rem;
-}
-
-.notes-section label {
-    display: block;
-    font-weight: 600;
-    color: #475569;
-    margin-bottom: 0.5rem;
-}
-
-.notes-textarea {
-    width: 100%;
-    min-height: 100px;
-    padding: 0.75rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    resize: vertical;
-    font-family: inherit;
-    transition: border-color 0.3s ease;
-}
-
-.notes-textarea:focus {
-    outline: none;
-    border-color: #10b981;
-}
-
 /* Advancement Section */
 .advancement-section {
     background: white;
@@ -882,45 +642,12 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize progress slider
-    const progressSlider = document.getElementById('progress-slider');
-    const progressValue = document.getElementById('progress-value');
-    
-    if (progressSlider && progressValue) {
-        progressSlider.addEventListener('input', function() {
-            progressValue.textContent = this.value + '%';
-        });
-    }
-    
-    // Handle question answers
-    document.querySelectorAll('.answer-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const questionCard = this.closest('.question-card');
-            const questionId = questionCard.dataset.questionId;
-            const answer = this.classList.contains('answer-yes');
-            
-            // Disable all buttons in this question
-            questionCard.querySelectorAll('.answer-btn').forEach(btn => {
-                btn.disabled = true;
-                btn.classList.add('answered');
-            });
-            
-            // Send answer to server
-            submitAnswer(questionId, answer, questionCard);
-        });
+    // Initialize progress bars
+    const progressFills = document.querySelectorAll('.progress-fill[data-progress]');
+    progressFills.forEach(element => {
+        const progress = element.getAttribute('data-progress');
+        element.style.width = progress + '%';
     });
-    
-    // Handle manual progress update
-    const updateProgressBtn = document.querySelector('.update-progress-btn');
-    if (updateProgressBtn) {
-        updateProgressBtn.addEventListener('click', function() {
-            const farmId = this.dataset.farmId;
-            const progress = document.getElementById('progress-slider').value;
-            const notes = document.getElementById('progress-notes').value;
-            
-            updateProgress(farmId, progress, notes, this);
-        });
-    }
     
     // Handle stage advancement
     const advanceStageBtn = document.querySelector('.advance-stage-btn');
@@ -932,103 +659,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function submitAnswer(questionId, answer, questionCard) {
-    const farmId = window.location.pathname.split('/').pop();
-    
-    fetch(`/crop-growth/farm/${farmId}/quick-update`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            question_id: questionId,
-            answer: answer
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Show success message
-            showNotification(data.message, 'success');
-            
-            // Update progress display
-            updateProgressDisplay(data.crop_growth);
-            
-            // Check if stage advanced
-            if (data.stage_advanced) {
-                showNotification(`Stage advanced to ${data.new_stage}!`, 'success');
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
-            }
-        } else {
-            showNotification(data.message, 'error');
-            // Re-enable buttons on error
-            questionCard.querySelectorAll('.answer-btn').forEach(btn => {
-                btn.disabled = false;
-                btn.classList.remove('answered');
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification('An error occurred while submitting your answer.', 'error');
-        // Re-enable buttons on error
-        questionCard.querySelectorAll('.answer-btn').forEach(btn => {
-            btn.disabled = false;
-            btn.classList.remove('answered');
-        });
-    });
-}
 
-function updateProgress(farmId, progress, notes, button) {
-    // Disable button
-    button.disabled = true;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Updating...';
-    
-    fetch(`/crop-growth/farm/${farmId}/progress`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            stage_progress: progress,
-            notes: notes
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showNotification(data.message, 'success');
-            
-            // Update progress display
-            updateProgressDisplay(data.crop_growth);
-            
-            // Check if stage can be advanced
-            if (data.can_advance) {
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-            }
-        } else {
-            showNotification(data.message, 'error');
-        }
-        
-        // Re-enable button
-        button.disabled = false;
-        button.innerHTML = '<i class="fas fa-save me-1"></i>Update Progress';
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification('An error occurred while updating progress.', 'error');
-        
-        // Re-enable button
-        button.disabled = false;
-        button.innerHTML = '<i class="fas fa-save me-1"></i>Update Progress';
-    });
-}
 
 function advanceStage(farmId, button) {
     // Disable button

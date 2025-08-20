@@ -75,12 +75,13 @@ class LocationController extends Controller
             return response('', 304);
         }
 
-        return response()
-            ->file($filePath)
-            ->header('Content-Type', 'application/json')
-            ->header('Cache-Control', 'public, max-age=86400') // Cache for 24 hours
-            ->header('ETag', $etag)
-            ->header('Last-Modified', gmdate('D, d M Y H:i:s T', $lastModified));
+        $response = response()->file($filePath);
+        $response->headers->set('Content-Type', 'application/json');
+        $response->headers->set('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+        $response->headers->set('ETag', $etag);
+        $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s T', $lastModified));
+        
+        return $response;
     }
 }
 

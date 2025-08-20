@@ -21,6 +21,9 @@
                     Welcome back, {{ Auth::user()->name }}
                 </h1>
                 <p class="welcome-subtitle">Your watermelon farm is ready for AI-powered insights and analysis</p>
+                <div class="sync-status">
+
+                </div>
             </div>
             <div class="welcome-visual">
                 <div class="welcome-circle">
@@ -35,15 +38,23 @@
     <!-- Farm Information -->
     @if(Auth::user()->farms->count() > 0)
         @foreach(Auth::user()->farms as $farm)
-        <div class="section">
+        <div class="section" id="farm-section-{{ $farm->id }}">
             <div class="section-header">
                 <h2 class="section-title">
                     <i class="fas fa-tractor section-icon"></i>
                     Farm Overview
                 </h2>
+                <div class="farm-actions">
+                    <button class="btn btn-sm btn-outline-primary refresh-crop-data" data-farm-id="{{ $farm->id }}">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning force-update-progress" data-farm-id="{{ $farm->id }}" title="Force update progress based on time">
+                        <i class="fas fa-clock"></i> Update Time
+                    </button>
+                </div>
             </div>
             
-            <div class="farm-grid">
+            <div class="farm-grid" id="farm-grid-{{ $farm->id }}">
                 <div class="farm-card">
                     <div class="card-header">
                         <i class="fas fa-info-circle card-icon"></i>
@@ -74,98 +85,43 @@
                         <i class="fas fa-chart-line card-icon"></i>
                         <h3 class="card-title">Growth Progress</h3>
                     </div>
-                    <div class="card-content">
-                        <div class="progress-container">
-                            @php
-                                $plantingDate = $farm->planting_date;
-                                $currentDate = now();
-                                $harvestDate = $plantingDate->copy()->addDays(80);
-                                $totalDays = 80;
-                                
-                                // Check if planting date is in the future
-                                $isFuture = $plantingDate->isAfter($currentDate);
-                                
-                                if ($isFuture) {
-                                    // Future planting date
-                                    $daysUntilPlanting = $currentDate->diffInDays($plantingDate);
-                                    $progressPercentage = 0;
-                                    $daysElapsed = 0;
-                                    $daysRemaining = $totalDays;
-                                    $growthStage = 'Not Yet Planted';
-                                    $statusColor = 'secondary';
-                                } else {
-                                    // Past planting date - calculate real progress
-                                    $daysElapsed = $plantingDate->diffInDays($currentDate);
-                                    
-                                    // Calculate progress with higher precision
-                                    $progressPercentage = ($daysElapsed / $totalDays) * 100;
-                                    
-                                    // Ensure it's within bounds and round to 1 decimal
-                                    $progressPercentage = min(100, max(0, $progressPercentage));
-                                    $progressPercentage = round($progressPercentage, 1);
-                                    
-                                    // Round days to whole numbers for more accurate percentage calculation
-                                    $daysElapsed = round($daysElapsed);
-                                    $progressPercentage = ($daysElapsed / $totalDays) * 100;
-                                    $progressPercentage = min(100, max(0, $progressPercentage));
-                                    $progressPercentage = round($progressPercentage, 1);
-                                    
-                                    $daysRemaining = max(0, $totalDays - $daysElapsed);
-                                    
-                                    // Determine growth stage and status based on actual progress
-                                    if ($progressPercentage >= 100) {
-                                        $growthStage = 'Ready for Harvest';
-                                        $statusColor = 'success';
-                                    } elseif ($progressPercentage >= 75) {
-                                        $growthStage = 'Fruit Development';
-                                        $statusColor = 'warning';
-                                    } elseif ($progressPercentage >= 50) {
-                                        $growthStage = 'Flowering';
-                                        $statusColor = 'info';
-                                    } elseif ($progressPercentage >= 25) {
-                                        $growthStage = 'Vegetative Growth';
-                                        $statusColor = 'primary';
-                                    } else {
-                                        $growthStage = 'Early Growth';
-                                        $statusColor = 'secondary';
-                                    }
-                                }
-                            @endphp
-                            <div class="growth-stage">
-                                <span class="stage-badge {{ $statusColor }}">{{ $growthStage }}</span>
+                    <div class="card-content" id="growth-content-{{ $farm->id }}">
+                        <div class="crop-loading">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading crop data...</span>
                             </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: {{ $progressPercentage }}%"></div>
-                            </div>
-                            <span class="progress-text">{{ number_format($progressPercentage, 1) }}% Complete</span>
-                        </div>
-                        <div class="harvest-info">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>Estimated harvest: {{ $harvestDate->format('M d, Y') }}</span>
-                        </div>
-                        <div class="growth-stats">
-                            @if ($isFuture)
-                                <div class="stat-item">
-                                    <i class="fas fa-calendar-plus"></i>
-                                    <span>Days until planting: {{ round($daysUntilPlanting) }}</span>
-                                </div>
-                                <div class="stat-item">
-                                    <i class="fas fa-hourglass-half"></i>
-                                    <span>Growth period: {{ $totalDays }} days</span>
-                                </div>
-                            @else
-                                <div class="stat-item">
-                                    <i class="fas fa-hourglass-half"></i>
-                                    <span>Days remaining: {{ round($daysRemaining) }}</span>
-                                </div>
-                            @endif
+                            <p class="mt-2">Loading crop growth data...</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         @endforeach
+    @else
+        <!-- No Farms Message -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-tractor section-icon"></i>
+                    Farm Overview
+                </h2>
+            </div>
+            <div class="no-farms-message">
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-seedling" style="font-size: 4rem; color: #64748b; opacity: 0.5;"></i>
+                    </div>
+                    <h3 class="mb-3" style="color: #64748b;">No Farms Found</h3>
+                    <p class="mb-4" style="color: #94a3b8;">You haven't created any farms yet. Create your first farm to start tracking crop growth!</p>
+                    <a href="{{ route('crop-growth.index') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Your First Farm
+                    </a>
+                </div>
+            </div>
+        </div>
     @endif
+
+
 
     <!-- Weather Information -->
     @if(Auth::user()->farms->count() > 0)
@@ -207,6 +163,8 @@
         </div>
         
         <div class="actions-grid">
+
+            
             <div class="action-card">
                 <div class="action-icon">
                     <i class="fas fa-camera"></i>
@@ -302,15 +260,536 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Load weather data for all farms
-    loadWeatherData();
+    console.log('Dashboard loaded, initializing crop data monitoring...');
     
-    // Set up refresh buttons
-    setupRefreshButtons();
+    // Check if we have the required elements
+    const farmSections = document.querySelectorAll('[id^="farm-section-"]');
+    console.log(`Found ${farmSections.length} farm sections`);
     
-    // Auto-refresh weather every 30 minutes
-    setInterval(loadWeatherData, 30 * 60 * 1000);
+    // Wait a bit to ensure authentication is properly loaded
+    setTimeout(() => {
+        if (isUserAuthenticated()) {
+            console.log('User authenticated, checking for farms...');
+            
+            if (userHasFarms()) {
+                console.log('User has farms, loading crop data...');
+                
+                // Load crop growth data for all farms
+                try {
+                    loadCropGrowthData();
+                } catch (error) {
+                    console.error('Error loading crop growth data:', error);
+                }
+            } else {
+                console.log('User has no farms, skipping crop data loading');
+            }
+            
+            // Load weather data for all farms
+            try {
+                loadWeatherData();
+            } catch (error) {
+                console.error('Error loading weather data:', error);
+            }
+            
+            // Set up refresh buttons
+            try {
+                setupRefreshButtons();
+                setupCropRefreshButtons();
+            } catch (error) {
+                console.error('Error setting up refresh buttons:', error);
+            }
+            
+            // Auto-refresh crop data every 15 minutes
+            setInterval(() => {
+                try {
+                    loadCropGrowthData();
+                } catch (error) {
+                    console.error('Error in auto-refresh crop data:', error);
+                }
+            }, 15 * 60 * 1000);
+            
+            // Auto-refresh weather every 30 minutes
+            setInterval(() => {
+                try {
+                    loadWeatherData();
+                } catch (error) {
+                    console.error('Error in auto-refresh weather:', error);
+                }
+            }, 30 * 60 * 1000);
+            
+            // Real-time crop data monitoring (check every 2 minutes for changes)
+            setInterval(() => {
+                try {
+                    checkCropDataUpdates();
+                } catch (error) {
+                    console.error('Error in crop data monitoring:', error);
+                }
+            }, 2 * 60 * 1000);
+        } else {
+            console.error('User not authenticated, cannot load crop data');
+            // Show authentication error on all insights containers
+            const insightsContainers = document.querySelectorAll('[id^="insights-container-"]');
+            insightsContainers.forEach(container => {
+                displayCropInsightsError(container, 'Authentication required. Please log in to view crop insights.');
+            });
+            
+            // Also show error on growth containers
+            const growthContainers = document.querySelectorAll('[id^="growth-content-"]');
+            growthContainers.forEach(container => {
+                displayCropGrowthError(container, 'Authentication required. Please log in to view crop data.');
+            });
+            
+            // Show manual refresh option
+            showManualRefreshOption();
+        }
+    }, 500);
 });
+
+function loadCropGrowthData() {
+    console.log('Loading crop growth data...');
+    
+    // Check if user is authenticated
+    if (!isUserAuthenticated()) {
+        console.error('User not authenticated, cannot load crop data');
+        return;
+    }
+    
+    const growthContainers = document.querySelectorAll('[id^="growth-content-"]');
+    const insightsContainers = document.querySelectorAll('[id^="insights-container-"]');
+    
+    console.log(`Found ${growthContainers.length} growth containers and ${insightsContainers.length} insights containers`);
+    
+    if (growthContainers.length === 0 && insightsContainers.length === 0) {
+        console.log('No containers found, user may not have farms or containers not loaded yet');
+        
+        // Check if we have farm sections but no growth containers (indicating farms exist but containers failed to render)
+        const farmSections = document.querySelectorAll('[id^="farm-section-"]');
+        if (farmSections.length > 0) {
+            console.error('Farm sections found but no growth containers - potential rendering issue');
+            farmSections.forEach(section => {
+                const farmId = section.id.replace('farm-section-', '');
+                const growthContainer = document.getElementById(`growth-content-${farmId}`);
+                if (growthContainer) {
+                    displayCropGrowthError(growthContainer, 'Failed to initialize crop growth display. Please refresh the page.');
+                }
+            });
+        }
+        return;
+    }
+    
+    growthContainers.forEach(container => {
+        try {
+            const farmId = container.id.replace('growth-content-', '');
+            console.log(`Loading crop growth data for farm ${farmId}`);
+            fetchCropGrowthData(farmId);
+        } catch (error) {
+            console.error('Error processing growth container:', error);
+        }
+    });
+    
+    insightsContainers.forEach(container => {
+        try {
+            const farmId = container.id.replace('insights-container-', '');
+            console.log(`Loading crop insights data for farm ${farmId}`);
+            fetchCropInsightsData(farmId);
+        } catch (error) {
+            console.error('Error processing insights container:', error);
+        }
+    });
+}
+
+function isUserAuthenticated() {
+    // Check for CSRF token
+    const token = document.querySelector('meta[name="csrf-token"]');
+    if (!token) {
+        console.log('CSRF token not found');
+        return false;
+    }
+    
+    // Check if we're on the dashboard page (not login/register)
+    const currentPath = window.location.pathname;
+    if (currentPath === '/login' || currentPath === '/register') {
+        console.log('On login/register page');
+        return false;
+    }
+    
+    // Check if user name is displayed (indicating authentication)
+    const userNameElement = document.querySelector('.welcome-title');
+    if (userNameElement && userNameElement.textContent.includes('Welcome back')) {
+        console.log('User name found in welcome title');
+        return true;
+    }
+    
+    // Additional check: look for logout button or user dropdown
+    const logoutButton = document.querySelector('a[href*="logout"], button[onclick*="logout"]');
+    if (logoutButton) {
+        console.log('Logout button found');
+        return true;
+    }
+    
+    console.log('No authentication indicators found');
+    return false;
+}
+
+function userHasFarms() {
+    const farmSections = document.querySelectorAll('[id^="farm-section-"]');
+    const noFarmsMessage = document.querySelector('.no-farms-message');
+    
+    console.log(`Farm sections found: ${farmSections.length}, No farms message: ${noFarmsMessage ? 'present' : 'absent'}`);
+    
+    return farmSections.length > 0;
+}
+
+function checkCropDataUpdates() {
+    // Check if user is still authenticated
+    if (!isUserAuthenticated()) {
+        console.log('User no longer authenticated, stopping crop data updates');
+        return;
+    }
+    
+    // Check if any crop data has been updated recently
+    fetch('/crop-growth/dashboard-data', {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin'
+    })
+        .then(response => {
+            // Check if response is HTML (login page) instead of JSON
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('text/html')) {
+                throw new Error('Session expired - received HTML response');
+            }
+            
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.data.length > 0) {
+                // Check if any farm data has been updated in the last 5 minutes
+                const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+                const updatedFarms = data.data.filter(farm => {
+                    const lastUpdated = new Date(farm.last_updated);
+                    return lastUpdated > fiveMinutesAgo;
+                });
+                
+                if (updatedFarms.length > 0) {
+                    console.log('Crop data updates detected, refreshing dashboard...');
+                    
+                    // Show notification for updates
+                    updatedFarms.forEach(farm => {
+                        showCropUpdateNotification(farm);
+                    });
+                    
+                    // Refresh the dashboard data
+                    loadCropGrowthData();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error checking for crop data updates:', error);
+            
+            if (error.message.includes('Session expired')) {
+                console.log('Session expired, showing notification');
+                showSessionExpiredNotification();
+            } else if (error.message.includes('HTML response')) {
+                console.log('Received HTML response, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Authentication required')) {
+                console.log('Authentication required, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('CSRF token not found')) {
+                console.log('CSRF token not found, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Not authenticated')) {
+                console.log('Not authenticated, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Failed to load')) {
+                console.log('Failed to load data, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Farm data not found')) {
+                console.log('Farm data not found, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('API returned error')) {
+                console.log('API returned error, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Missing required data')) {
+                console.log('Missing required data, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Incomplete data')) {
+                console.log('Incomplete data, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Farm data not found for ID')) {
+                console.log('Farm data not found for ID, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Error fetching crop insights data')) {
+                console.log('Error fetching crop insights data, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Error checking for crop data updates')) {
+                console.log('Error checking for crop data updates, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Error fetching crop growth data')) {
+                console.log('Error fetching crop growth data, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Error fetching weather data')) {
+                console.log('Error fetching weather data, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Error checking for weather data updates')) {
+                console.log('Error checking for weather data updates, showing manual refresh option');
+                showManualRefreshOption();
+            } else if (error.message.includes('Error fetching crop data')) {
+                console.log('Error fetching crop data, showing manual refresh option');
+                showManualRefreshOption();
+            }
+        });
+}
+
+function showCropUpdateNotification(farmData) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'crop-update-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <div class="notification-icon">
+                <i class="fas fa-seedling"></i>
+            </div>
+            <div class="notification-text">
+                <h5>Crop Growth Updated</h5>
+                <p>${farmData.farm_name}: ${farmData.stage_name} - ${Math.round(farmData.stage_progress)}% complete</p>
+            </div>
+            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+    
+    // Update sync indicator to show recent activity
+    updateSyncIndicator(true);
+}
+
+function showSessionExpiredNotification() {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'session-expired-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <div class="notification-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="notification-text">
+                <h5>Session Expired</h5>
+                <p>Your session has expired. Please log in again to continue.</p>
+            </div>
+            <div class="notification-actions">
+                <a href="/login" class="btn btn-primary btn-sm">Login</a>
+                <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 10 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 10000);
+}
+
+function showRefreshNotification() {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'refresh-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <div class="notification-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="notification-text">
+                <h5>Page Refresh Required</h5>
+                <p>Please refresh the page to reload your session and view crop insights.</p>
+            </div>
+            <div class="notification-actions">
+                <button class="btn btn-primary btn-sm" onclick="window.location.reload()">Refresh Page</button>
+                <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 15 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 15000);
+}
+
+function redirectToLogin() {
+    // Show a brief message before redirecting
+    const notification = document.createElement('div');
+    notification.className = 'redirect-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <div class="notification-icon">
+                <i class="fas fa-sign-in-alt"></i>
+            </div>
+            <div class="notification-text">
+                <h5>Redirecting to Login</h5>
+                <p>Please log in to continue using the dashboard.</p>
+            </div>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Redirect after 2 seconds
+    setTimeout(() => {
+        window.location.href = '/login';
+    }, 2000);
+}
+
+function showManualRefreshOption() {
+    // Show a notification with manual refresh option
+    const notification = document.createElement('div');
+    notification.className = 'manual-refresh-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <div class="notification-icon">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+            <div class="notification-text">
+                <h5>Manual Refresh Required</h5>
+                <p>Click the refresh button below to reload your session and view crop insights.</p>
+            </div>
+            <div class="notification-actions">
+                <button class="btn btn-primary btn-sm" onclick="window.location.reload()">Refresh Now</button>
+                <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 20 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 20000);
+}
+
+function updateSyncIndicator(isActive = true) {
+    const indicator = document.getElementById('sync-indicator');
+    if (indicator) {
+        if (isActive) {
+            indicator.classList.add('active');
+            indicator.innerHTML = `
+                <i class="fas fa-sync-alt fa-spin"></i>
+                <span>Real-time crop monitoring active - Updates detected</span>
+            `;
+            
+            // Reset to normal state after 3 seconds
+            setTimeout(() => {
+                indicator.innerHTML = `
+                    <i class="fas fa-sync-alt fa-spin"></i>
+                    <span>Real-time crop monitoring active</span>
+                `;
+            }, 3000);
+        } else {
+            indicator.classList.remove('active');
+            indicator.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Crop monitoring paused</span>
+            `;
+        }
+    }
+}
+
+
+
+
+
+function forceUpdateCropProgress(farmId) {
+    // Call the backend to force update crop progress
+    fetch(`/crop-growth/farm/${farmId}/force-update`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success notification
+            showCropUpdateNotification({
+                farm_name: 'Farm',
+                stage_name: data.crop_growth.current_stage,
+                stage_progress: data.crop_growth.stage_progress
+            });
+            
+            // Refresh the data
+            fetchCropGrowthData(farmId);
+            fetchCropInsightsData(farmId);
+        } else {
+            console.error('Failed to force update:', data.message);
+            // Show error notification
+            const notification = document.createElement('div');
+            notification.className = 'crop-update-notification';
+            notification.style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <div class="notification-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="notification-text">
+                        <h5>Update Failed</h5>
+                        <p>${data.message}</p>
+                    </div>
+                    <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+        }
+    })
+    .catch(error => {
+        console.error('Error forcing update:', error);
+        // Refresh anyway to show current state
+        fetchCropGrowthData(farmId);
+        fetchCropInsightsData(farmId);
+    });
+}
+
+
+
+
 
 function loadWeatherData() {
     const weatherContainers = document.querySelectorAll('.weather-container');
@@ -321,14 +800,255 @@ function loadWeatherData() {
     });
 }
 
-function fetchWeatherData(farmId) {
+function fetchCropGrowthData(farmId) {
+    const container = document.getElementById(`growth-content-${farmId}`);
+    
+    if (!container) {
+        console.error(`Container not found for farm ${farmId}`);
+        return;
+    }
+    
+    // Show loading state
+    container.innerHTML = `
+        <div class="crop-loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading crop data...</p>
+        </div>
+    `;
+    
+    // Check authentication before making request
+    const token = document.querySelector('meta[name="csrf-token"]');
+    if (!token) {
+        console.error('CSRF token not found');
+        displayCropGrowthError(container, 'Authentication required. Please refresh the page.');
+        return;
+    }
+    
+    console.log('Making request to /crop-growth/dashboard-data with token:', token.getAttribute('content').substring(0, 10) + '...');
+    console.log('Farm ID:', farmId);
+    
+    // Add timeout and better error handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    fetch(`/crop-growth/dashboard-data`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token.getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin',
+        signal: controller.signal
+    })
+    .then(response => {
+        clearTimeout(timeoutId); // Clear the timeout
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        console.log('Response URL:', response.url);
+        
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error('Authentication required');
+            } else if (response.status === 403) {
+                throw new Error('Access denied');
+            } else if (response.status === 500) {
+                throw new Error('Server error');
+            } else if (response.status === 419) {
+                throw new Error('CSRF token expired. Please refresh the page.');
+            } else {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        console.log('Dashboard data received:', data);
+        
+        if (data.success) {
+            if (data.data && data.data.length > 0) {
+                const farmData = data.data.find(farm => farm.farm_id == farmId);
+                if (farmData) {
+                    console.log(`Found data for farm ${farmId}:`, farmData);
+                    displayCropGrowthData(container, farmData);
+                } else {
+                    console.error(`No data found for farm ${farmId} in response`);
+                    displayCropGrowthError(container, 'Farm data not found in response');
+                }
+            } else {
+                console.error('No farm data in response');
+                displayCropGrowthError(container, 'No farm data available');
+            }
+        } else {
+            console.error('API returned error:', data.message);
+            displayCropGrowthError(container, data.message || 'Failed to load crop data');
+        }
+    })
+    .catch(error => {
+        clearTimeout(timeoutId); // Clear the timeout
+        console.error('Error fetching crop growth data:', error);
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        
+        let errorMessage = 'Failed to load crop growth data. Please try again.';
+        let debugInfo = `Error: ${error.name} - ${error.message}`;
+        
+        if (error.name === 'AbortError') {
+            errorMessage = 'Request timed out. Please check your connection and try again.';
+            debugInfo += ' - Request was aborted due to timeout';
+        } else if (error.message.includes('Authentication required')) {
+            errorMessage = 'Please refresh the page and log in again.';
+        } else if (error.message.includes('CSRF token expired')) {
+            errorMessage = 'Session expired. Please refresh the page.';
+        } else if (error.message.includes('Access denied')) {
+            errorMessage = 'Access denied. Please check your permissions.';
+        } else if (error.message.includes('Server error')) {
+            errorMessage = 'Server error. Please try again later.';
+        } else if (error.message.includes('Failed to fetch')) {
+            errorMessage = 'Network error. The server might be down or unreachable. Please check if the Laravel server is running on http://localhost:8000';
+            debugInfo += ' - This usually means the Laravel development server is not running.';
+        } else if (error.message.includes('NetworkError')) {
+            errorMessage = 'Network connection failed. Check your internet connection.';
+        } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            errorMessage = 'Connection error. Please check if the server is running on http://localhost:8000';
+            debugInfo += ' - Make sure to run: php artisan serve';
+        } else if (error.name === 'TypeError') {
+            errorMessage = 'Connection error. Please check if the server is running.';
+        }
+        
+        console.log('Final error message:', errorMessage);
+        console.log('Debug info:', debugInfo);
+        
+        displayCropGrowthError(container, errorMessage);
+    });
+}
+
+function fetchCropInsightsData(farmId) {
+    const container = document.getElementById(`insights-container-${farmId}`);
+    
+    console.log(`Fetching crop insights for farm ${farmId}`);
+    
+    // Check if user is authenticated by looking for CSRF token
+    const token = document.querySelector('meta[name="csrf-token"]');
+    if (!token) {
+        console.error('CSRF token not found - user may not be authenticated');
+        displayCropInsightsError(container, 'Authentication required. Please refresh the page and try again.');
+        return;
+    }
+    
+    // Add timeout and better error handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    fetch(`/crop-growth/dashboard-data`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': token.getAttribute('content'),
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin',
+        signal: controller.signal
+    })
+        .then(response => {
+            clearTimeout(timeoutId); // Clear the timeout
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            
+            // Check if response is HTML (login page) instead of JSON
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('text/html')) {
+                throw new Error('Authentication required - received HTML response');
+            }
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Authentication required');
+                } else if (response.status === 403) {
+                    throw new Error('Access denied');
+                } else if (response.status === 419) {
+                    throw new Error('CSRF token expired. Please refresh the page.');
+                } else if (response.status === 500) {
+                    throw new Error('Server error');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            }
+            
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received data:', data);
+            if (data.success) {
+                const farmData = data.data.find(farm => farm.farm_id == farmId);
+                console.log('Found farm data:', farmData);
+                if (farmData) {
+                    displayCropInsightsData(container, farmData);
+                } else {
+                    console.error('Farm data not found for ID:', farmId);
+                    displayCropInsightsError(container, 'Farm data not found');
+                }
+            } else {
+                console.error('API returned error:', data.message);
+                displayCropInsightsError(container, data.message || 'Failed to load insights data');
+            }
+        })
+        .catch(error => {
+            clearTimeout(timeoutId); // Clear the timeout
+            console.error('Error fetching crop insights data:', error);
+            console.error('Error name:', error.name);
+            console.error('Error message:', error.message);
+            
+            let errorMessage = 'Failed to load insights data. Please try again.';
+            
+            if (error.name === 'AbortError') {
+                errorMessage = 'Request timed out. Please check your connection and try again.';
+            } else if (error.message.includes('Authentication required') || error.message.includes('HTML response')) {
+                errorMessage = 'Authentication required. Please refresh the page and log in again.';
+                showManualRefreshOption();
+            } else if (error.message.includes('CSRF token expired')) {
+                errorMessage = 'Session expired. Please refresh the page.';
+                showSessionExpiredNotification();
+            } else if (error.message.includes('Server error')) {
+                errorMessage = 'Server error. Please try again later.';
+            } else if (error.message.includes('Failed to fetch')) {
+                errorMessage = 'Network error. Please check if the server is running.';
+            } else if (error.message.includes('Farm data not found')) {
+                errorMessage = 'Farm data not found. Please refresh the page and try again.';
+                showManualRefreshOption();
+            } else {
+                errorMessage = error.message || 'Failed to load insights data. Please try again.';
+            }
+            
+            displayCropInsightsError(container, errorMessage);
+        });
+}
+
+function fetchWeatherData(farmId, forceRefresh = false) {
     const container = document.getElementById(`weather-container-${farmId}`);
     
-    fetch(`/weather/farm/${farmId}`)
+    // Use refresh endpoint if forcing refresh
+    const url = forceRefresh ? `/weather/farm/${farmId}/refresh` : `/weather/farm/${farmId}`;
+    
+    fetch(url)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 displayWeatherData(container, data.data);
+                if (forceRefresh) {
+                    // Show success message briefly
+                    const successMsg = document.createElement('div');
+                    successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 12px 20px; border-radius: 8px; z-index: 1000; font-size: 14px;';
+                    successMsg.innerHTML = '✅ Weather data refreshed successfully';
+                    document.body.appendChild(successMsg);
+                    setTimeout(() => successMsg.remove(), 3000);
+                }
             } else {
                 displayWeatherError(container, data.message, data.debug_info);
             }
@@ -339,20 +1059,432 @@ function fetchWeatherData(farmId) {
         });
 }
 
+function displayCropGrowthData(container, farmData) {
+    const {
+        current_stage,
+        stage_name,
+        stage_icon,
+        stage_color,
+        stage_progress,
+        overall_progress,
+        harvest_date_formatted,
+        days_remaining,
+        days_elapsed,
+        growth_status,
+        last_updated,
+        planting_date_formatted,
+        next_stage,
+        next_stage_name,
+        can_advance,
+        total_growth_period
+    } = farmData;
+    
+    // Calculate more accurate progress metrics
+    const progressMetrics = calculateAccurateProgress(farmData);
+    
+    container.innerHTML = `
+        <div class="growth-progress-compact">
+            <!-- Current Stage -->
+            <div class="stage-header">
+                <span class="stage-badge" style="background: ${stage_color};">
+                    ${stage_icon} ${stage_name}
+                </span>
+                <span class="stage-percent">${Math.round(stage_progress)}%</span>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${Math.max(2, stage_progress)}%; background: ${stage_color};"></div>
+                </div>
+                <div class="progress-text">${Math.round(stage_progress)}% Stage Complete</div>
+            </div>
+            
+            <!-- Key Info -->
+            <div class="growth-info">
+                <div class="info-row">
+                    <span class="info-label">Days Elapsed</span>
+                    <span class="info-value">${Math.round(days_elapsed)} days</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Days Remaining</span>
+                    <span class="info-value">${Math.round(days_remaining)} days</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Est. Harvest</span>
+                    <span class="info-value">${harvest_date_formatted}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Overall Progress</span>
+                    <span class="info-value">${Math.round(overall_progress)}% Complete</span>
+                </div>
+            </div>
+            
+            <!-- Status -->
+            <div class="growth-status">
+                <div class="status-badge ${growth_status.color}">
+                    <i class="${growth_status.icon}"></i>
+                    <span>${growth_status.message}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function calculateAccurateProgress(farmData) {
+    const { current_stage, stage_progress, overall_progress, days_elapsed, total_growth_period } = farmData;
+    
+    // Stage durations (in days)
+    const stageDurations = {
+        'seedling': 20,
+        'vegetative': 25,
+        'flowering': 15,
+        'fruiting': 20,
+        'harvest': 0
+    };
+    
+    const totalDays = total_growth_period || 80;
+    let stageExplanation = '';
+    let overallExplanation = '';
+    
+    // Calculate accurate stage explanation
+    switch (current_stage) {
+        case 'seedling':
+            const seedlingDays = Math.min(days_elapsed, stageDurations.seedling);
+            stageExplanation = `${Math.round(seedlingDays)} of ${stageDurations.seedling} days completed in seedling stage`;
+            break;
+            
+        case 'vegetative':
+            const vegDaysElapsed = Math.max(0, days_elapsed - stageDurations.seedling);
+            const vegDays = Math.min(vegDaysElapsed, stageDurations.vegetative);
+            stageExplanation = `${Math.round(vegDays)} of ${stageDurations.vegetative} days completed in vegetative stage`;
+            break;
+            
+        case 'flowering':
+            const flowerDaysElapsed = Math.max(0, days_elapsed - stageDurations.seedling - stageDurations.vegetative);
+            const flowerDays = Math.min(flowerDaysElapsed, stageDurations.flowering);
+            stageExplanation = `${Math.round(flowerDays)} of ${stageDurations.flowering} days completed in flowering stage`;
+            break;
+            
+        case 'fruiting':
+            const fruitDaysElapsed = Math.max(0, days_elapsed - stageDurations.seedling - stageDurations.vegetative - stageDurations.flowering);
+            const fruitDays = Math.min(fruitDaysElapsed, stageDurations.fruiting);
+            stageExplanation = `${Math.round(fruitDays)} of ${stageDurations.fruiting} days completed in fruiting stage`;
+            break;
+            
+        case 'harvest':
+            stageExplanation = 'All growth stages completed - ready for harvest';
+            break;
+            
+        default:
+            stageExplanation = `${Math.round(stage_progress)}% complete in ${current_stage} stage`;
+    }
+    
+    // Calculate overall explanation
+    const daysCompleted = Math.min(days_elapsed, totalDays);
+    const calculatedOverall = Math.min(100, (daysCompleted / totalDays) * 100);
+    
+    overallExplanation = `${Math.round(daysCompleted)} of ${totalDays} total growing days completed`;
+    
+    return {
+        stageExplanation,
+        overallExplanation,
+        daysCompleted,
+        totalDays,
+        calculatedOverall
+    };
+}
+
+function generateTimelineStages(farmData) {
+    const { current_stage, days_elapsed } = farmData;
+    
+    const stages = [
+        { key: 'seedling', name: 'Seedling', icon: '🌱', duration: 20, color: '#10b981' },
+        { key: 'vegetative', name: 'Vegetative', icon: '🌿', duration: 25, color: '#059669' },
+        { key: 'flowering', name: 'Flowering', icon: '🌸', duration: 15, color: '#8b5cf6' },
+        { key: 'fruiting', name: 'Fruiting', icon: '🍉', duration: 20, color: '#f59e0b' },
+        { key: 'harvest', name: 'Harvest', icon: '✂️', duration: 0, color: '#dc2626' }
+    ];
+    
+    let cumulativeDays = 0;
+    let stagesHtml = '';
+    
+    stages.forEach((stage, index) => {
+        const stageStart = cumulativeDays;
+        const stageEnd = cumulativeDays + stage.duration;
+        const isCurrentStage = stage.key === current_stage;
+        const isCompleted = days_elapsed >= stageEnd;
+        const isActive = days_elapsed >= stageStart && days_elapsed < stageEnd;
+        
+        let stageClass = 'timeline-stage';
+        if (isCompleted) stageClass += ' completed';
+        if (isCurrentStage) stageClass += ' current';
+        if (isActive) stageClass += ' active';
+        
+        // Calculate progress within this stage
+        let stageProgress = 0;
+        if (isCompleted) {
+            stageProgress = 100;
+        } else if (isActive || isCurrentStage) {
+            const daysInStage = days_elapsed - stageStart;
+            stageProgress = stage.duration > 0 ? Math.min(100, (daysInStage / stage.duration) * 100) : 0;
+        }
+        
+        stagesHtml += `
+            <div class="${stageClass}" style="--stage-color: ${stage.color}">
+                <div class="stage-marker">
+                    <span class="stage-icon">${stage.icon}</span>
+                    ${isCurrentStage ? '<div class="current-indicator"></div>' : ''}
+                </div>
+                <div class="stage-info">
+                    <div class="stage-name">${stage.name}</div>
+                    <div class="stage-duration">${stage.duration > 0 ? stage.duration + ' days' : 'Ready'}</div>
+                    ${isActive || isCurrentStage ? `<div class="stage-progress">${Math.round(stageProgress)}%</div>` : ''}
+                </div>
+            </div>
+        `;
+        
+        cumulativeDays += stage.duration;
+    });
+    
+    return stagesHtml;
+}
+
+// Keep the old function for backward compatibility
+function getProgressExplanation(farmData) {
+    return calculateAccurateProgress(farmData);
+}
+
+function displayCropInsightsData(container, farmData) {
+    console.log('Displaying crop insights data:', farmData);
+    
+    const {
+        nutrient_predictions,
+        harvest_countdown,
+        current_stage,
+        stage_name
+    } = farmData;
+    
+    // Check if required data exists
+    if (!nutrient_predictions || !harvest_countdown) {
+        console.error('Missing required data:', { nutrient_predictions, harvest_countdown });
+        container.innerHTML = `
+            <div class="insights-error">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="error-message">
+                    <h4>Incomplete Data</h4>
+                    <p>Missing nutrient predictions or harvest countdown data.</p>
+
+                    <button class="btn btn-success btn-sm retry-insights" onclick="fetchCropInsightsData('${container.id.replace('insights-container-', '')}')">
+                        <i class="fas fa-redo"></i> Try Again
+                    </button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="insights-grid">
+            <div class="insight-card nutrient-predictions">
+                <div class="card-header">
+                    <h4><i class="fas fa-flask"></i> Nutrient Requirements</h4>
+                </div>
+                <div class="card-content">
+                    <div class="nutrient-item">
+                        <span class="nutrient-label">Nitrogen (N):</span>
+                        <span class="nutrient-value">${nutrient_predictions.nitrogen}</span>
+                    </div>
+                    <div class="nutrient-item">
+                        <span class="nutrient-label">Phosphorus (P):</span>
+                        <span class="nutrient-value">${nutrient_predictions.phosphorus}</span>
+                    </div>
+                    <div class="nutrient-item">
+                        <span class="nutrient-label">Potassium (K):</span>
+                        <span class="nutrient-value">${nutrient_predictions.potassium}</span>
+                    </div>
+                    
+                    <div class="recommendations">
+                        <h5><i class="fas fa-lightbulb"></i> Recommendations</h5>
+                        <ul>
+                            ${nutrient_predictions.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="insight-card harvest-countdown">
+                <div class="card-header">
+                    <h4><i class="fas fa-calendar-check"></i> Harvest Countdown</h4>
+                </div>
+                <div class="card-content">
+                    <div class="countdown-status ${harvest_countdown.color}">
+                        <i class="${harvest_countdown.icon}"></i>
+                        <span class="countdown-message">${harvest_countdown.message}</span>
+                    </div>
+                    
+                    ${harvest_countdown.days > 0 ? `
+                        <div class="countdown-days">
+                            <span class="days-number">${harvest_countdown.days}</span>
+                            <span class="days-label">days</span>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="stage-info">
+                        <span class="current-stage">${stage_name}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+
+
+function displayCropGrowthError(container, message) {
+    const farmId = container.id.replace('growth-content-', '');
+    container.innerHTML = `
+        <div class="crop-error">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="error-message">
+                <h4>Crop Data Unavailable</h4>
+                <p>${message}</p>
+                <div class="error-actions">
+                    <button class="btn btn-primary btn-sm retry-crop" onclick="fetchCropGrowthData('${farmId}')">
+                        <i class="fas fa-redo"></i> Try Again
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="window.location.reload()">
+                        <i class="fas fa-refresh"></i> Refresh Page
+                    </button>
+                    <a href="/debug/crop-data" target="_blank" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-bug"></i> Debug Info
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function displayCropInsightsError(container, message) {
+    let actionButton = '';
+    
+    if (message.includes('Authentication required')) {
+        actionButton = `
+            <button class="btn btn-primary btn-sm" onclick="window.location.reload()">
+                <i class="fas fa-refresh"></i> Refresh Page
+            </button>
+            <a href="/login" class="btn btn-outline-primary btn-sm ms-2">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        `;
+    } else {
+        actionButton = `
+            <button class="btn btn-success btn-sm retry-insights" onclick="fetchCropInsightsData('${container.id.replace('insights-container-', '')}')">
+                <i class="fas fa-redo"></i> Try Again
+            </button>
+        `;
+    }
+    
+    container.innerHTML = `
+        <div class="insights-error">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="error-message">
+                <h4>Insights Data Unavailable</h4>
+                <p>${message}</p>
+                <div class="error-actions">
+                    ${actionButton}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function displayWeatherData(container, weatherData) {
     const { current, forecast, alerts, farm } = weatherData;
     
-    // Debug: Log forecast data length
+    // Debug: Log forecast data length - v2.7 (Replaced with emoji-based Heroicons)
+    console.log('=== WEATHER DEBUG v2.7 ===');
     console.log('Forecast data received:', forecast ? forecast.length : 'null', 'days');
     if (forecast) {
         console.log('Forecast days:', forecast.map(day => day.date));
+        console.log('Full forecast data:', forecast);
+        console.log('Is fallback data?', forecast.some(day => day.is_fallback));
+        
+        // Check for duplicates in received data
+        const dates = forecast.map(day => day.date);
+        const uniqueDates = [...new Set(dates)];
+        if (dates.length !== uniqueDates.length) {
+            console.error('DUPLICATE DATES DETECTED in received data:', dates);
+        } else {
+            console.log('✓ No duplicates in received data');
+        }
+        
+        // Test day name calculation for first few days
+        console.log('Day name verification:');
+        forecast.slice(0, 3).forEach(day => {
+            const dayName = getDayName(day.date, day.day_name);
+            console.log(`  ${day.date} -> ${dayName} (from backend: ${day.day_name || 'none'})`);
+        });
+        
+        // Debug weather icons
+        console.log('Weather icon debugging:');
+        forecast.slice(0, 5).forEach(day => {
+            const iconClass = getWeatherIcon(day.icon);
+            console.log(`  ${day.date}: icon="${day.icon}" -> class="${iconClass}" desc="${day.description}"`);
+        });
+        
+        // Verify today is not included in forecast
+        const todayForCheck = new Date().toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric',
+            timeZone: 'Asia/Manila'
+        });
+        const todayInForecast = forecast.some(day => day.date === todayForCheck);
+        if (todayInForecast) {
+            console.warn('⚠️ Today (' + todayForCheck + ') found in forecast - should only show future days');
+        } else {
+            console.log('✓ Today (' + todayForCheck + ') correctly excluded from forecast');
+        }
     }
     
+    // Filter out any past dates that might have slipped through (safety measure)
+    const today = new Date().toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric',
+        timeZone: 'Asia/Manila'
+    });
+    
+    const filteredForecast = forecast ? forecast.filter(day => {
+        // Parse forecast date and compare with today
+        const forecastDate = new Date(`${day.date}, ${new Date().getFullYear()}`);
+        const todayDate = new Date();
+        
+        // Only include future dates
+        return forecastDate > todayDate;
+    }) : [];
+    
+    console.log('Filtered forecast (future dates only):', filteredForecast.map(day => day.date));
+    
     // Ensure we have 10 days of forecast data
-    let extendedForecast = forecast;
-    if (forecast && forecast.length < 10) {
-        console.log('Extending forecast from', forecast.length, 'to 10 days');
-        extendedForecast = extendForecastTo10Days(forecast);
+    let extendedForecast = filteredForecast;
+    if (filteredForecast && filteredForecast.length < 10) {
+        console.log('Extending forecast from', filteredForecast.length, 'to 10 days');
+        extendedForecast = extendForecastTo10Days(filteredForecast);
+        
+        // Check for duplicates after extension
+        const extendedDates = extendedForecast.map(day => day.date);
+        const uniqueExtendedDates = [...new Set(extendedDates)];
+        if (extendedDates.length !== uniqueExtendedDates.length) {
+            console.error('DUPLICATE DATES DETECTED after extension:', extendedDates);
+        } else {
+            console.log('✓ No duplicates after extension. Final dates:', extendedDates);
+        }
     }
     
     // Get farming recommendations based on weather
@@ -365,6 +1497,13 @@ function displayWeatherData(container, weatherData) {
                 <div class="weather-header">
                     <div class="header-content">
                         <h3 class="weather-title">🌤️ Today's Weather</h3>
+                        <div class="weather-date">${new Date().toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            month: 'long', 
+                            day: 'numeric',
+                            year: 'numeric',
+                            timeZone: 'Asia/Manila'
+                        })}</div>
                         <span class="weather-location">📍 ${farm.location}</span>
                     </div>
                     <div class="weather-icon-large">
@@ -372,13 +1511,16 @@ function displayWeatherData(container, weatherData) {
                     </div>
                 </div>
                 
-                <div class="weather-main">
+                                    <div class="weather-main">
                     <div class="temp-display">
-                        <span class="temp-value">${current.temperature}°C</span>
-                        <span class="temp-feels-like">Feels like ${current.feels_like}°C</span>
+                                        <span class="temp-value">${Math.round(current.temperature)}°C</span>
+                <span class="temp-feels-like">Feels like ${Math.round(current.feels_like)}°C</span>
                     </div>
                     <div class="weather-description">
                         <span>${current.description}</span>
+                        <small class="data-source" style="display: block; color: #64748b; font-size: 0.75rem; margin-top: 4px;">
+                            ${current.data_source || 'OpenWeatherMap'} • Updated: ${getTimeAgo(current.timestamp)}
+                        </small>
                     </div>
                 </div>
                 
@@ -398,7 +1540,7 @@ function displayWeatherData(container, weatherData) {
                             <i class="fas fa-wind"></i>
                         </div>
                         <div class="metric-content">
-                            <span class="metric-value">${current.wind_speed} km/h</span>
+                            <span class="metric-value">${Math.round(current.wind_speed)} km/h</span>
                             <span class="metric-label">Wind</span>
                             <span class="metric-status ${getWindStatusClass(current.wind_speed)}">${getWindStatus(current.wind_speed)}</span>
                         </div>
@@ -408,7 +1550,7 @@ function displayWeatherData(container, weatherData) {
                             <i class="fas fa-thermometer-half"></i>
                         </div>
                         <div class="metric-content">
-                            <span class="metric-value">${current.feels_like}°C</span>
+                            <span class="metric-value">${Math.round(current.feels_like)}°C</span>
                             <span class="metric-label">Feels Like</span>
                             <span class="metric-status ${getFeelsLikeStatusClass(current.feels_like)}">${getFeelsLikeStatus(current.feels_like)}</span>
                         </div>
@@ -437,7 +1579,7 @@ function displayWeatherData(container, weatherData) {
                 <div class="forecast-overview">
                     <div class="overview-stats">
                         <div class="stat-item">
-                            <span class="stat-value">${getTemperatureRange(extendedForecast)}°C</span>
+                            <span class="stat-value">${Math.round(getTemperatureRangeValue(extendedForecast))}°C</span>
                             <span class="stat-label">Temp Range</span>
                         </div>
                         <div class="stat-item">
@@ -452,16 +1594,16 @@ function displayWeatherData(container, weatherData) {
                         ${extendedForecast.slice(0, 5).map(day => `
                             <div class="forecast-day-compact">
                                 <div class="day-header-compact">
-                                    <span class="day-name-compact">${getDayName(day.date)}</span>
+                                    <span class="day-name-compact">${getDayName(day.date, day.day_name)}</span>
                                     <span class="day-date-compact">${formatDate(day.date)}</span>
                                 </div>
                                 <div class="day-weather-compact">
-                                    <i class="${getWeatherIcon(day.icon)} day-icon-compact"></i>
-                                    <span class="day-temp-compact">${day.temperature}°C</span>
+                                    <i class="${getWeatherIcon(day.icon)} day-icon-compact" title="Weather: ${day.description}"></i>
+                                    <span class="day-temp-compact">${Math.round(day.temperature)}°C</span>
                                 </div>
                                 <div class="day-metrics-compact">
                                     <span class="metric-compact">🌧️${getRainChanceForDay(day)}%</span>
-                                    <span class="metric-compact">💨${day.wind_speed}</span>
+                                    <span class="metric-compact">💨${Math.round(day.wind_speed)}</span>
                                 </div>
                             </div>
                         `).join('')}
@@ -470,21 +1612,20 @@ function displayWeatherData(container, weatherData) {
                         ${extendedForecast.slice(5, 10).map(day => `
                             <div class="forecast-day-compact">
                                 <div class="day-header-compact">
-                                    <span class="day-name-compact">${getDayName(day.date)}</span>
+                                    <span class="day-name-compact">${getDayName(day.date, day.day_name)}</span>
                                     <span class="day-date-compact">${formatDate(day.date)}</span>
                                 </div>
                                 <div class="day-weather-compact">
-                                    <i class="${getWeatherIcon(day.icon)} day-icon-compact"></i>
-                                    <span class="day-temp-compact">${day.temperature}°C</span>
+                                    <i class="${getWeatherIcon(day.icon)} day-icon-compact" title="Weather: ${day.description}"></i>
+                                    <span class="day-temp-compact">${Math.round(day.temperature)}°C</span>
                                 </div>
                                 <div class="day-metrics-compact">
                                     <span class="metric-compact">🌧️${getRainChanceForDay(day)}%</span>
-                                    <span class="metric-compact">💨${day.wind_speed}</span>
+                                    <span class="metric-compact">💨${Math.round(day.wind_speed)}</span>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
-                </div>
                 
                 <div class="weekly-tips">
                     <h4>📋 Weekly Plan</h4>
@@ -679,46 +1820,46 @@ function getRainChanceText(current) {
 }
 
 function getWeatherIcon(iconCode) {
-    // Convert OpenWeatherMap icon codes to Font Awesome icons with colors
+    // Convert OpenWeatherMap icon codes to Heroicons with accurate colors
     const iconMap = {
         // Clear sky
-        '01d': 'fas fa-sun text-warning', // Bright yellow sun
-        '01n': 'fas fa-moon text-info',   // Blue moon
+        '01d': 'heroicon-sun text-warning', // Bright yellow sun for day
+        '01n': 'heroicon-moon text-primary', // Blue moon for night
         
-        // Few clouds
-        '02d': 'fas fa-cloud-sun text-primary', // Blue clouds with sun
-        '02n': 'fas fa-cloud-moon text-primary', // Blue clouds with moon
+        // Few clouds (partly cloudy)
+        '02d': 'heroicon-cloud-sun text-warning', // Yellow partly cloudy for day
+        '02n': 'heroicon-cloud text-secondary', // Gray clouds for night
         
         // Scattered clouds
-        '03d': 'fas fa-cloud text-primary',      // Blue clouds
-        '03n': 'fas fa-cloud text-primary',      // Blue clouds
+        '03d': 'heroicon-cloud text-primary',      // Blue clouds for day
+        '03n': 'heroicon-cloud text-secondary',    // Gray clouds for night
         
-        // Broken clouds
-        '04d': 'fas fa-clouds text-primary',     // Blue clouds
-        '04n': 'fas fa-clouds text-primary',     // Blue clouds
+        // Broken clouds (overcast)
+        '04d': 'heroicon-cloud text-secondary',     // Gray overcast clouds
+        '04n': 'heroicon-cloud text-dark',          // Dark clouds for night
         
         // Shower rain
-        '09d': 'fas fa-cloud-rain text-info',    // Blue rain
-        '09n': 'fas fa-cloud-rain text-info',    // Blue rain
+        '09d': 'heroicon-cloud-rain text-info',    // Rain showers
+        '09n': 'heroicon-cloud-rain text-info',    // Rain showers
         
-        // Rain
-        '10d': 'fas fa-cloud-sun-rain text-info', // Blue rain with sun
-        '10n': 'fas fa-cloud-moon-rain text-info', // Blue rain with moon
+        // Light rain
+        '10d': 'heroicon-cloud-rain text-info', // Light rain for day
+        '10n': 'heroicon-cloud-rain text-info', // Light rain for night
         
         // Thunderstorm
-        '11d': 'fas fa-bolt text-warning',       // Yellow lightning
-        '11n': 'fas fa-bolt text-warning',       // Yellow lightning
+        '11d': 'heroicon-bolt text-warning',       // Yellow lightning
+        '11n': 'heroicon-bolt text-warning',       // Yellow lightning
         
         // Snow
-        '13d': 'fas fa-snowflake text-info',     // Blue snow
-        '13n': 'fas fa-snowflake text-info',     // Blue snow
+        '13d': 'heroicon-snowflake text-info',     // Blue snow
+        '13n': 'heroicon-snowflake text-info',     // Blue snow
         
         // Mist/Fog
-        '50d': 'fas fa-smog text-secondary',     // Gray mist
-        '50n': 'fas fa-smog text-secondary'      // Gray mist
+        '50d': 'heroicon-eye-slash text-secondary',     // Visibility icon for mist/fog
+        '50n': 'heroicon-eye-slash text-secondary'      // Visibility icon for mist/fog
     };
     
-    return iconMap[iconCode] || 'fas fa-question text-muted'; // Default fallback
+    return iconMap[iconCode] || 'heroicon-cloud text-muted'; // Default to generic cloud
 }
 
 function getRainChanceForDay(day) {
@@ -877,6 +2018,14 @@ function getTemperatureRange(forecast) {
     return `${min}° to ${max}°`;
 }
 
+function getTemperatureRangeValue(forecast) {
+    if (!forecast || forecast.length === 0) return 0;
+    const temps = forecast.map(day => day.temperature);
+    const min = Math.min(...temps);
+    const max = Math.max(...temps);
+    return max - min;
+}
+
 function getRainyDays(forecast) {
     if (!forecast) return 0;
     return forecast.filter(day => day.description.includes('rain') || day.description.includes('drizzle')).length;
@@ -891,14 +2040,56 @@ function getWindPattern(forecast) {
     return "Calm";
 }
 
-function getDayName(dateStr) {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { weekday: 'short' });
+function getDayName(dateStr, dayName = null) {
+    // If we have day_name from backend, use it directly (it's already in Manila timezone)
+    if (dayName) {
+        return dayName.substring(0, 3); // Convert "Monday" to "Mon"
+    }
+    
+    // Handle date strings like "Aug 20" by adding current year
+    let fullDateStr = dateStr;
+    if (dateStr && !dateStr.includes(',') && !dateStr.includes('/')) {
+        const currentYear = new Date().getFullYear();
+        fullDateStr = `${dateStr}, ${currentYear}`;
+    }
+    
+    const date = new Date(fullDateStr);
+    
+    // Verify the date parsed correctly
+    if (isNaN(date.getTime())) {
+        console.error('Invalid date string:', dateStr, 'parsed as:', fullDateStr);
+        return 'N/A';
+    }
+    
+    // Use Manila timezone for consistent day names
+    return date.toLocaleDateString('en-US', { 
+        weekday: 'short',
+        timeZone: 'Asia/Manila'
+    });
 }
 
 function formatDate(dateStr) {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    // Handle date strings like "Aug 20" by adding current year
+    let fullDateStr = dateStr;
+    if (dateStr && !dateStr.includes(',') && !dateStr.includes('/')) {
+        const currentYear = new Date().getFullYear();
+        fullDateStr = `${dateStr}, ${currentYear}`;
+    }
+    
+    const date = new Date(fullDateStr);
+    
+    // Verify the date parsed correctly
+    if (isNaN(date.getTime())) {
+        console.error('Invalid date string in formatDate:', dateStr, 'parsed as:', fullDateStr);
+        return dateStr; // Return original string if parsing fails
+    }
+    
+    // Use Manila timezone for consistent date formatting
+    return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric',
+        timeZone: 'Asia/Manila'
+    });
 }
 
 function getSeverityLabel(severity) {
@@ -949,43 +2140,59 @@ function extendForecastTo10Days(forecast) {
     if (!forecast || forecast.length === 0) return [];
     
     const extendedForecast = [...forecast];
-    const currentDate = new Date();
     
     // If we have less than 10 days, extend with estimated data
     while (extendedForecast.length < 10) {
         const lastDay = extendedForecast[extendedForecast.length - 1];
         
-        // Parse the last day's date more carefully
+        // Calculate next date properly
         let nextDate;
         if (lastDay.date && typeof lastDay.date === 'string') {
-            // Try to parse the date string
-            const dateParts = lastDay.date.split(' ');
-            if (dateParts.length === 2) {
-                const month = dateParts[0];
-                const day = parseInt(dateParts[1]);
-                const currentYear = new Date().getFullYear();
-                const monthIndex = new Date(Date.parse(month + " 1, 2000")).getMonth();
-                nextDate = new Date(currentYear, monthIndex, day + 1);
-            } else {
-                // Fallback: just add one day to current date
+            // Try to parse the date string (format: "Aug 20" or "Aug 20")
+            try {
+                const dateParts = lastDay.date.split(' ');
+                if (dateParts.length === 2) {
+                    const monthStr = dateParts[0];
+                    const day = parseInt(dateParts[1]);
+                    const currentYear = new Date().getFullYear();
+                    
+                    // Create a date object from the parsed date
+                    const currentDate = new Date(`${monthStr} ${day}, ${currentYear}`);
+                    
+                    // Add one day
+                    nextDate = new Date(currentDate);
+                    nextDate.setDate(currentDate.getDate() + 1);
+                } else {
+                    throw new Error('Invalid date format');
+                }
+            } catch (e) {
+                // Fallback: calculate from current date + days elapsed
                 nextDate = new Date();
                 nextDate.setDate(nextDate.getDate() + extendedForecast.length);
             }
         } else {
-            // Fallback: just add one day to current date
+            // Fallback: calculate from current date + days elapsed
             nextDate = new Date();
             nextDate.setDate(nextDate.getDate() + extendedForecast.length);
         }
         
         // Create estimated weather data for the next day
         const estimatedDay = {
-            date: nextDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            time: '12:00 PM',
+            date: nextDate.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                timeZone: 'Asia/Manila'
+            }),
+            day_name: nextDate.toLocaleDateString('en-US', { 
+                weekday: 'long',
+                timeZone: 'Asia/Manila'
+            }),
+            time: '12:00',
             temperature: lastDay.temperature + Math.floor(Math.random() * 6) - 3, // ±3°C variation
             description: lastDay.description, // Keep similar description
             icon: lastDay.icon,
             humidity: Math.max(50, Math.min(90, lastDay.humidity + Math.floor(Math.random() * 10) - 5)), // ±5% variation
-            wind_speed: Math.max(3, Math.min(25, lastDay.wind_speed + Math.floor(Math.random() * 6) - 3)), // ±3 km/h variation
+            wind_speed: Math.round(Math.max(3, Math.min(25, lastDay.wind_speed + Math.floor(Math.random() * 6) - 3))), // ±3 km/h variation, rounded
             is_fallback: true
         };
         
@@ -1013,6 +2220,52 @@ function getWaterSummary(current, forecast) {
 
 function getSunlightSummary(current) {
     return "Good sunlight hours";
+}
+
+function getTimeAgo(timestamp) {
+    if (!timestamp) return 'Unknown';
+    
+    try {
+        const now = new Date();
+        const time = new Date(timestamp);
+        const diffInMinutes = Math.floor((now - time) / (1000 * 60));
+        
+        if (diffInMinutes < 1) return 'Just now';
+        if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+        
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours}h ago`;
+        
+        const diffInDays = Math.floor(diffInHours / 24);
+        return `${diffInDays}d ago`;
+    } catch (e) {
+        return 'Recently';
+    }
+}
+
+function refreshWeatherData() {
+    const refreshBtn = document.querySelector('.refresh-weather-btn');
+    if (refreshBtn) {
+        const icon = refreshBtn.querySelector('i');
+        icon.classList.add('fa-spin');
+        refreshBtn.disabled = true;
+    }
+    
+    // Force refresh weather data for all farms
+    const weatherContainers = document.querySelectorAll('[id^="weather-container-"]');
+    weatherContainers.forEach(container => {
+        const farmId = container.id.replace('weather-container-', '');
+        fetchWeatherData(farmId, true); // true = force refresh
+    });
+    
+    // Re-enable button after 3 seconds
+    setTimeout(() => {
+        if (refreshBtn) {
+            const icon = refreshBtn.querySelector('i');
+            icon.classList.remove('fa-spin');
+            refreshBtn.disabled = false;
+        }
+    }, 3000);
 }
 
 function displayWeatherError(container, message, debugInfo = null) {
@@ -1069,6 +2322,68 @@ function setupRefreshButtons() {
             
             // Fetch fresh data
             fetchWeatherData(farmId);
+        });
+    });
+}
+
+function setupCropRefreshButtons() {
+    document.querySelectorAll('.refresh-crop-data').forEach(button => {
+        button.addEventListener('click', function() {
+            const farmId = this.dataset.farmId;
+            const container = document.getElementById(`growth-content-${farmId}`);
+            
+            // Show loading state
+            container.innerHTML = `
+                <div class="crop-loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Refreshing crop data...</span>
+                    </div>
+                    <p class="mt-2">Refreshing crop growth data...</p>
+                </div>
+            `;
+            
+            // Fetch fresh data
+            fetchCropGrowthData(farmId);
+        });
+    });
+    
+    document.querySelectorAll('.force-update-progress').forEach(button => {
+        button.addEventListener('click', function() {
+            const farmId = this.dataset.farmId;
+            const container = document.getElementById(`growth-content-${farmId}`);
+            
+            // Show loading state
+            container.innerHTML = `
+                <div class="crop-loading">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Updating progress...</span>
+                    </div>
+                    <p class="mt-2">Updating crop progress based on time...</p>
+                </div>
+            `;
+            
+            // Force update progress
+            forceUpdateCropProgress(farmId);
+        });
+    });
+    
+    document.querySelectorAll('.refresh-insights').forEach(button => {
+        button.addEventListener('click', function() {
+            const farmId = this.dataset.farmId;
+            const container = document.getElementById(`insights-container-${farmId}`);
+            
+            // Show loading state
+            container.innerHTML = `
+                <div class="insights-loading">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Refreshing insights...</span>
+                    </div>
+                    <p class="mt-2">Refreshing crop insights...</p>
+                </div>
+            `;
+            
+            // Fetch fresh data
+            fetchCropInsightsData(farmId);
         });
     });
 }
@@ -1130,7 +2445,7 @@ function displayHistoricalWeather(container, data) {
                         </div>
                         <div class="stat-content">
                             <span class="stat-label">Temperature Range</span>
-                            <span class="stat-value">${summary.temperature.min}°C - ${summary.temperature.max}°C</span>
+                            <span class="stat-value">${Math.round(summary.temperature.min)}°C - ${Math.round(summary.temperature.max)}°C</span>
                         </div>
                     </div>
                     <div class="stat-item">
@@ -1139,7 +2454,7 @@ function displayHistoricalWeather(container, data) {
                         </div>
                         <div class="stat-content">
                             <span class="stat-label">Total Rainfall</span>
-                            <span class="stat-value">${summary.rainfall.total}mm</span>
+                            <span class="stat-value">${Math.round(summary.rainfall.total)}mm</span>
                         </div>
                     </div>
                     <div class="stat-item">
@@ -1226,14 +2541,14 @@ function displayHistoricalWeather(container, data) {
                             </div>
                             <div class="day-temp">
                                 <div class="temp-range">
-                                    <span class="temp-min">${day.temperature.min}°</span>
+                                    <span class="temp-min">${Math.round(day.temperature.min)}°</span>
                                     <span class="temp-separator">-</span>
-                                    <span class="temp-max">${day.temperature.max}°</span>
+                                    <span class="temp-max">${Math.round(day.temperature.max)}°</span>
                                 </div>
                             </div>
                             <div class="day-rain">
                                 <i class="fas fa-cloud-rain"></i>
-                                <span>${day.rainfall}mm</span>
+                                <span>${Math.round(day.rainfall)}mm</span>
                             </div>
                             <div class="day-description">${day.description}</div>
                         </div>
@@ -1250,14 +2565,14 @@ function displayHistoricalWeather(container, data) {
                             </div>
                             <div class="day-temp">
                                 <div class="temp-range">
-                                    <span class="temp-min">${day.temperature.min}°</span>
+                                    <span class="temp-min">${Math.round(day.temperature.min)}°</span>
                                     <span class="temp-separator">-</span>
-                                    <span class="temp-max">${day.temperature.max}°</span>
+                                    <span class="temp-max">${Math.round(day.temperature.max)}°</span>
                                 </div>
                             </div>
                             <div class="day-rain">
                                 <i class="fas fa-cloud-rain"></i>
-                                <span>${day.rainfall}mm</span>
+                                <span>${Math.round(day.rainfall)}mm</span>
                             </div>
                             <div class="day-description">${day.description}</div>
                         </div>
@@ -1335,9 +2650,41 @@ function displayHistoricalWeather(container, data) {
 .welcome-subtitle {
     font-size: 1.125rem;
     opacity: 0.95;
-    margin: 0;
+    margin: 0 0 1rem 0;
     font-weight: 400;
     line-height: 1.6;
+}
+
+.sync-status {
+    margin-top: 1rem;
+}
+
+.sync-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.sync-indicator.active {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.sync-indicator i {
+    color: #fbbf24;
+    font-size: 0.875rem;
+}
+
+.sync-indicator span {
+    color: white;
 }
 
 .welcome-visual {
@@ -1629,10 +2976,8 @@ function displayHistoricalWeather(container, data) {
 .actions-grid {
     display: flex;
     gap: 2rem;
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
     justify-content: center;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     padding: 1rem 0;
 }
 
@@ -1732,6 +3077,7 @@ function displayHistoricalWeather(container, data) {
     width: auto;
     min-width: 130px;
     box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+    text-decoration: none;
 }
 
 .action-button:hover {
@@ -1834,24 +3180,7 @@ function displayHistoricalWeather(container, data) {
     display: inline-block;
 }
 
-/* Custom Scrollbar for Actions Grid */
-.actions-grid::-webkit-scrollbar {
-    height: 6px;
-}
 
-.actions-grid::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.actions-grid::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-.actions-grid::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
 
 /* Action Card Hover Effects */
 .action-card:hover {
@@ -1947,6 +3276,14 @@ function displayHistoricalWeather(container, data) {
     color: #1e293b;
     margin: 0 0 0.25rem 0;
     letter-spacing: -0.025em;
+}
+
+.weather-date {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #64748b;
+    margin: 0 0 0.5rem 0;
+    text-transform: capitalize;
 }
 
 .weather-location {
@@ -2454,8 +3791,12 @@ function displayHistoricalWeather(container, data) {
 }
 
 .day-icon-compact {
-    width: 32px;
-    height: 32px;
+    font-size: 1.5rem;
+    color: inherit;
+    display: inline-block;
+    width: auto;
+    height: auto;
+    line-height: 1;
 }
 
 .day-temp-compact {
@@ -2759,6 +4100,491 @@ function displayHistoricalWeather(container, data) {
 }
 
 
+
+/* Farm Actions */
+.farm-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.insights-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Crop Loading States */
+.crop-loading,
+.insights-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #64748b;
+}
+
+/* Overall Progress Bar */
+.overall-progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-fill.overall {
+    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+}
+
+.progress-text.overall {
+    color: #7c3aed;
+}
+
+/* Growth Status */
+.growth-status {
+    margin-top: 1rem;
+}
+
+.growth-status .status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+    justify-content: center;
+}
+
+.status-item.success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.status-item.warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.status-item.info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.status-item.primary {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.status-item.secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+.status-item.danger {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+/* Last Updated */
+.last-updated {
+    margin-top: 1rem;
+    text-align: center;
+    padding: 0.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Progress Explanation */
+.progress-explanation {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 12px;
+    border: 1px solid #0ea5e9;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.1);
+}
+
+.explanation-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #0ea5e9;
+}
+
+.explanation-header i {
+    color: #0ea5e9;
+    font-size: 1rem;
+}
+
+.explanation-header span {
+    font-weight: 600;
+    color: #0c4a6e;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.explanation-content p {
+    margin: 0.25rem 0;
+    font-size: 0.85rem;
+    color: #0c4a6e;
+    line-height: 1.4;
+}
+
+.explanation-content strong {
+    color: #0369a1;
+    font-weight: 600;
+}
+
+/* Insights Grid */
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.insight-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.insight-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.insight-card:hover::before {
+    transform: scaleX(1);
+}
+
+.insight-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+
+.insight-card .card-header {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.insight-card .card-header h4 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.insight-card .card-header h4 i {
+    color: #10b981;
+}
+
+/* Nutrient Predictions */
+.nutrient-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+}
+
+.nutrient-item:hover {
+    background: #f8fafc;
+    margin: 0 -0.5rem;
+    padding: 0.75rem 0.5rem;
+    border-radius: 8px;
+}
+
+.nutrient-item:last-child {
+    border-bottom: none;
+}
+
+.nutrient-label {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.nutrient-value {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 0.9rem;
+}
+
+.recommendations {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.recommendations h5 {
+    margin: 0 0 0.75rem 0;
+    color: #1e293b;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recommendations h5 i {
+    color: #f59e0b;
+}
+
+.recommendations ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.recommendations li {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+/* Harvest Countdown */
+.countdown-status {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.countdown-status.success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.countdown-status.warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.countdown-status.info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.countdown-status.primary {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.countdown-status.danger {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.countdown-message {
+    font-size: 1.1rem;
+}
+
+.countdown-days {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.days-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.days-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stage-info {
+    text-align: center;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.current-stage {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+/* Error States */
+.crop-error,
+.insights-error {
+    text-align: center;
+    padding: 2rem;
+    color: #64748b;
+}
+
+/* Crop Update Notifications */
+.crop-update-notification,
+.session-expired-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    animation: slideInRight 0.3s ease-out;
+    max-width: 350px;
+    overflow: hidden;
+}
+
+.crop-update-notification {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.session-expired-notification {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.refresh-notification {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+}
+
+.redirect-notification {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+}
+
+.manual-refresh-notification {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    color: white;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+}
+
+.notification-icon {
+    font-size: 1.25rem;
+    color: #fbbf24;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.notification-text {
+    flex: 1;
+}
+
+.notification-text h5 {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.notification-text p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.3;
+    opacity: 0.95;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.notification-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.notification-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.notification-actions .btn {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+}
+
+.error-icon {
+    margin-bottom: 1rem;
+}
+
+.error-icon i {
+    font-size: 3rem;
+    color: #f59e0b;
+}
+
+.error-message h4 {
+    margin: 0 0 0.75rem 0;
+    color: #1e293b;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.error-message p {
+    margin: 0 0 1rem 0;
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.error-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-actions .btn {
+    min-width: 120px;
+}
 
 /* Weather Service Status - Enhanced for Farmers */
 .weather-status-info {
@@ -3229,6 +5055,19 @@ function displayHistoricalWeather(container, data) {
         padding: 1.25rem;
         min-height: auto;
         height: auto;
+    }
+    
+    .insights-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .insight-card {
+        padding: 1.25rem;
+    }
+    
+    .countdown-days .days-number {
+        font-size: 2rem;
     }
     
     .temp-value {
@@ -3968,8 +5807,11 @@ function displayHistoricalWeather(container, data) {
 
 /* Weather icon colors for forecast */
 .day-icon-compact {
-    font-size: 2rem;
+    font-size: 1.5rem;
     margin-right: 0.5rem;
+    color: inherit;
+    display: inline-block;
+    line-height: 1;
 }
 
 .text-warning {
@@ -4048,6 +5890,126 @@ function displayHistoricalWeather(container, data) {
     font-size: 0.8rem;
     padding: 0.5rem 1rem;
 }
+
+/* Compact Growth Progress Section */
+.growth-progress-compact {
+    /* Inherits card styling from parent */
+    padding: 0;
+}
+
+.stage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.stage-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 16px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.stage-percent {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.progress-container {
+    margin-bottom: 1rem;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+
+.progress-text {
+    font-size: 0.8rem;
+    color: #64748b;
+    text-align: center;
+}
+
+.growth-info {
+    margin-bottom: 1rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.info-value {
+    font-size: 0.85rem;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.growth-status {
+    margin-bottom: 1rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    width: 100%;
+    justify-content: center;
+}
+
+.status-badge.primary {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.status-badge.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.status-badge.warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.status-badge.info {
+    background: rgba(6, 182, 212, 0.1);
+    color: #06b6d4;
+}
+
+
 </style>
 @endpush
 @endsection

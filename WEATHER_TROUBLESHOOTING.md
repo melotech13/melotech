@@ -46,7 +46,7 @@ Look in `storage/logs/laravel.log` for detailed error messages.
 **Solution:**
 1. Add to your `.env` file:
    ```env
-   OPENWEATHERMAP_API_KEY=your_actual_api_key_here
+   OPENWEATHERMAP_API_KEY=d9da6799a84a9fef052289eeea15fb59
    ```
 2. Clear Laravel cache:
    ```bash

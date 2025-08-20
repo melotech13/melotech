@@ -5,6 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class CropGrowth
+ * 
+ * @property int $id
+ * @property int $farm_id
+ * @property string $current_stage
+ * @property int $stage_progress
+ * @property int $overall_progress
+ * @property array|null $stage_data
+ * @property \Carbon\Carbon $last_updated
+ * @property string|null $notes
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * 
+ * @property-read \App\Models\Farm $farm
+ * 
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\CropGrowth whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\CropGrowth whereFarmId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\CropGrowth whereCurrentStage($value)
+ */
 class CropGrowth extends Model
 {
     use HasFactory;
@@ -67,6 +87,11 @@ class CropGrowth extends Model
         ]
     ];
 
+    /**
+     * Get the farm that owns the crop growth record.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function farm()
     {
         return $this->belongsTo(Farm::class);
@@ -78,10 +103,11 @@ class CropGrowth extends Model
         return self::STAGES[$stage] ?? null;
     }
 
-    public function getNextStage()
+    public function getNextStage($stage = null)
     {
         $stages = array_keys(self::STAGES);
-        $currentIndex = array_search($this->current_stage, $stages);
+        $targetStage = $stage ?? $this->current_stage;
+        $currentIndex = array_search($targetStage, $stages);
         
         if ($currentIndex !== false && $currentIndex < count($stages) - 1) {
             return $stages[$currentIndex + 1];
@@ -142,6 +168,78 @@ class CropGrowth extends Model
         }
         
         $this->save();
+        
+        return $this;
+    }
+    
+    /**
+     * Automatically update progress based on time elapsed since planting
+     */
+    public function updateProgressFromTime()
+    {
+        $farm = $this->farm;
+        if (!$farm) {
+            return $this;
+        }
+        
+        $plantingDate = $farm->planting_date;
+        $currentDate = now();
+        
+        // Skip if planting date is in the future
+        if ($plantingDate->isAfter($currentDate)) {
+            return $this;
+        }
+        
+        $daysElapsed = $plantingDate->diffInDays($currentDate);
+        
+        // Define stage durations
+        $stageDurations = [
+            'seedling' => 20,
+            'vegetative' => 25,
+            'flowering' => 15,
+            'fruiting' => 20
+        ];
+        
+        $currentStage = 'seedling';
+        $stageProgress = 0;
+        $daysRemaining = $daysElapsed;
+        
+        // Calculate which stage we should be in and progress within that stage
+        foreach ($stageDurations as $stage => $duration) {
+            if ($daysRemaining >= $duration) {
+                $daysRemaining -= $duration;
+                $currentStage = $this->getNextStage($stage);
+            } else {
+                $stageProgress = ($daysRemaining / $duration) * 100;
+                break;
+            }
+        }
+        
+        // If we've passed all stages, we're ready for harvest
+        $totalStageDays = array_sum($stageDurations);
+        if ($daysElapsed >= $totalStageDays) {
+            $currentStage = 'harvest';
+            $stageProgress = 100;
+        }
+        
+        // Only update if the calculated progress is different from current
+        if ($this->current_stage !== $currentStage || abs($this->stage_progress - $stageProgress) > 1) {
+            $this->current_stage = $currentStage;
+            $this->stage_progress = $stageProgress;
+            $this->last_updated = now();
+            
+            // Recalculate overall progress
+            $stages = array_keys(self::STAGES);
+            $currentIndex = array_search($this->current_stage, $stages);
+            $totalStages = count($stages);
+            
+            if ($currentIndex !== false) {
+                $stageWeight = 100 / $totalStages;
+                $this->overall_progress = ($currentIndex * $stageWeight) + ($this->stage_progress * $stageWeight / 100);
+            }
+            
+            $this->save();
+        }
         
         return $this;
     }

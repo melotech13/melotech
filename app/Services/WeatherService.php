@@ -23,7 +23,7 @@ class WeatherService
     {
         $cacheKey = "weather_{$latitude}_{$longitude}";
         
-        // Return cached data if available (cache for 30 minutes)
+        // Return cached data if available (cache for 10 minutes for more frequent updates)
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -62,13 +62,15 @@ class WeatherService
                 Log::info('Weather data parsed successfully', [
                     'has_main' => isset($weatherData['main']),
                     'has_weather' => isset($weatherData['weather']),
-                    'has_wind' => isset($weatherData['wind'])
+                    'has_wind' => isset($weatherData['wind']),
+                    'actual_temp' => $weatherData['main']['temp'] ?? 'N/A',
+                    'feels_like' => $weatherData['main']['feels_like'] ?? 'N/A'
                 ]);
                 
                 $formattedData = $this->formatWeatherData($weatherData);
                 
-                // Cache the formatted data
-                Cache::put($cacheKey, $formattedData, now()->addMinutes(30));
+                // Cache the formatted data (reduced cache time for more frequent updates)
+                Cache::put($cacheKey, $formattedData, now()->addMinutes(10));
                 
                 return $formattedData;
             }
@@ -141,8 +143,8 @@ class WeatherService
             $humidity = rand(60, 80); // Other seasons
         }
         
-        // Estimate wind speed
-        $windSpeed = rand(5, 15);
+        // Estimate wind speed (rounded to nearest km/h)
+        $windSpeed = round(rand(5, 15));
         
         // Generate appropriate weather description
         $descriptions = [
@@ -162,7 +164,7 @@ class WeatherService
             'pressure' => 1013,
             'description' => $description,
             'icon' => '02d',
-            'wind_speed' => $windSpeed,
+            'wind_speed' => round($windSpeed),
             'wind_direction' => $this->getWindDirection(rand(0, 360)),
             'visibility' => 10.0,
             'sunrise' => '6:00 AM',
@@ -198,13 +200,26 @@ class WeatherService
                 'lon' => $longitude,
                 'appid' => $this->apiKey,
                 'units' => 'metric',
-                'lang' => 'en',
-                'cnt' => 10 // 10-day forecast
+                'lang' => 'en'
+                // Note: Free API provides 5-day forecast with 3-hour intervals
             ]);
 
             if ($response->successful()) {
                 $forecastData = $response->json();
                 $formattedData = $this->formatForecastData($forecastData);
+                
+                // Define Manila time for logging
+                $manilaTime = now()->setTimezone('Asia/Manila');
+                
+                Log::info('Forecast data formatted', [
+                    'original_count' => count($forecastData['list'] ?? []),
+                    'formatted_count' => count($formattedData),
+                    'formatted_dates' => array_map(fn($item) => $item['date'], $formattedData),
+                    'today_excluded' => $manilaTime->format('M d'),
+                    'current_manila_time' => $manilaTime->format('Y-m-d H:i:s T'),
+                    'latitude' => $latitude,
+                    'longitude' => $longitude
+                ]);
                 
                 // Cache the formatted data
                 Cache::put($cacheKey, $formattedData, now()->addHours(2));
@@ -238,7 +253,7 @@ class WeatherService
     protected function getFallbackForecastData()
     {
         $forecasts = [];
-        $currentDate = now();
+        $manilaTime = now()->setTimezone('Asia/Manila');
         
         // Weather descriptions for different conditions
         $weatherDescriptions = [
@@ -250,7 +265,7 @@ class WeatherService
         ];
         
         for ($i = 1; $i <= 10; $i++) {
-            $date = $currentDate->copy()->addDays($i);
+            $date = $manilaTime->copy()->addDays($i);
             $month = (int) $date->format('n');
             
             // Basic temperature estimation
@@ -266,15 +281,23 @@ class WeatherService
             
             $forecasts[] = [
                 'date' => $date->format('M d'),
+                'day_name' => $date->format('l'), // Full day name
                 'time' => '12:00',
                 'temperature' => $baseTemp + rand(-3, 3),
                 'description' => $weatherDescriptions[array_rand($weatherDescriptions)],
                 'icon' => '02d',
                 'humidity' => rand(60, 85),
-                'wind_speed' => rand(5, 20),
+                'wind_speed' => round(rand(5, 20)), // Round wind speed
                 'is_fallback' => true
             ];
         }
+        
+        Log::info('Generated fallback forecast data', [
+            'count' => count($forecasts),
+            'dates' => array_map(fn($item) => $item['date'], $forecasts),
+            'starts_from_tomorrow' => true,
+            'today_excluded' => $manilaTime->format('M d')
+        ]);
         
         return $forecasts;
     }
@@ -451,6 +474,7 @@ class WeatherService
             'davao city' => ['lat' => 7.1907, 'lon' => 125.4553],
             'batangas city' => ['lat' => 13.7563, 'lon' => 121.0583],
             'angeles city' => ['lat' => 15.1450, 'lon' => 120.5847],
+            'tuguegarao city' => ['lat' => 17.6132, 'lon' => 121.7270], // Capital of Cagayan
             'quezon city' => ['lat' => 14.6760, 'lon' => 121.0437],
             'caloocan' => ['lat' => 14.6546, 'lon' => 120.9842],
             'pasig' => ['lat' => 14.5764, 'lon' => 121.0851],
@@ -485,6 +509,7 @@ class WeatherService
             'davao' => ['lat' => 7.1907, 'lon' => 125.4553], // Davao City
             'batangas' => ['lat' => 13.7563, 'lon' => 121.0583], // Batangas City
             'pampanga' => ['lat' => 15.1450, 'lon' => 120.5847], // Angeles City
+            'cagayan' => ['lat' => 17.6132, 'lon' => 121.7270], // Tuguegarao City
             'laguna' => ['lat' => 14.1667, 'lon' => 121.2333], // San Pablo
             'cavite' => ['lat' => 14.4791, 'lon' => 120.8969], // Cavite City
             'rizal' => ['lat' => 14.6507, 'lon' => 121.1029], // Marikina
@@ -563,20 +588,30 @@ class WeatherService
      */
     protected function formatWeatherData($data)
     {
+        // Improve temperature accuracy by using more precise rounding
+        $temp = $data['main']['temp'];
+        $feelsLike = $data['main']['feels_like'];
+        
+        // Round to nearest 0.5 degree for better accuracy, then display as integer
+        $displayTemp = round($temp * 2) / 2;
+        $displayFeelsLike = round($feelsLike * 2) / 2;
+        
         return [
-            'temperature' => round($data['main']['temp']),
-            'feels_like' => round($data['main']['feels_like']),
+            'temperature' => round($displayTemp),
+            'feels_like' => round($displayFeelsLike),
             'humidity' => $data['main']['humidity'],
             'pressure' => $data['main']['pressure'],
             'description' => ucfirst($data['weather'][0]['description']),
             'icon' => $data['weather'][0]['icon'],
             'wind_speed' => round($data['wind']['speed'] * 3.6, 1), // Convert m/s to km/h
-            'wind_direction' => $this->getWindDirection($data['wind']['deg']),
-            'visibility' => round($data['visibility'] / 1000, 1), // Convert m to km
+            'wind_direction' => $this->getWindDirection($data['wind']['deg'] ?? 0),
+            'visibility' => round(($data['visibility'] ?? 10000) / 1000, 1), // Convert m to km
             'sunrise' => now()->setTimezone('Asia/Manila')->setTimestamp($data['sys']['sunrise'])->format('g:i A'),
             'sunset' => now()->setTimezone('Asia/Manila')->setTimestamp($data['sys']['sunset'])->format('g:i A'),
             'timestamp' => now()->setTimezone('Asia/Manila')->format('M d, Y H:i'),
-            'location' => $data['name'] . ', ' . ($data['sys']['country'] ?? '')
+            'location' => $data['name'] . ', ' . ($data['sys']['country'] ?? ''),
+            'raw_temp' => $temp, // Keep raw temperature for debugging
+            'data_source' => 'OpenWeatherMap'
         ];
     }
 
@@ -586,20 +621,63 @@ class WeatherService
     protected function formatForecastData($data)
     {
         $forecasts = [];
+        $dailyForecasts = [];
+        $manilaTime = now()->setTimezone('Asia/Manila');
+        $today = $manilaTime->format('M d');
         
+        // Group forecasts by date and select the midday forecast (12:00) or closest to it
         foreach ($data['list'] as $item) {
-            $forecasts[] = [
-                'date' => date('M d', strtotime($item['dt_txt'])),
-                'time' => date('H:i', strtotime($item['dt_txt'])),
+            // Convert UTC time to Manila time for proper date grouping
+            $utcTime = new \DateTime($item['dt_txt'], new \DateTimeZone('UTC'));
+            $manilaDateTime = $utcTime->setTimezone(new \DateTimeZone('Asia/Manila'));
+            
+            $dateKey = $manilaDateTime->format('M d');
+            $hour = $manilaDateTime->format('H');
+            
+            // Skip today's and past dates - forecast should only show future days
+            if ($manilaDateTime->format('Y-m-d') <= $manilaTime->format('Y-m-d')) {
+                continue;
+            }
+            
+            // If we don't have this date yet, or if this is closer to midday (12:00)
+            if (!isset($dailyForecasts[$dateKey]) || 
+                abs($hour - 12) < abs($dailyForecasts[$dateKey]['manila_hour'] - 12)) {
+                
+                $dailyForecasts[$dateKey] = $item;
+                $dailyForecasts[$dateKey]['manila_hour'] = $hour;
+                $dailyForecasts[$dateKey]['manila_datetime'] = $manilaDateTime;
+            }
+        }
+        
+        // Convert to the expected format and sort by date
+        $sortedForecasts = [];
+        foreach ($dailyForecasts as $dateKey => $item) {
+            $manilaDateTime = $item['manila_datetime'];
+            
+            $sortedForecasts[] = [
+                'date' => $dateKey,
+                'day_name' => $manilaDateTime->format('l'), // Full day name
+                'time' => $manilaDateTime->format('H:i'),
                 'temperature' => round($item['main']['temp']),
                 'description' => ucfirst($item['weather'][0]['description']),
                 'icon' => $item['weather'][0]['icon'],
                 'humidity' => $item['main']['humidity'],
-                'wind_speed' => round($item['wind']['speed'] * 3.6, 1)
+                'wind_speed' => round($item['wind']['speed'] * 3.6), // Round to nearest km/h
+                'sort_date' => $manilaDateTime->format('Y-m-d')
             ];
         }
+        
+        // Sort by date to ensure proper order
+        usort($sortedForecasts, function($a, $b) {
+            return strcmp($a['sort_date'], $b['sort_date']);
+        });
+        
+        // Remove sort_date from final output
+        foreach ($sortedForecasts as &$forecast) {
+            unset($forecast['sort_date']);
+        }
 
-        return $forecasts;
+        return $sortedForecasts;
     }
 
     /**
@@ -828,8 +906,8 @@ class WeatherService
                 $rainfall = rand(0, 8); // Dry season
             }
             
-            // Estimate wind speed
-            $windSpeed = rand(5, 20);
+            // Estimate wind speed (rounded to nearest km/h)
+            $windSpeed = round(rand(5, 20));
             
             // Generate weather description based on conditions
             $descriptions = [
@@ -851,7 +929,7 @@ class WeatherService
                 ],
                 'humidity' => $humidity,
                 'pressure' => 1013 + rand(-10, 10),
-                'wind_speed' => $windSpeed,
+                'wind_speed' => round($windSpeed),
                 'description' => $description,
                 'icon' => '02d',
                 'rainfall' => $rainfall,

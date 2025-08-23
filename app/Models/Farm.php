@@ -97,12 +97,16 @@ class Farm extends Model
                 }
             }
             
-            $this->cropGrowth()->create([
+            $cropGrowth = $this->cropGrowth()->create([
                 'current_stage' => $currentStage,
                 'stage_progress' => $initialProgress,
                 'overall_progress' => $this->calculateOverallProgress($currentStage, $initialProgress),
                 'last_updated' => now(),
             ]);
+            
+            // Set the farm relationship to avoid N+1 queries
+            $cropGrowth->setRelation('farm', $this);
+            
             $this->refresh();
         }
         

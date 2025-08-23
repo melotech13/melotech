@@ -43,9 +43,16 @@ class CropGrowth extends Model
 
     protected $casts = [
         'stage_data' => 'array',
+        'notes' => 'array',
         'last_updated' => 'date',
         'stage_progress' => 'integer',
         'overall_progress' => 'integer',
+    ];
+
+    protected $appends = [
+        'days_elapsed',
+        'days_remaining',
+        'harvest_date',
     ];
 
     // Growth stage constants
@@ -242,5 +249,104 @@ class CropGrowth extends Model
         }
         
         return $this;
+    }
+
+    /**
+     * Get days elapsed since planting
+     */
+    public function getDaysElapsedAttribute()
+    {
+        // Ensure farm relationship is loaded
+        if (!$this->relationLoaded('farm')) {
+            $this->load('farm');
+        }
+        
+        if (!$this->farm || !$this->farm->planting_date) {
+            return 0;
+        }
+        
+        $plantingDate = $this->farm->planting_date;
+        $currentDate = now();
+        
+        // Skip if planting date is in the future
+        if ($plantingDate->isAfter($currentDate)) {
+            return 0;
+        }
+        
+        return round($plantingDate->diffInDays($currentDate));
+    }
+
+    /**
+     * Get days remaining until harvest
+     */
+    public function getDaysRemainingAttribute()
+    {
+        // Ensure farm relationship is loaded
+        if (!$this->relationLoaded('farm')) {
+            $this->load('farm');
+        }
+        
+        if (!$this->farm || !$this->farm->planting_date) {
+            return 80; // Full growth period if not planted yet
+        }
+        
+        $plantingDate = $this->farm->planting_date;
+        $currentDate = now();
+        
+        // Skip if planting date is in the future
+        if ($plantingDate->isAfter($currentDate)) {
+            return 80; // Full growth period if not planted yet
+        }
+        
+        // Calculate total growth period (80 days for watermelon)
+        $totalGrowthDays = 80;
+        $daysElapsed = $plantingDate->diffInDays($currentDate);
+        
+        $daysRemaining = $totalGrowthDays - $daysElapsed;
+        return max(0, round($daysRemaining));
+    }
+
+    /**
+     * Get estimated harvest date
+     */
+    public function getHarvestDateAttribute()
+    {
+        // Ensure farm relationship is loaded
+        if (!$this->relationLoaded('farm')) {
+            $this->load('farm');
+        }
+        
+        if (!$this->farm || !$this->farm->planting_date) {
+            return null;
+        }
+        
+        // Watermelon typically takes 80 days from planting to harvest
+        return $this->farm->planting_date->addDays(80);
+    }
+
+    /**
+     * Ensure notes is always an array
+     */
+    public function setNotesAttribute($value)
+    {
+        if (is_string($value)) {
+            $this->attributes['notes'] = json_encode([$value]);
+        } elseif (is_array($value)) {
+            $this->attributes['notes'] = json_encode($value);
+        } else {
+            $this->attributes['notes'] = json_encode([]);
+        }
+    }
+
+    /**
+     * Get notes as array
+     */
+    public function getNotesAttribute($value)
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+        return is_array($value) ? $value : [];
     }
 }

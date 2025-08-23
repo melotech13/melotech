@@ -36,6 +36,8 @@ Route::middleware('auth')->group(function () {
         return view('dashboard');
     })->name('dashboard');
     
+
+    
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     
     // Weather routes
@@ -48,6 +50,7 @@ Route::middleware('auth')->group(function () {
     
     // Crop Growth routes
     Route::get('/crop-growth', [CropGrowthController::class, 'index'])->name('crop-growth.index');
+    Route::post('/crop-growth/farm', [CropGrowthController::class, 'store'])->name('crop-growth.store');
     Route::post('/crop-growth/farm/{farm}/progress', [CropGrowthController::class, 'updateProgress'])->name('crop-growth.progress');
     Route::post('/crop-growth/farm/{farm}/advance', [CropGrowthController::class, 'advanceStage'])->name('crop-growth.advance');
     Route::post('/crop-growth/farm/{farm}/quick-update', [CropGrowthController::class, 'quickUpdate'])->name('crop-growth.quick-update');

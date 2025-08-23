@@ -25,7 +25,7 @@ return new class extends Migration
             
             // Growth tracking
             $table->date('last_updated');
-            $table->text('notes')->nullable();
+            $table->json('notes')->nullable();
             
             // Timestamps
             $table->timestamps();

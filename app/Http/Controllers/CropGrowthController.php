@@ -78,6 +78,54 @@ class CropGrowthController extends Controller
         return redirect()->route('crop-growth.index', ['selected_farm' => $farm->id]);
     }
 
+    /**
+     * Store a newly created farm
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'farm_name' => 'required|string|max:255',
+            'watermelon_variety' => 'required|string|max:255',
+            'planting_date' => 'required|date',
+            'field_size' => 'required|numeric|min:0.1',
+            'field_size_unit' => 'required|in:acres,hectares',
+            'province_name' => 'required|string|max:255',
+            'city_municipality_name' => 'required|string|max:255',
+            'barangay_name' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            $user = Auth::user();
+            
+            $farm = new Farm();
+            $farm->user_id = $user->id;
+            $farm->farm_name = $request->farm_name;
+            $farm->watermelon_variety = $request->watermelon_variety;
+            $farm->planting_date = $request->planting_date;
+            $farm->field_size = $request->field_size;
+            $farm->field_size_unit = $request->field_size_unit;
+            $farm->city_municipality_name = $request->city_municipality_name ?? 'Unknown';
+            $farm->province_name = $request->province_name ?? 'Unknown';
+            $farm->barangay_name = $request->barangay_name;
+            $farm->save();
+
+            // Create initial crop growth record
+            $cropGrowth = new CropGrowth();
+            $cropGrowth->farm_id = $farm->id;
+            $cropGrowth->current_stage = 'seedling';
+            $cropGrowth->stage_progress = 0;
+            $cropGrowth->overall_progress = 0;
+            $cropGrowth->save();
+
+            return redirect()->route('crop-growth.index', ['selected_farm' => $farm->id])
+                ->with('success', 'Farm created successfully! Your crop growth tracking has begun.');
+                
+        } catch (\Exception $e) {
+            Log::error('Error creating farm', ['error' => $e->getMessage(), 'user_id' => Auth::id()]);
+            return back()->with('error', 'Failed to create farm. Please try again.');
+        }
+    }
+
     public function updateProgress(Request $request, Farm $farm)
     {
         $request->validate([

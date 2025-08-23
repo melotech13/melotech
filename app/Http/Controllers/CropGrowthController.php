@@ -12,7 +12,7 @@ use Carbon\Carbon;
 
 class CropGrowthController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
             /** @var User $user */
@@ -27,6 +27,20 @@ class CropGrowthController extends Controller
             $isAuthenticated = Auth::check();
             
             Log::info('Crop growth index loaded', ['user_id' => $user->id, 'farms_count' => $farms->count()]);
+            
+            // Get selected farm for detailed view
+            $selectedFarm = null;
+            $selectedCropGrowth = null;
+            $stages = CropGrowth::STAGES;
+            
+            if ($request->has('selected_farm') && $farms->where('id', $request->selected_farm)->count() > 0) {
+                $selectedFarm = $farms->where('id', $request->selected_farm)->first();
+                $selectedCropGrowth = $selectedFarm->getOrCreateCropGrowth();
+            } elseif ($farms->count() > 0) {
+                // Default to first farm if no selection
+                $selectedFarm = $farms->first();
+                $selectedCropGrowth = $selectedFarm->getOrCreateCropGrowth();
+            }
             
             // Get questions for all farms with their stages
             $farmQuestions = [];
@@ -51,7 +65,7 @@ class CropGrowthController extends Controller
             
             Log::info('Farm questions prepared', ['farm_questions_count' => count($farmQuestions)]);
             
-            return view('crop-growth.index', compact('farms', 'isAuthenticated', 'farmQuestions'));
+            return view('crop-growth.index', compact('farms', 'isAuthenticated', 'farmQuestions', 'selectedFarm', 'selectedCropGrowth', 'stages'));
         } catch (\Exception $e) {
             Log::error('Error in crop-growth index', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->with('error', 'Failed to load crop growth data. Please try again.');
@@ -60,11 +74,8 @@ class CropGrowthController extends Controller
 
     public function show(Farm $farm)
     {
-        $cropGrowth = $farm->getOrCreateCropGrowth();
-        $stages = CropGrowth::STAGES;
-        $questions = $this->getStageQuestions($cropGrowth->current_stage);
-        
-        return view('crop-growth.show', compact('farm', 'cropGrowth', 'stages', 'questions'));
+        // Redirect to index with farm parameter for single page view
+        return redirect()->route('crop-growth.index', ['selected_farm' => $farm->id]);
     }
 
     public function updateProgress(Request $request, Farm $farm)

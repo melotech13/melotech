@@ -165,7 +165,7 @@
     }
 
     .melon-icon-large {
-        font-size: 8rem;
+        font-size: 4rem;
         color: var(--melon-pink);
         filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         position: relative;
@@ -173,7 +173,7 @@
     }
 
     .melon-icon-medium {
-        font-size: 4rem;
+        font-size: 2.5rem;
         color: var(--melon-pink);
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
         position: absolute;
@@ -181,7 +181,7 @@
     }
 
     .melon-icon-small {
-        font-size: 2.5rem;
+        font-size: 1.5rem;
         color: var(--melon-pink);
         filter: drop-shadow(0 1px 3px rgba(0,0,0,0.1));
         position: absolute;
@@ -189,7 +189,7 @@
     }
 
     .melon-icon-tiny {
-        font-size: 1.5rem;
+        font-size: 1rem;
         color: var(--melon-pink);
         filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
         position: absolute;

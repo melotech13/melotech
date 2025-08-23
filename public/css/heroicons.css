@@ -1,0 +1,29 @@
+/* Heroicons CSS for Weather Icons */
+.heroicon {
+    width: 1.2em;
+    height: 1.2em;
+    display: inline-block;
+    vertical-align: middle;
+    font-style: normal;
+    font-size: 1.2em;
+    line-height: 1;
+    color: currentColor;
+}
+
+/* Weather Icons using Font Awesome */
+.heroicon-sun::before { content: '\f185'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+.heroicon-moon::before { content: '\f186'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+.heroicon-cloud::before { content: '\f0c2'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+.heroicon-cloud-sun::before { content: '\f6c4'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+.heroicon-cloud-rain::before { content: '\f73d'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+.heroicon-bolt::before { content: '\f0e7'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+.heroicon-snowflake::before { content: '\f2dc'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+.heroicon-eye-slash::before { content: '\f070'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+
+/* Additional weather icons */
+.heroicon-cloud-showers-heavy::before { content: '\f740'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+.heroicon-smog::before { content: '\f75f'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+.heroicon-wind::before { content: '\f72e'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+.heroicon-temperature-high::before { content: '\f769'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+.heroicon-temperature-low::before { content: '\f76b'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }
+.heroicon-tint::before { content: '\f043'; font-family: 'Font Awesome 6 Free'; font-weight: 900; }

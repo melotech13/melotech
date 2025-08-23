@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heroicons Test - MeloTech</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Heroicons CSS -->
+    <link rel="stylesheet" href="css/heroicons.css">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background: #f8fafc;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .icon-test {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .icon-test .heroicon {
+            margin-right: 1rem;
+            font-size: 2rem;
+        }
+        .icon-name {
+            font-weight: bold;
+            color: #374151;
+        }
+        .icon-description {
+            color: #6b7280;
+            margin-left: 1rem;
+        }
+        h1 {
+            color: #1f2937;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .section {
+            margin: 2rem 0;
+        }
+        .section h2 {
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🌤️ Heroicons Test Page</h1>
+        
+        <div class="section">
+            <h2>Weather Icons</h2>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-sun"></span>
+                <span class="icon-name">heroicon-sun</span>
+                <span class="icon-description">Sun icon for clear weather</span>
+            </div>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-moon"></span>
+                <span class="icon-name">heroicon-moon</span>
+                <span class="icon-description">Moon icon for clear night</span>
+            </div>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-cloud"></span>
+                <span class="icon-name">heroicon-cloud</span>
+                <span class="icon-description">Cloud icon for cloudy weather</span>
+            </div>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-cloud-sun"></span>
+                <span class="icon-name">heroicon-cloud-sun</span>
+                <span class="icon-description">Partly cloudy icon</span>
+            </div>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-cloud-rain"></span>
+                <span class="icon-name">heroicon-cloud-rain</span>
+                <span class="icon-description">Rain icon</span>
+            </div>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-bolt"></span>
+                <span class="icon-name">heroicon-bolt</span>
+                <span class="icon-description">Lightning/thunderstorm icon</span>
+            </div>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-snowflake"></span>
+                <span class="icon-name">heroicon-snowflake</span>
+                <span class="icon-description">Snow icon</span>
+            </div>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-eye-slash"></span>
+                <span class="icon-name">heroicon-eye-slash</span>
+                <span class="icon-description">Fog/mist icon</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Additional Weather Icons</h2>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-cloud-showers-heavy"></span>
+                <span class="icon-name">heroicon-cloud-showers-heavy</span>
+                <span class="icon-description">Heavy rain icon</span>
+            </div>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-smog"></span>
+                <span class="icon-name">heroicon-smog</span>
+                <span class="icon-description">Smog/haze icon</span>
+            </div>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-wind"></span>
+                <span class="icon-name">heroicon-wind</span>
+                <span class="icon-description">Wind icon</span>
+            </div>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-temperature-high"></span>
+                <span class="icon-name">heroicon-temperature-high</span>
+                <span class="icon-description">High temperature icon</span>
+            </div>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-temperature-low"></span>
+                <span class="icon-name">heroicon-temperature-low</span>
+                <span class="icon-description">Low temperature icon</span>
+            </div>
+            
+            <div class="icon-test">
+                <span class="heroicon heroicon-tint"></span>
+                <span class="icon-name">heroicon-tint</span>
+                <span class="icon-description">Humidity icon</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Status</h2>
+            <p><strong>✅ Heroicons CSS loaded:</strong> <span id="css-status">Checking...</span></p>
+            <p><strong>✅ Font Awesome loaded:</strong> <span id="fa-status">Checking...</span></p>
+        </div>
+    </div>
+    
+    <script>
+        // Check if CSS is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const cssStatus = document.getElementById('css-status');
+            const faStatus = document.getElementById('fa-status');
+            
+            // Check if our CSS is loaded
+            const testElement = document.createElement('div');
+            testElement.className = 'heroicon heroicon-sun';
+            testElement.style.position = 'absolute';
+            testElement.style.left = '-9999px';
+            document.body.appendChild(testElement);
+            
+            const computedStyle = window.getComputedStyle(testElement, '::before');
+            const content = computedStyle.content;
+            
+            if (content && content !== 'none') {
+                cssStatus.textContent = '✅ Working';
+                cssStatus.style.color = 'green';
+            } else {
+                cssStatus.textContent = '❌ Not working';
+                cssStatus.style.color = 'red';
+            }
+            
+            document.body.removeChild(testElement);
+            
+            // Check if Font Awesome is loaded
+            const faTest = document.createElement('i');
+            faTest.className = 'fas fa-sun';
+            faTest.style.position = 'absolute';
+            faTest.style.left = '-9999px';
+            document.body.appendChild(faTest);
+            
+            const faComputedStyle = window.getComputedStyle(faTest, '::before');
+            const faContent = faComputedStyle.content;
+            
+            if (faContent && faContent !== 'none') {
+                faStatus.textContent = '✅ Working';
+                faStatus.style.color = 'green';
+            } else {
+                faStatus.textContent = '❌ Not working';
+                faStatus.style.color = 'red';
+            }
+            
+            document.body.removeChild(faTest);
+        });
+    </script>
+</body>
+</html>

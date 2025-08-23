@@ -41,13 +41,13 @@ Route::middleware('auth')->group(function () {
     // Weather routes
     Route::get('/weather/farm/{farmId}', [App\Http\Controllers\WeatherController::class, 'getFarmWeather'])->name('weather.farm');
     Route::get('/weather/user-farm', [App\Http\Controllers\WeatherController::class, 'getUserFarmWeather'])->name('weather.user-farm');
-    Route::post('/weather/refresh/{farmId}', [App\Http\Controllers\WeatherController::class, 'refreshWeather'])->name('weather.refresh');
+    Route::get('/weather/farm/{farmId}/refresh', [App\Http\Controllers\WeatherController::class, 'refreshWeather'])->name('weather.refresh');
     Route::get('/weather/historical/{farmId}', [App\Http\Controllers\WeatherController::class, 'getHistoricalWeather'])->name('weather.historical');
     Route::get('/weather/test-connection', [App\Http\Controllers\WeatherController::class, 'testConnection'])->name('weather.test');
+    Route::get('/weather', [App\Http\Controllers\WeatherController::class, 'showWeatherPage'])->name('weather.index');
     
     // Crop Growth routes
     Route::get('/crop-growth', [CropGrowthController::class, 'index'])->name('crop-growth.index');
-    Route::get('/crop-growth/farm/{farm}', [CropGrowthController::class, 'show'])->name('crop-growth.show');
     Route::post('/crop-growth/farm/{farm}/progress', [CropGrowthController::class, 'updateProgress'])->name('crop-growth.progress');
     Route::post('/crop-growth/farm/{farm}/advance', [CropGrowthController::class, 'advanceStage'])->name('crop-growth.advance');
     Route::post('/crop-growth/farm/{farm}/quick-update', [CropGrowthController::class, 'quickUpdate'])->name('crop-growth.quick-update');

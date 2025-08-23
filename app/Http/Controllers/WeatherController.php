@@ -467,4 +467,15 @@ class WeatherController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Show the dedicated weather information page
+     */
+    public function showWeatherPage()
+    {
+        $user = auth()->user();
+        $farms = $user->farms;
+        
+        return view('weather.index', compact('farms'));
+    }
 }

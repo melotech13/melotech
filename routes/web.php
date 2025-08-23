@@ -57,6 +57,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/crop-growth/dashboard-data', [CropGrowthController::class, 'getDashboardData'])->name('crop-growth.dashboard-data');
     Route::post('/crop-growth/farm/{farm}/force-update', [CropGrowthController::class, 'forceUpdateProgress'])->name('crop-growth.force-update');
     
+                 // Crop Progress Update routes
+             Route::get('/crop-progress', [App\Http\Controllers\CropProgressController::class, 'index'])->name('crop-progress.index');
+             Route::get('/crop-progress/questions', [App\Http\Controllers\CropProgressController::class, 'showQuestions'])->name('crop-progress.questions');
+             Route::post('/crop-progress/questions', [App\Http\Controllers\CropProgressController::class, 'storeQuestions'])->name('crop-progress.store-questions');
+
+             Route::get('/crop-progress/export', [App\Http\Controllers\CropProgressController::class, 'exportProgress'])->name('crop-progress.export');
+             Route::get('/crop-progress/export/{id}', [App\Http\Controllers\CropProgressController::class, 'exportSingleUpdate'])->name('crop-progress.export-single');
+             Route::get('/crop-progress/{id}/recommendations', [App\Http\Controllers\CropProgressController::class, 'getRecommendations'])->name('crop-progress.recommendations');
+    
     // Debug route for testing crop data
     Route::get('/debug/crop-data', function() {
         /** @var User $user */

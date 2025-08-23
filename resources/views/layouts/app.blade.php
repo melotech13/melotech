@@ -380,7 +380,9 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            
+                            <a class="nav-link {{ request()->routeIs('crop-progress.*') ? 'active' : '' }}" href="{{ route('crop-progress.index') }}">
+                                <i class="fas fa-clipboard-check me-2"></i>Progress Update
+                            </a>
                         </li>
                     </ul>
                     
@@ -399,6 +401,9 @@
                                 </a></li>
                                 <li><a class="dropdown-item" href="{{ route('crop-growth.index') }}">
                                     <i class="fas fa-seedling"></i>Crop Growth
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ route('crop-progress.index') }}">
+                                    <i class="fas fa-clipboard-check"></i>Progress Update
                                 </a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 

@@ -17,11 +17,26 @@ class PhotoDiagnosisController extends Controller
     public function index()
     {
         $user = Auth::user();
+        
+        // Optimize database queries by getting all analyses in one query
         $analyses = PhotoAnalysis::where('user_id', $user->id)
-            ->orderBy('analysis_date', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get();
-
-        return view('photo-diagnosis.index', compact('analyses'));
+        
+        // Pre-calculate counts to avoid multiple database queries in the view
+        $totalAnalyses = $analyses->count();
+        $leavesCount = $analyses->where('analysis_type', 'leaves')->count();
+        $watermelonCount = $analyses->where('analysis_type', 'watermelon')->count();
+        $avgConfidence = $totalAnalyses > 0 ? $analyses->avg('confidence_score') : 0;
+        
+        // Pass pre-calculated values to the view
+        return view('photo-diagnosis.index', compact(
+            'analyses', 
+            'totalAnalyses', 
+            'leavesCount', 
+            'watermelonCount', 
+            'avgConfidence'
+        ));
     }
 
     /**

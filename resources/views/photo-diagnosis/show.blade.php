@@ -24,11 +24,11 @@
                 <div class="header-stats">
                     <div class="stat-badge">
                         <i class="fas fa-calendar"></i>
-                        <span>{{ $analysis->created_at->format('M d, Y') }}</span>
+                        <span>{{ $photoAnalysis->created_at->format('M d, Y') }}</span>
                     </div>
                     <div class="stat-badge">
                         <i class="fas fa-tag"></i>
-                        <span>{{ ucfirst($analysis->analysis_type) }}</span>
+                        <span>{{ ucfirst($photoAnalysis->analysis_type) }}</span>
                     </div>
                     <div class="action-status">
                         <a href="{{ route('photo-diagnosis.create') }}" class="btn btn-sm me-2" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; text-decoration: none;">
@@ -241,15 +241,17 @@
 <style>
     /* Basic styling */
     .analysis-results-container {
-        max-width: 1200px;
+        max-width: 1400px;
         width: 100%;
         margin: 0 auto;
-        padding: 2rem 1.5rem;
+        padding: 0 1.5rem;
+        margin-top: 0 !important;
+        padding-top: 2rem !important;
     }
 
     /* Unified Header */
     .unified-header {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 25%, #1e40af 50%, #1e3a8a 75%, #1e293b 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 25%, #1e40af 50%, #1e3a8a 75%, #1e3a8a 100%);
         border-radius: 20px;
         padding: 2.5rem 2rem;
         margin-bottom: 2rem;
@@ -656,7 +658,7 @@
 
     @media (max-width: 767.98px) {
         .analysis-results-container {
-            padding: 1rem 0.75rem;
+            padding: 1.25rem 0.75rem;
         }
 
         .unified-header {

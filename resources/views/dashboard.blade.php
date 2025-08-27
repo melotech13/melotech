@@ -21,8 +21,15 @@
                     Welcome back, {{ Auth::user()->name }}
                 </h1>
                 <p class="welcome-subtitle">Your watermelon farm is ready for AI-powered insights and analysis</p>
-                <div class="sync-status">
-
+                <div class="header-stats">
+                    <div class="stat-badge">
+                        <i class="fas fa-home"></i>
+                        <span>{{ Auth::user()->farms->count() }} {{ Str::plural('Farm', Auth::user()->farms->count()) }}</span>
+                    </div>
+                    <div class="stat-badge">
+                        <i class="fas fa-seedling"></i>
+                        <span>Dashboard</span>
+                    </div>
                 </div>
             </div>
             <div class="welcome-visual">
@@ -2589,24 +2596,27 @@ function displayHistoricalWeather(container, data) {
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 .dashboard-container {
-    max-width: 1100px;
+    max-width: 1400px;
+    width: 100%;
     margin: 0 auto;
-    padding: 2rem 1.5rem;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    min-height: 100vh;
+    padding: 0 1.5rem;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    position: relative;
+    z-index: 1;
+    margin-top: 0 !important;
+    padding-top: 1.5rem !important;
 }
 
 /* Welcome Section */
 .welcome-section {
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-    border-radius: 20px;
-    padding: 2.5rem 2rem;
-    margin-bottom: 2.5rem;
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 25%, #60a5fa 50%, #93c5fd 75%, #dbeafe 100%);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    margin-bottom: 2rem;
     color: white;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 20px 40px rgba(30, 64, 175, 0.3);
 }
 
 .welcome-section::before {
@@ -2621,11 +2631,13 @@ function displayHistoricalWeather(container, data) {
 }
 
 .welcome-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     position: relative;
     z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 2rem;
 }
 
 .welcome-text {
@@ -2633,13 +2645,11 @@ function displayHistoricalWeather(container, data) {
 }
 
 .welcome-title {
-    font-size: 2.25rem;
-    font-weight: 800;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    letter-spacing: -0.025em;
+    font-size: 3rem;
+    font-weight: 900;
+    margin: 0 0 1rem 0;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    color: #ffffff !important;
 }
 
 .welcome-icon {
@@ -2648,43 +2658,46 @@ function displayHistoricalWeather(container, data) {
 }
 
 .welcome-subtitle {
-    font-size: 1.125rem;
-    opacity: 0.95;
-    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    margin: 0 0 1.5rem 0;
+    color: #ffffff !important;
     font-weight: 400;
-    line-height: 1.6;
 }
 
-.sync-status {
-    margin-top: 1rem;
-}
+
 
 .sync-indicator {
-    display: inline-flex;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 500;
+}
+
+/* Header Stats */
+.header-stats {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.stat-badge {
+    background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
-}
-
-.sync-indicator.active {
-    background: rgba(16, 185, 129, 0.2);
-    border-color: rgba(16, 185, 129, 0.3);
-}
-
-.sync-indicator i {
-    color: #fbbf24;
-    font-size: 0.875rem;
-}
-
-.sync-indicator span {
-    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ffffff !important;
 }
 
 .welcome-visual {
@@ -4988,9 +5001,37 @@ function displayHistoricalWeather(container, data) {
 }
 
 /* Responsive Design */
+@media (max-width: 991.98px) {
+    .dashboard-container {
+        max-width: 100%;
+        padding: 1.25rem 1rem;
+    }
+    
+    .welcome-section {
+        padding: 2rem 1.5rem;
+    }
+    
+    .welcome-content {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .welcome-title {
+        font-size: 2rem;
+    }
+    
+    .welcome-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .header-stats {
+        justify-content: center;
+    }
+}
+
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 1rem;
+        padding: 1rem 0.75rem;
     }
     
     .welcome-section {
@@ -5005,6 +5046,16 @@ function displayHistoricalWeather(container, data) {
         flex-direction: column;
         text-align: center;
         gap: 1rem;
+    }
+    
+    .header-stats {
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    .stat-badge {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
     }
     
     .welcome-circle {
@@ -5147,6 +5198,15 @@ function displayHistoricalWeather(container, data) {
     
     .welcome-subtitle {
         font-size: 0.9rem;
+    }
+    
+    .header-stats {
+        gap: 0.5rem;
+    }
+    
+    .stat-badge {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
     }
     
     .farm-card {

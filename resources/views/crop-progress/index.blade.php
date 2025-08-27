@@ -212,10 +212,10 @@
 <style>
     /* Basic styling */
     .crop-progress-container {
-        max-width: 1200px;
+        max-width: 1400px;
         width: 100%;
         margin: 0 auto;
-        padding: 2rem 1.5rem;
+        padding: 0 1.5rem;
         position: relative;
         z-index: 1;
         margin-top: 0 !important;
@@ -821,7 +821,7 @@
 
     @media (max-width: 767.98px) {
         .crop-progress-container {
-            padding: 1rem 0.75rem;
+            padding: 1.25rem 0.75rem;
         }
 
         .unified-header {

@@ -347,6 +347,8 @@
         max-width: 1400px;
         margin: 0 auto;
         padding: 0 1.5rem;
+        margin-top: 0 !important;
+        padding-top: 2rem !important;
     }
 
     /* Enhanced Page Header */
@@ -354,7 +356,7 @@
         background: linear-gradient(135deg, #1e40af 0%, #3b82f6 25%, #60a5fa 50%, #93c5fd 75%, #dbeafe 100%);
         border-radius: 24px;
         padding: 3rem 2.5rem;
-        margin-bottom: 2.5rem;
+        margin-bottom: 2rem;
         color: white;
         box-shadow: 0 20px 40px rgba(30, 64, 175, 0.3);
         position: relative;
@@ -391,16 +393,13 @@
         font-weight: 900;
         margin: 0 0 1rem 0;
         text-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        background: linear-gradient(45deg, #ffffff, #f0f9ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: #ffffff !important;
     }
 
     .page-subtitle {
         font-size: 1.25rem;
         margin: 0 0 1.5rem 0;
-        opacity: 0.95;
+        color: #ffffff !important;
         font-weight: 400;
     }
 
@@ -421,6 +420,7 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        color: #ffffff !important;
     }
 
     /* Header actions removed - single farm per account */
@@ -500,7 +500,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1.5rem;
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 0 auto;
     }
 
@@ -614,7 +614,7 @@
     /* Enhanced Layout */
     .farm-details-section {
         display: block;
-        max-width: 1000px;
+        max-width: 1400px;
         margin: 0 auto;
     }
 
@@ -1162,7 +1162,7 @@
 
     @media (max-width: 767.98px) {
         .crop-growth-container {
-            padding: 0 1rem;
+            padding: 1.25rem 0.75rem;
         }
 
         .page-header {

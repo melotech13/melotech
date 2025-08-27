@@ -123,6 +123,8 @@
         max-width: 700px;
         margin: 0 auto;
         padding: 0 1rem;
+        margin-top: 0 !important;
+        padding-top: 2rem !important;
     }
 
     .page-header {

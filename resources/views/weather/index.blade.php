@@ -3,9 +3,7 @@
 @section('title', 'Weather Information')
 
 @section('content')
-<div class="container-fluid weather-page-container">
-    <div class="row">
-        <div class="col-12">
+<div class="weather-page-container">
             <!-- Unified Header -->
             <div class="unified-header">
                 <div class="header-main">
@@ -85,16 +83,26 @@
                     </div>
                 </div>
             @endif
-        </div>
-    </div>
-</div>
 
 <!-- Weather Styles -->
 <style>
-.page-header {
+    /* Basic styling */
+    .weather-page-container {
+        max-width: 1400px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        position: relative;
+        z-index: 1;
+        margin-top: 0 !important;
+        padding-top: 1.5rem !important;
+    }
+
+    .page-header {
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border-radius: 16px;
     padding: 2rem;
+    margin-bottom: 2rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     border: 1px solid #f1f5f9;
 }
@@ -826,9 +834,20 @@
 }
 
 /* Responsive Design */
+@media (max-width: 991.98px) {
+    .weather-page-container {
+        max-width: 100%;
+        padding: 1.25rem 1rem;
+    }
+}
+
 @media (max-width: 768px) {
     .forecast-grid {
         grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .weather-page-container {
+        padding: 1rem 0.75rem;
     }
 }
 
@@ -839,6 +858,10 @@
     
     .weather-farm-section {
         padding: 1rem;
+    }
+
+    .weather-page-container {
+        padding: 1rem 0.75rem;
     }
     
     .farm-title {

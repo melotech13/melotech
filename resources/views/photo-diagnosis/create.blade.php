@@ -150,10 +150,12 @@
 <style>
     /* Basic styling */
     .photo-analysis-container {
-        max-width: 1000px;
+        max-width: 1400px;
         width: 100%;
         margin: 0 auto;
-        padding: 2rem 1.5rem;
+        padding: 0 1.5rem;
+        margin-top: 0 !important;
+        padding-top: 2rem !important;
     }
 
     /* Unified Header */
@@ -413,6 +415,11 @@
         background: #f9fafb;
         transition: all 0.3s ease;
         cursor: pointer;
+        /* Ensure proper centering */
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     .upload-area:hover {
@@ -432,6 +439,14 @@
         margin-bottom: 1rem;
     }
 
+    .upload-content {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
     .upload-content h6 {
         font-size: 1.25rem;
         font-weight: 600;
@@ -449,12 +464,29 @@
         text-align: center;
     }
 
+    .preview-content.show {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        min-height: 300px !important;
+    }
+
     #image-preview {
-        max-width: 100%;
-        max-height: 300px;
+        max-width: 100% !important;
+        max-height: 300px !important;
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         margin-bottom: 1rem;
+        display: block !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        object-fit: contain;
+        width: auto !important;
+        height: auto !important;
+        /* Force centering */
+        text-align: center;
     }
 
     .preview-actions {
@@ -488,6 +520,11 @@
         padding-top: 1rem;
         border-top: 1px solid #e5e7eb;
         margin-top: 2rem;
+        /* Ensure perfect centering with flexbox */
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
     }
 
     /* Buttons */
@@ -496,12 +533,15 @@
         border-radius: 8px;
         font-weight: 600;
         text-decoration: none;
-        display: inline-flex;
-        align-items: center;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         gap: 0.5rem;
         transition: all 0.2s ease;
         border: none;
         cursor: pointer;
+        /* Ensure button is centered */
+        margin: 0 auto !important;
     }
 
     .btn-primary {
@@ -541,6 +581,15 @@
         font-size: 1.1rem;
     }
 
+    /* Submit button specific centering */
+    #submit-btn {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 auto !important;
+        min-width: 200px !important;
+    }
+
     /* Responsive Design */
     @media (max-width: 991.98px) {
         .photo-analysis-container {
@@ -576,7 +625,7 @@
 
     @media (max-width: 767.98px) {
         .photo-analysis-container {
-            padding: 1rem 0.75rem;
+            padding: 1.25rem 0.75rem;
         }
 
         .unified-header {
@@ -593,6 +642,25 @@
 
         .upload-area {
             padding: 2rem 1rem;
+        }
+
+        .preview-content.show {
+            min-height: 250px;
+        }
+
+        #image-preview {
+            max-height: 250px;
+        }
+
+        /* Mobile button centering */
+        .form-actions {
+            padding: 1rem 0.5rem;
+        }
+
+        #submit-btn {
+            min-width: 180px !important;
+            width: 100% !important;
+            max-width: 300px !important;
         }
     }
 </style>
@@ -653,6 +721,7 @@ document.addEventListener('DOMContentLoaded', function() {
             imagePreview.src = e.target.result;
             uploadContent.style.display = 'none';
             previewContent.style.display = 'block';
+            previewContent.classList.add('show');
             submitBtn.disabled = false;
         };
         reader.readAsDataURL(file);
@@ -663,6 +732,7 @@ document.addEventListener('DOMContentLoaded', function() {
         photoInput.value = '';
         uploadContent.style.display = 'block';
         previewContent.style.display = 'none';
+        previewContent.classList.remove('show');
         submitBtn.disabled = true;
     };
 

@@ -42,16 +42,67 @@
                         <i class="fas fa-apple-alt"></i>
                         <span>{{ $analyses->where('analysis_type', 'watermelon')->count() }} Fruits</span>
                     </div>
-                    <div class="action-status">
-                        <a href="{{ route('photo-diagnosis.create') }}" class="btn btn-sm" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; text-decoration: none;">
-                            <i class="fas fa-plus me-2"></i>New Analysis
-                        </a>
-                    </div>
+
                 </div>
             </div>
             <div class="header-visual">
                 <div class="header-circle">
                     <i class="fas fa-microscope"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Analyzing Section -->
+    <div class="start-analyzing-section">
+        <div class="section-card start-analyzing-card">
+            <div class="start-analyzing-content">
+                <div class="start-analyzing-left">
+                    <div class="start-analyzing-icon">
+                        <i class="fas fa-camera-retro"></i>
+                    </div>
+                    <div class="start-analyzing-text">
+                        <h2 class="start-analyzing-title">Ready to Analyze Your Crops?</h2>
+                        <p class="start-analyzing-description">
+                            Upload a photo of your watermelon leaves or fruit and get instant AI-powered analysis. 
+                            Our advanced system can detect diseases, assess health conditions, and provide actionable insights.
+                        </p>
+                        <div class="start-analyzing-features">
+                            <div class="feature-item">
+                                <i class="fas fa-bolt"></i>
+                                <span>Instant Analysis</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-microscope"></i>
+                                <span>AI-Powered Detection</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Accurate Results</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="start-analyzing-right">
+                    <div class="start-analyzing-cta">
+                        <a href="{{ route('photo-diagnosis.create') }}" class="btn-start-analyzing">
+                            <div class="btn-content">
+                                <i class="fas fa-play-circle"></i>
+                                <span class="btn-text">Start Analyzing</span>
+                            </div>
+                            <div class="btn-subtext">Upload & Analyze Your Photos</div>
+                        </a>
+                        <div class="quick-info">
+                            <div class="info-item">
+                                <i class="fas fa-clock"></i>
+                                <span>Results in seconds</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-images"></i>
+                                <span>Support for multiple formats</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -177,74 +228,29 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="quick-actions-section">
-        <div class="section-card">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-bolt me-2"></i>
-                    Quick Actions
-                </h3>
-            </div>
-            <div class="card-content">
-                <div class="actions-grid">
-                    <div class="action-card">
-                        <div class="action-icon">
-                            <i class="fas fa-upload"></i>
-                        </div>
-                        <h5>New Analysis</h5>
-                        <p>Upload a photo for instant AI diagnosis</p>
-                        <a href="{{ route('photo-diagnosis.create') }}" class="btn btn-primary">
-                            <i class="fas fa-play me-2"></i>Start Analysis
-                        </a>
-                    </div>
-                    
-                    <div class="action-card">
-                        <div class="action-icon">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                        <h5>View History</h5>
-                        <p>Review all your previous analyses and results</p>
-                        <a href="#" class="btn btn-outline-primary">
-                            <i class="fas fa-history me-2"></i>Browse History
-                        </a>
-                    </div>
-                    
-                    <div class="action-card">
-                        <div class="action-icon">
-                            <i class="fas fa-question-circle"></i>
-                        </div>
-                        <h5>Get Help</h5>
-                        <p>Learn how to get the best results from photo analysis</p>
-                        <a href="#" class="btn btn-outline-secondary">
-                            <i class="fas fa-info-circle me-2"></i>View Tips
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </div>
 
 @push('styles')
 <style>
     /* Basic styling */
     .photo-diagnosis-container {
-        max-width: 1200px;
+        max-width: 1400px;
         width: 100%;
         margin: 0 auto;
-        padding: 2rem 1.5rem;
+        padding: 0 1.5rem;
         position: relative;
         z-index: 1;
+        margin-top: 0 !important;
+        padding-top: 2rem !important;
     }
 
     /* Unified Header */
     .unified-header {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 25%, #1e40af 50%, #1e3a8a 75%, #1e293b 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 25%, #1e40af 50%, #1e3a8a 75%, #1e3a8a 100%);
         border-radius: 20px;
         padding: 2.5rem 2rem;
         margin-bottom: 2rem;
-        margin-top: 1rem;
         color: white;
         box-shadow: 0 15px 30px rgba(59, 130, 246, 0.3);
         position: relative;
@@ -339,6 +345,198 @@
 
     .action-status .btn:hover {
         background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Start Analyzing Section */
+    .start-analyzing-section {
+        margin-bottom: 2rem;
+    }
+
+    .start-analyzing-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        border: 2px solid #e5e7eb;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 0;
+    }
+
+    .start-analyzing-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        border-color: #d1d5db;
+    }
+
+    .start-analyzing-content {
+        display: flex;
+        align-items: center;
+        gap: 3rem;
+        padding: 2.5rem;
+    }
+
+    .start-analyzing-left {
+        flex: 1;
+        display: flex;
+        align-items: flex-start;
+        gap: 2rem;
+    }
+
+    .start-analyzing-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: white;
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        flex-shrink: 0;
+    }
+
+    .start-analyzing-text {
+        flex: 1;
+    }
+
+    .start-analyzing-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 1rem 0;
+        line-height: 1.2;
+    }
+
+    .start-analyzing-description {
+        font-size: 1rem;
+        color: #6b7280;
+        line-height: 1.6;
+        margin: 0 0 1.5rem 0;
+    }
+
+    .start-analyzing-features {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: #374151;
+        font-weight: 500;
+    }
+
+    .feature-item i {
+        color: #3b82f6;
+        font-size: 1rem;
+    }
+
+    .start-analyzing-right {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        flex-shrink: 0;
+        min-width: 280px;
+    }
+
+    .start-analyzing-cta {
+        text-align: center;
+    }
+
+    .btn-start-analyzing {
+        display: inline-block;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e40af 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 16px;
+        padding: 1.5rem 2.5rem;
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transform: translateZ(0);
+        margin-bottom: 1rem;
+    }
+
+    .btn-start-analyzing::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 50%, #1e3a8a 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .btn-start-analyzing:hover::before {
+        opacity: 1;
+    }
+
+    .btn-start-analyzing:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-start-analyzing:active {
+        transform: translateY(-1px) scale(1.01);
+    }
+
+    .btn-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-content i {
+        font-size: 1.5rem;
+    }
+
+    .btn-text {
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: 0.025em;
+    }
+
+    .btn-subtext {
+        position: relative;
+        z-index: 1;
+        font-size: 0.875rem;
+        opacity: 0.9;
+        font-weight: 500;
+    }
+
+    .quick-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .info-item i {
+        color: #10b981;
+        font-size: 1rem;
     }
 
     /* Statistics Section */
@@ -521,57 +719,7 @@
         color: #6b7280;
     }
 
-    /* Quick Actions */
-    .actions-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-    }
 
-    .action-card {
-        text-align: center;
-        padding: 2rem 1.5rem;
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 16px;
-        transition: all 0.3s ease;
-    }
-
-    .action-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        border-color: #d1d5db;
-    }
-
-    .action-icon {
-        width: 80px;
-        height: 80px;
-        border-radius: 20px;
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        color: white;
-        margin: 0 auto 1.5rem;
-    }
-
-    .action-card:nth-child(2) .action-icon {
-        background: linear-gradient(135deg, #10b981, #059669);
-    }
-
-    .action-card h5 {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 0.75rem;
-    }
-
-    .action-card p {
-        color: #6b7280;
-        margin-bottom: 1.5rem;
-        font-size: 0.9rem;
-    }
 
     /* No Data Content */
     .no-data-content {
@@ -684,14 +832,30 @@
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         }
 
-        .actions-grid {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        .start-analyzing-content {
+            flex-direction: column;
+            gap: 2rem;
+            padding: 2rem 1.5rem;
+        }
+
+        .start-analyzing-left {
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .start-analyzing-right {
+            min-width: auto;
+            width: 100%;
+        }
+
+        .start-analyzing-features {
+            justify-content: center;
         }
     }
 
     @media (max-width: 767.98px) {
         .photo-diagnosis-container {
-            padding: 1rem 0.75rem;
+            padding: 1.25rem 0.75rem;
         }
 
         .unified-header {
@@ -713,6 +877,42 @@
 
         .card-header, .card-content {
             padding: 1.25rem;
+        }
+
+        .start-analyzing-content {
+            padding: 1.5rem 1rem;
+        }
+
+        .start-analyzing-left {
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .start-analyzing-icon {
+            width: 70px;
+            height: 70px;
+            font-size: 2rem;
+        }
+
+        .start-analyzing-title {
+            font-size: 1.5rem;
+        }
+
+        .start-analyzing-features {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-start-analyzing {
+            padding: 1.25rem 2rem;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .btn-text {
+            font-size: 1.125rem;
         }
     }
 </style>

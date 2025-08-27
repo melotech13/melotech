@@ -4,17 +4,34 @@
 
 @section('content')
 <div class="questions-container">
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="header-content">
-            <h1 class="page-title">
-                <i class="fas fa-question-circle me-3"></i>
-                Crop Progress Questions
-            </h1>
-            <p class="page-subtitle">Answer simple questions about your crop to track progress</p>
-            <div class="farm-info">
-                <span class="farm-badge">{{ $farm->farm_name }}</span>
-                <span class="farm-badge">{{ $farm->watermelon_variety }}</span>
+    <!-- Unified Header -->
+    <div class="unified-header">
+        <div class="header-main">
+            <div class="header-left">
+                <h1 class="page-title">
+                    <i class="fas fa-question-circle"></i>
+                    Crop Progress Questions
+                </h1>
+                <p class="page-subtitle">Answer simple questions about your crop to track progress</p>
+                <div class="header-stats">
+                    <div class="stat-badge">
+                        <i class="fas fa-tractor"></i>
+                        <span>{{ $farm->farm_name }}</span>
+                    </div>
+                    <div class="stat-badge">
+                        <i class="fas fa-seedling"></i>
+                        <span>{{ $farm->watermelon_variety }}</span>
+                    </div>
+                    <div class="stat-badge">
+                        <i class="fas fa-list"></i>
+                        <span>{{ count($questions) }} Questions</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-visual">
+                <div class="header-circle">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
             </div>
         </div>
     </div>

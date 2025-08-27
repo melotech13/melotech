@@ -3,26 +3,41 @@
 @section('title', 'Weather Information')
 
 @section('content')
-<div class="container-fluid py-4">
+<div class="container-fluid weather-page-container">
     <div class="row">
         <div class="col-12">
-            <!-- Page Header -->
-            <div class="page-header mb-4">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
+            <!-- Unified Header -->
+            <div class="unified-header">
+                <div class="header-main">
+                    <div class="header-left">
                         <h1 class="page-title">
-                            <i class="fas fa-cloud-sun text-primary me-3"></i>
+                            <i class="fas fa-cloud-sun"></i>
                             Weather Information
                         </h1>
-                        <p class="page-subtitle text-muted">
+                        <p class="page-subtitle">
                             Real-time weather data and forecasts for your farming operations
                         </p>
+                        <div class="header-stats">
+                            <div class="stat-badge">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>{{ $farms->count() }} {{ Str::plural('Location', $farms->count()) }}</span>
+                            </div>
+                            <div class="stat-badge">
+                                <i class="fas fa-cloud"></i>
+                                <span>Live Weather</span>
+                            </div>
+                            <div class="action-status">
+                                <button class="btn btn-sm btn-light refresh-all-weather" id="refreshAllWeather" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white;">
+                                    <i class="fas fa-sync-alt me-2"></i>
+                                    Refresh All
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="weather-actions">
-                        <button class="btn btn-primary refresh-all-weather" id="refreshAllWeather">
-                            <i class="fas fa-sync-alt me-2"></i>
-                            Refresh All
-                        </button>
+                    <div class="header-visual">
+                        <div class="header-circle">
+                            <i class="fas fa-thermometer-half"></i>
+                        </div>
                     </div>
                 </div>
             </div>

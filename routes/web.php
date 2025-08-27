@@ -2,9 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\CropGrowthController;
+use App\Http\Controllers\PhotoDiagnosisController;
 use App\Models\User;
 
 Route::get('/', function () {
@@ -65,6 +67,40 @@ Route::middleware('auth')->group(function () {
              Route::get('/crop-progress/export', [App\Http\Controllers\CropProgressController::class, 'exportProgress'])->name('crop-progress.export');
              Route::get('/crop-progress/export/{id}', [App\Http\Controllers\CropProgressController::class, 'exportSingleUpdate'])->name('crop-progress.export-single');
              Route::get('/crop-progress/{id}/recommendations', [App\Http\Controllers\CropProgressController::class, 'getRecommendations'])->name('crop-progress.recommendations');
+    
+    // Photo Diagnosis routes
+    Route::get('/photo-diagnosis', [PhotoDiagnosisController::class, 'index'])->name('photo-diagnosis.index');
+    Route::get('/photo-diagnosis/create', [PhotoDiagnosisController::class, 'create'])->name('photo-diagnosis.create');
+    Route::post('/photo-diagnosis', [PhotoDiagnosisController::class, 'store'])->name('photo-diagnosis.store');
+    Route::get('/photo-diagnosis/{photoAnalysis}', [PhotoDiagnosisController::class, 'show'])->name('photo-diagnosis.show');
+    
+    // Debug route for photo upload testing
+    Route::post('/photo-diagnosis/debug', function(Request $request) {
+        try {
+            $user = Auth::user();
+            \Log::info('Debug upload attempt', [
+                'user_id' => $user->id ?? 'not authenticated',
+                'has_file' => $request->hasFile('photo'),
+                'analysis_type' => $request->get('analysis_type'),
+                'file_info' => $request->hasFile('photo') ? [
+                    'size' => $request->file('photo')->getSize(),
+                    'mime' => $request->file('photo')->getMimeType(),
+                    'extension' => $request->file('photo')->getClientOriginalExtension(),
+                ] : 'No file'
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Debug info logged',
+                'user_authenticated' => !!$user,
+                'has_file' => $request->hasFile('photo'),
+                'analysis_type' => $request->get('analysis_type')
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Debug upload error: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    })->name('photo-diagnosis.debug');
     
     // Debug route for testing crop data
     Route::get('/debug/crop-data', function() {
@@ -164,8 +200,8 @@ Route::middleware('auth')->group(function () {
     })->name('test.crop-insights');
     
     // Debug route (only in debug mode)
-    if (config('app.debug')) {
-        Route::get('/weather/debug/geocoding', [App\Http\Controllers\WeatherController::class, 'debugGeocoding'])->name('weather.debug.geocoding');
-        
-    }
+if (config('app.debug')) {
+    Route::get('/weather/debug/geocoding', [App\Http\Controllers\WeatherController::class, 'debugGeocoding'])->name('weather.debug.geocoding');
+
+}
 });

@@ -20,27 +20,31 @@
         </div>
     @endif
 
-    <!-- Enhanced Page Header -->
-    <div class="page-header">
-        <div class="header-content">
-            <div class="header-main">
+    <!-- Unified Header -->
+    <div class="unified-header">
+        <div class="header-main">
+            <div class="header-left">
                 <h1 class="page-title">
-                    <i class="fas fa-seedling me-3"></i>
+                    <i class="fas fa-seedling"></i>
                     Crop Growth Dashboard
                 </h1>
                 <p class="page-subtitle">Comprehensive monitoring and management of your watermelon crop development</p>
                 <div class="header-stats">
                     <div class="stat-badge">
-                        <i class="fas fa-farm me-2"></i>
-                        <span>{{ $farms->count() }} Farms</span>
+                        <i class="fas fa-tractor"></i>
+                        <span>{{ $farms->count() }} {{ Str::plural('Farm', $farms->count()) }}</span>
                     </div>
                     <div class="stat-badge">
-                        <i class="fas fa-chart-line me-2"></i>
+                        <i class="fas fa-chart-line"></i>
                         <span>Active Growth</span>
                     </div>
                 </div>
             </div>
-                         <!-- Single farm per account - no actions needed -->
+            <div class="header-visual">
+                <div class="header-circle">
+                    <i class="fas fa-leaf"></i>
+                </div>
+            </div>
         </div>
     </div>
 

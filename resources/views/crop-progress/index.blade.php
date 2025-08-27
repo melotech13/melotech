@@ -20,43 +20,44 @@
         </div>
     @endif
 
-    <!-- Page Header with Farm Status -->
+    <!-- Unified Header -->
     <div class="unified-header">
         <div class="header-main">
             <div class="header-left">
                 <h1 class="page-title">
-                    <i class="fas fa-clipboard-check me-3"></i>
+                    <i class="fas fa-clipboard-check"></i>
                     Crop Progress Update
                 </h1>
                 <p class="page-subtitle">Update your crop progress through guided questions or image selection</p>
-            </div>
-            
-            @if($selectedFarm)
-            <div class="header-right">
-                <div class="farm-info">
-                    <div class="farm-name">
-                        <i class="fas fa-farm me-2"></i>
-                        {{ $selectedFarm->farm_name }}
+                @if($selectedFarm)
+                <div class="header-stats">
+                    <div class="stat-badge">
+                        <i class="fas fa-tractor"></i>
+                        <span>{{ $selectedFarm->farm_name }}</span>
                     </div>
-                    <div class="farm-details">
-                        <span class="farm-variety">{{ $selectedFarm->watermelon_variety }}</span>
-                        <span class="farm-size">{{ $selectedFarm->field_size }} {{ $selectedFarm->field_size_unit }}</span>
+                    <div class="stat-badge">
+                        <i class="fas fa-seedling"></i>
+                        <span>{{ $selectedFarm->watermelon_variety }}</span>
                     </div>
-                </div>
-                
-                @if($canUpdate)
-                <div class="update-status ready">
-                    <i class="fas fa-check-circle me-2"></i>
-                    <span>Ready for Update</span>
-                </div>
-                @else
-                <div class="update-status waiting">
-                    <i class="fas fa-clock me-2"></i>
-                    <span>Next Update: {{ $nextUpdateDate->format('M d, Y') }}</span>
+                    @if($canUpdate)
+                    <div class="action-status ready" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Ready for Update</span>
+                    </div>
+                    @else
+                    <div class="action-status" style="background: rgba(251, 191, 36, 0.2); border-color: rgba(251, 191, 36, 0.3);">
+                        <i class="fas fa-clock"></i>
+                        <span>Next: {{ $nextUpdateDate->format('M d, Y') }}</span>
+                    </div>
+                    @endif
                 </div>
                 @endif
             </div>
-            @endif
+            <div class="header-visual">
+                <div class="header-circle">
+                    <i class="fas fa-tasks"></i>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -215,6 +216,10 @@
         width: 100%;
         margin: 0 auto;
         padding: 2rem 1.5rem;
+        position: relative;
+        z-index: 1;
+        margin-top: 0 !important;
+        padding-top: 2rem !important;
     }
 
     /* Card styling */
@@ -223,9 +228,11 @@
         border-radius: 20px;
         box-shadow: 0 8px 25px rgba(0,0,0,0.08);
         border: 1px solid rgba(0,0,0,0.05);
-        overflow: hidden;
+        overflow: visible;
         width: 100%;
         margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 1;
     }
 
     /* Specific sizing for action card */
@@ -565,17 +572,19 @@
         min-width: 80px;
     }
 
-    /* Unified Header */
+        /* Unified Header */
     .unified-header {
         background: linear-gradient(135deg, #059669 0%, #10b981 25%, #34d399 50%, #6ee7b7 75%, #a7f3d0 100%);
         border-radius: 20px;
         padding: 2.5rem 2rem;
         margin-bottom: 2rem;
+        margin-top: 0 !important;
         color: white;
         box-shadow: 0 15px 30px rgba(5, 150, 105, 0.3);
         position: relative;
         overflow: hidden;
         width: 100%;
+        z-index: 1;
     }
 
     .unified-header::before {
@@ -835,6 +844,17 @@
         .card-header, .card-content {
             padding: 1.25rem;
         }
+    }
+    
+
+    
+    /* Override any height constraints that might hide content */
+    .table-responsive,
+    .table-card,
+    .card-content {
+        min-height: auto !important;
+        max-height: none !important;
+        height: auto !important;
     }
 </style>
 @endpush

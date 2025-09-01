@@ -815,10 +815,14 @@
                     Start Free Today
                 </a>
                 <p class="cta-note">100% Free for Farmers • No Credit Card Required • No Hidden Costs • No Trial Period</p>
+                
+
             </div>
         </div>
     </div>
 </section>
+
+
 @endsection
 
 @push('scripts')

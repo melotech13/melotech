@@ -70,6 +70,75 @@
                     </div>
                 </div>
                 @endforeach
+
+                <!-- Progress History Table -->
+                <div class="progress-history-container">
+                    <div class="progress-history-card">
+                        <div class="progress-history-header">
+                            <h3 class="progress-history-title">
+                                <i class="fas fa-chart-line"></i>
+                                Progress History
+                            </h3>
+                            <button class="export-btn" onclick="exportProgressData()">
+                                <i class="fas fa-download"></i>
+                                Export All
+                            </button>
+                        </div>
+                        <div class="progress-history-content">
+                            <div class="progress-table-wrapper">
+                                <table class="progress-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Week</th>
+                                            <th>Date</th>
+                                            <th>Method</th>
+                                            <th>Progress</th>
+                                            <th>Next Update</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span class="week-badge">Week 1</span>
+                                            </td>
+                                            <td>Sep 01, 2025</td>
+                                            <td>
+                                                <span class="method-badge">Questions</span>
+                                            </td>
+                                            <td>
+                                                <div class="progress-container">
+                                                    <div class="progress-bar" style="width: 100%">
+                                                        <span class="progress-text">100%</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>Sep 07, 2025</td>
+                                            <td>
+                                                <div class="actions-dropdown">
+                                                    <button class="actions-btn" onclick="toggleActions(this)">
+                                                        <i class="fas fa-cog"></i>
+                                                        <i class="fas fa-chevron-down"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a href="#" onclick="viewSummary('1')">
+                                                            <i class="fas fa-chart-line"></i>
+                                                            View Summary
+                                                        </a>
+                                                        <a href="#" onclick="viewRecommendations('1')">
+                                                            <i class="fas fa-lightbulb"></i>
+                                                            View Recommendations
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @else
                 <div class="text-center py-5">
                     <div class="empty-state">
@@ -535,7 +604,13 @@
 
 /* Forecast Section */
 .forecast-section {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
+}
+
+.forecast-grid-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
 .forecast-title {
@@ -551,90 +626,118 @@
 .forecast-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 0.75rem;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    justify-items: center;
+    align-items: start;
 }
 
 .forecast-day {
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 1rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 1.25rem 1rem;
     text-align: center;
     border: 1px solid #e2e8f0;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 180px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .forecast-day:hover {
-    background: #f1f5f9;
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: #cbd5e1;
 }
 
 .extended-forecast {
     border: 1px dashed #cbd5e1;
-    background: #f8fafc;
-    opacity: 0.9;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    opacity: 0.95;
 }
 
 .extended-forecast:hover {
-    background: #f1f5f9;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
     opacity: 1;
+    border-color: #94a3b8;
 }
 
 .forecast-date {
     font-size: 0.875rem;
     font-weight: 600;
     color: #1e293b;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.025em;
 }
 
 .forecast-icon {
-    width: 32px;
-    height: 32px;
-    margin: 0 auto 0.5rem;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 0.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .forecast-icon i {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
 }
 
 .forecast-temp {
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 700;
     color: #1e293b;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
 }
 
 .forecast-desc {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: #64748b;
     font-weight: 500;
     text-transform: capitalize;
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
 }
 
 /* Forecast Summary */
 .forecast-summary {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-radius: 12px;
-    padding: 1rem;
-    border: 1px solid #e2e8f0;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    border: none;
+    margin-bottom: 1.5rem;
+    box-shadow: none;
 }
 
 .summary-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
+    gap: 0.5rem;
 }
 
 .summary-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem;
-    background: white;
-    border-radius: 8px;
+    padding: 0.75rem 0.5rem;
+    background: #ffffff;
+    border-radius: 10px;
     border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    min-height: 70px;
+}
+
+.summary-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: #cbd5e1;
 }
 
 .summary-icon {
@@ -643,14 +746,34 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f1f5f9;
-    border-radius: 6px;
-    color: #475569;
-    font-size: 0.875rem;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.9rem;
+    flex-shrink: 0;
 }
+
+.summary-item:nth-child(1) .summary-icon {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.summary-item:nth-child(2) .summary-icon {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.summary-item:nth-child(3) .summary-icon {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.summary-item:nth-child(4) .summary-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+
 
 .summary-content {
     flex: 1;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .summary-value {
@@ -658,12 +781,23 @@
     font-weight: 700;
     color: #1e293b;
     line-height: 1.2;
+    letter-spacing: -0.025em;
+    margin-bottom: 0.125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .summary-label {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: #64748b;
     font-weight: 500;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Enhanced Forecast Details */
@@ -833,6 +967,213 @@
     padding: 2rem;
 }
 
+/* Progress History Table - Clean New Implementation */
+.progress-history-container {
+    margin: 2rem 0;
+    width: 100%;
+}
+
+.progress-history-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    width: 100%;
+}
+
+.progress-history-header {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.progress-history-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.progress-history-title i {
+    color: #3b82f6;
+}
+
+.export-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.export-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.progress-history-content {
+    padding: 0;
+}
+
+/* Fixed Size Table Wrapper */
+.progress-table-wrapper {
+    height: 600px;
+    min-height: 600px;
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: none;
+}
+
+.progress-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    table-layout: fixed;
+}
+
+.progress-table thead th {
+    background: #f8fafc;
+    color: #374151;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.progress-table tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.progress-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* Badges */
+.week-badge {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.method-badge {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Progress Bar */
+.progress-container {
+    background: #f3f4f6;
+    border-radius: 8px;
+    height: 20px;
+    overflow: hidden;
+    position: relative;
+    min-width: 100px;
+}
+
+.progress-bar {
+    background: #10b981;
+    height: 100%;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Actions Dropdown */
+.actions-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.actions-btn {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+    transition: all 0.2s ease;
+}
+
+.actions-btn:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
+    z-index: 20;
+    display: none;
+    padding: 0.5rem 0;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: #374151;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: background 0.2s ease;
+}
+
+.dropdown-menu a:hover {
+    background: #f3f4f6;
+}
+
 /* Responsive Design */
 @media (max-width: 991.98px) {
     .weather-page-container {
@@ -900,45 +1241,76 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, 10 * 60 * 1000);
 
-    // Refresh all weather button
-    document.getElementById('refreshAllWeather').addEventListener('click', function() {
-        this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
-        
-        const promises = Array.from(farmContainers).map(container => {
-            const farmId = container.dataset.farmId;
-            return fetchWeatherData(farmId, true);
-        });
+    // Refresh all weather button - using event delegation for better reliability
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.refresh-all-weather') || e.target.closest('#refreshAllWeather')) {
+            const button = e.target.closest('.refresh-all-weather') || e.target.closest('#refreshAllWeather');
+            if (button) {
+                console.log('Refresh All button clicked');
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+                
+                const promises = Array.from(farmContainers).map(container => {
+                    const farmId = container.dataset.farmId;
+                    console.log('Refreshing weather for farm:', farmId);
+                    return fetchWeatherData(farmId, true).catch(error => {
+                        console.error('Error refreshing farm', farmId, ':', error);
+                        return Promise.resolve(); // Continue with other farms even if one fails
+                    });
+                });
 
-        Promise.all(promises).finally(() => {
-            this.disabled = false;
-            this.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Refresh All';
-        });
+                Promise.all(promises).finally(() => {
+                    console.log('All weather refresh operations completed');
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Refresh All';
+                });
+            }
+        }
     });
 });
 
 function fetchWeatherData(farmId, forceRefresh = false) {
     const container = document.getElementById(`weather-container-${farmId}`);
     
+    if (!container) {
+        console.error('Weather container not found for farm:', farmId);
+        return Promise.reject('Container not found');
+    }
+    
     // Use refresh endpoint if forcing refresh
     const url = forceRefresh ? `/weather/farm/${farmId}/refresh` : `/weather/farm/${farmId}`;
+    console.log('Fetching weather data from:', url);
     
-    return fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                displayWeatherData(container, data.data);
-                if (forceRefresh) {
-                    showSuccessMessage('Weather data refreshed successfully');
-                }
-            } else {
-                displayWeatherError(container, data.message, data.debug_info);
+    return fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Weather data received for farm', farmId, ':', data);
+        if (data.success) {
+            displayWeatherData(container, data.data);
+            if (forceRefresh) {
+                showSuccessMessage('Weather data refreshed successfully');
             }
-        })
-        .catch(error => {
-            console.error('Error fetching weather data:', error);
-            displayWeatherError(container, 'Failed to load weather data. Please try again.');
-        });
+        } else {
+            console.error('Weather API returned error:', data.message);
+            displayWeatherError(container, data.message, data.debug_info);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching weather data for farm', farmId, ':', error);
+        displayWeatherError(container, 'Failed to load weather data. Please try again.');
+        throw error; // Re-throw to be caught by the calling function
+    });
 }
 
 function displayWeatherData(container, weatherData) {
@@ -1158,7 +1530,7 @@ function displayWeatherData(container, weatherData) {
                                 </div>
                                 <div class="summary-content">
                                     <div class="summary-value">${getForecastTempRange(extendedForecast)}°C</div>
-                                    <div class="summary-label">Temperature Range</div>
+                                    <div class="summary-label">Temp Range</div>
                                 </div>
                             </div>
                             <div class="summary-item">
@@ -1167,7 +1539,7 @@ function displayWeatherData(container, weatherData) {
                                 </div>
                                 <div class="summary-content">
                                     <div class="summary-value">${getRainyDaysCount(extendedForecast)} days</div>
-                                    <div class="summary-label">Rain Expected</div>
+                                    <div class="summary-label">Rain Days</div>
                                 </div>
                             </div>
                             <div class="summary-item">
@@ -1176,7 +1548,7 @@ function displayWeatherData(container, weatherData) {
                                 </div>
                                 <div class="summary-content">
                                     <div class="summary-value">${getSunnyDaysCount(extendedForecast)} days</div>
-                                    <div class="summary-label">Clear Weather</div>
+                                    <div class="summary-label">Clear Days</div>
                                 </div>
                             </div>
                             <div class="summary-item">
@@ -1185,14 +1557,15 @@ function displayWeatherData(container, weatherData) {
                                 </div>
                                 <div class="summary-content">
                                     <div class="summary-value">${getOptimalFarmingDays(extendedForecast)} days</div>
-                                    <div class="summary-label">Optimal for Farming</div>
+                                    <div class="summary-label">Optimal Days</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Enhanced Forecast Grid -->
-                    <div class="forecast-grid">
+                    <div class="forecast-grid-container">
+                        <div class="forecast-grid">
                         ${extendedForecast.map(day => `
                             <div class="forecast-day ${day.is_extended ? 'extended-forecast' : ''}">
                                 <div class="forecast-date">${getDayName(day.date, day.day_name)}</div>
@@ -1211,12 +1584,9 @@ function displayWeatherData(container, weatherData) {
                                         <span>${Math.round(day.wind_speed)} km/h</span>
                                     </div>
                                 </div>
-                                <div class="forecast-recommendation">
-                                    ${getDayRecommendation(day, current)}
-                                </div>
-                                ${day.is_extended ? '<div class="forecast-note" style="font-size: 0.6rem; color: #64748b; font-style: italic;">Extended forecast</div>' : ''}
                             </div>
                         `).join('')}
+                        </div>
                     </div>
 
                     <!-- Forecast Insights -->
@@ -1224,7 +1594,7 @@ function displayWeatherData(container, weatherData) {
                         <div class="insights-header">
                             <h4 class="insights-title">
                                 <i class="fas fa-lightbulb me-2"></i>
-                                10-Day Farming Insights
+                                10-Day Weather Insights
                             </h4>
                         </div>
                         <div class="insights-content">
@@ -1262,15 +1632,6 @@ function displayWeatherData(container, weatherData) {
                             </div>
                         </div>
                     </div>
-
-                    ${extendedForecast.some(day => day.is_extended) ? `
-                        <div class="forecast-note-section" style="margin-top: 1rem; padding: 0.5rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <small style="color: #64748b; font-size: 0.75rem;">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Days 6-10 show extended forecast data based on seasonal patterns
-                            </small>
-                        </div>
-                    ` : ''}
                 </div>
             </div>
         </div>
@@ -1525,32 +1886,9 @@ function getOptimalFarmingDays(forecast) {
     }).length;
 }
 
-function getDayRecommendation(day, current) {
-    const temp = day.temperature;
-    const humidity = day.humidity;
-    const wind = day.wind_speed;
-    const description = day.description.toLowerCase();
-    
-    // Temperature-based recommendations
-    if (temp > 35) {
-        return '🌡️ Extra irrigation needed';
-    } else if (temp < 15) {
-        return '❄️ Protect sensitive crops';
-    }
-    
-    // Weather condition-based recommendations
-    if (description.includes('rain') || description.includes('shower')) {
-        return '🌧️ Good for soil moisture';
-    } else if (description.includes('clear') || description.includes('sun')) {
-        return '☀️ Perfect for harvesting';
-    } else if (wind > 20) {
-        return '💨 Secure structures';
-    } else if (humidity > 80) {
-        return '💧 Monitor for diseases';
-    }
-    
-    return '🌿 Normal farming activities';
-}
+
+
+
 
 function getBestPlantingDays(forecast) {
     if (!forecast) return 'Unable to determine';
@@ -1643,5 +1981,202 @@ function getOptimalActivities(forecast) {
     
     return activities.join(', ');
 }
+
+// Add responsive CSS for forecast section
+document.addEventListener('DOMContentLoaded', function() {
+    // Add responsive styles for forecast grid
+    const style = document.createElement('style');
+    style.textContent = `
+        @media (max-width: 1200px) {
+            .forecast-grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 0.75rem;
+                justify-items: center;
+            }
+            .forecast-day {
+                max-width: 160px;
+                min-height: 180px;
+            }
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+            .summary-item {
+                min-height: 65px;
+                padding: 0.75rem 0.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .forecast-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+                justify-items: center;
+            }
+            .forecast-day {
+                padding: 1rem 0.75rem;
+                max-width: 140px;
+                min-height: 160px;
+            }
+            .forecast-icon {
+                width: 32px;
+                height: 32px;
+            }
+            .forecast-icon i {
+                font-size: 1.5rem;
+            }
+            .forecast-temp {
+                font-size: 1rem;
+            }
+            .forecast-desc {
+                font-size: 0.7rem;
+            }
+            .summary-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            .summary-item {
+                padding: 0.75rem 0.5rem;
+                min-height: 60px;
+            }
+            .summary-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8rem;
+            }
+            .summary-value {
+                font-size: 0.95rem;
+            }
+            .summary-label {
+                font-size: 0.6rem;
+            }
+            .insights-content {
+                gap: 0.75rem;
+            }
+            .insight-item {
+                padding: 0.875rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .forecast-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+                justify-items: center;
+            }
+            .forecast-day {
+                padding: 0.875rem 0.5rem;
+                max-width: 120px;
+                min-height: 140px;
+            }
+            .forecast-date {
+                font-size: 0.8rem;
+            }
+            .forecast-icon {
+                width: 28px;
+                height: 28px;
+            }
+            .forecast-icon i {
+                font-size: 1.25rem;
+            }
+            .forecast-temp {
+                font-size: 0.9rem;
+            }
+            .forecast-desc {
+                font-size: 0.65rem;
+            }
+            .forecast-details {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            .detail-item {
+                font-size: 0.65rem;
+            }
+            .summary-item {
+                padding: 0.625rem 0.5rem;
+                min-height: 55px;
+            }
+            .summary-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 0.75rem;
+            }
+            .summary-value {
+                font-size: 0.85rem;
+            }
+            .summary-label {
+                font-size: 0.55rem;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// Progress History Table Functions
+function exportProgressData() {
+    const table = document.querySelector('.progress-table');
+    if (!table) return;
+    
+    let csv = 'Week,Date,Method,Progress,Next Update\n';
+    const rows = table.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 5) {
+            const week = cells[0].textContent.trim();
+            const date = cells[1].textContent.trim();
+            const method = cells[2].textContent.trim();
+            const progress = cells[3].textContent.trim();
+            const nextUpdate = cells[4].textContent.trim();
+            
+            csv += `"${week}","${date}","${method}","${progress}","${nextUpdate}"\n`;
+        }
+    });
+    
+    // Download CSV
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'progress_history.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    showSuccessMessage('Progress data exported successfully!');
+}
+
+function toggleActions(button) {
+    const dropdown = button.nextElementSibling;
+    const isOpen = dropdown.classList.contains('show');
+    
+    // Close all other dropdowns
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        menu.classList.remove('show');
+    });
+    
+    // Toggle current dropdown
+    if (!isOpen) {
+        dropdown.classList.add('show');
+    }
+}
+
+function viewSummary(updateId) {
+    showSuccessMessage('Progress summary for update ' + updateId + ' would be displayed here');
+}
+
+function viewRecommendations(updateId) {
+    showSuccessMessage('Recommendations for update ' + updateId + ' would be displayed here');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.actions-dropdown')) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
+});
 </script>
 @endsection

@@ -109,6 +109,10 @@
                             <i class="fas fa-image me-2"></i>
                             Upload Your Photo *
                         </h5>
+                        <div class="analysis-info">
+                            <i class="fas fa-clock me-2"></i>
+                            <span>Analysis typically takes 7-10 seconds for accurate results</span>
+                        </div>
                         <div class="upload-area" id="upload-area">
                             <div class="upload-content" id="upload-content">
                                 <div class="upload-icon">
@@ -141,6 +145,38 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-content">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+        </div>
+        <h3 class="loading-title">AI Analysis in Progress</h3>
+        <p class="loading-subtitle">Our advanced AI is analyzing your photo...</p>
+        <p class="loading-note">Analysis time may vary based on image complexity</p>
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-text" id="progress-text">0%</div>
+        </div>
+        <div class="analysis-steps">
+            <div class="step active" id="step-1">
+                <i class="fas fa-image"></i>
+                <span>Processing Image</span>
+            </div>
+            <div class="step" id="step-2">
+                <i class="fas fa-brain"></i>
+                <span>AI Analysis</span>
+            </div>
+            <div class="step" id="step-3">
+                <i class="fas fa-chart-line"></i>
+                <span>Generating Results</span>
             </div>
         </div>
     </div>
@@ -334,9 +370,27 @@
         font-size: 1.1rem;
         font-weight: 600;
         color: #1f2937;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .analysis-info {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
         margin-bottom: 1rem;
         display: flex;
         align-items: center;
+        color: #0369a1;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .analysis-info i {
+        color: #0ea5e9;
+        margin-right: 0.5rem;
     }
 
     /* Type Selection */
@@ -408,11 +462,11 @@
 
     /* Upload Area */
     .upload-area {
-        border: 2px dashed #d1d5db;
-        border-radius: 16px;
-        padding: 3rem 2rem;
+        border: 3px dashed #d1d5db;
+        border-radius: 20px;
+        padding: 4rem 2rem;
         text-align: center;
-        background: #f9fafb;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         transition: all 0.3s ease;
         cursor: pointer;
         /* Ensure proper centering */
@@ -420,6 +474,7 @@
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
+        min-height: 300px;
     }
 
     .upload-area:hover {
@@ -434,9 +489,15 @@
     }
 
     .upload-icon {
-        font-size: 3rem;
-        color: #9ca3af;
-        margin-bottom: 1rem;
+        font-size: 4rem;
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .upload-area:hover .upload-icon {
+        color: #3b82f6;
+        transform: scale(1.1);
     }
 
     .upload-content {
@@ -470,15 +531,17 @@
         align-items: center !important;
         justify-content: center !important;
         width: 100% !important;
-        min-height: 300px !important;
+        min-height: 500px !important;
+        padding: 2rem !important;
     }
 
     #image-preview {
         max-width: 100% !important;
-        max-height: 300px !important;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        margin-bottom: 1rem;
+        max-height: 600px !important;
+        min-height: 400px !important;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        margin-bottom: 1.5rem;
         display: block !important;
         margin-left: auto !important;
         margin-right: auto !important;
@@ -487,12 +550,41 @@
         height: auto !important;
         /* Force centering */
         text-align: center;
+        transition: all 0.3s ease;
+        border: 3px solid #e5e7eb;
+    }
+
+    #image-preview:hover {
+        transform: scale(1.02);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+        border-color: #3b82f6;
+    }
+
+    /* Animation for image preview appearance */
+    .preview-content.show #image-preview {
+        animation: imageAppear 0.6s ease-out;
+    }
+
+    @keyframes imageAppear {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
     }
 
     .preview-actions {
         display: flex;
         justify-content: center;
         gap: 1rem;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: rgba(59, 130, 246, 0.05);
+        border-radius: 12px;
+        border: 1px solid rgba(59, 130, 246, 0.1);
     }
 
     /* Form Controls */
@@ -645,11 +737,13 @@
         }
 
         .preview-content.show {
-            min-height: 250px;
+            min-height: 350px;
+            padding: 1rem !important;
         }
 
         #image-preview {
-            max-height: 250px;
+            max-height: 400px;
+            min-height: 300px;
         }
 
         /* Mobile button centering */
@@ -661,6 +755,290 @@
             min-width: 180px !important;
             width: 100% !important;
             max-width: 300px !important;
+        }
+    }
+
+    /* Loading Overlay Styles */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.85) 100%);
+        backdrop-filter: blur(20px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        transition: all 0.5s ease;
+    }
+
+    .loading-overlay.show {
+        opacity: 1;
+    }
+
+    .loading-content {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 30px;
+        padding: 4rem 3rem;
+        text-align: center;
+        max-width: 600px;
+        width: 90%;
+        box-shadow: 
+            0 25px 80px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(255, 255, 255, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        transform: translateY(30px) scale(0.95);
+        transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .loading-overlay.show .loading-content {
+        transform: translateY(0) scale(1);
+    }
+
+    .loading-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #ff6b6b, #ff8e8e, #ffb3b3, #ff6b6b);
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease-in-out infinite;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .loading-spinner {
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .spinner-ring {
+        width: 100px;
+        height: 100px;
+        border: 8px solid rgba(255, 107, 107, 0.1);
+        border-top: 8px solid #ff6b6b;
+        border-right: 8px solid #ff8e8e;
+        border-bottom: 8px solid #ffb3b3;
+        border-radius: 50%;
+        animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        margin: 0 auto;
+        position: relative;
+        box-shadow: 
+            0 0 30px rgba(255, 107, 107, 0.3),
+            inset 0 0 20px rgba(255, 107, 107, 0.1);
+    }
+
+    .spinner-ring::after {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        border: 2px solid transparent;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #ff6b6b, #ff8e8e, #ffb3b3, #ff6b6b);
+        background-size: 200% 200%;
+        animation: gradientRotate 2s linear infinite;
+        opacity: 0.3;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes gradientRotate {
+        0% { background-position: 0% 0%; }
+        100% { background-position: 200% 200%; }
+    }
+
+    .loading-title {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+    }
+
+    .loading-subtitle {
+        color: #4b5563;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+        line-height: 1.6;
+    }
+
+    .loading-note {
+        color: #6b7280;
+        margin-bottom: 3rem;
+        font-size: 0.95rem;
+        font-style: italic;
+        background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 142, 142, 0.1));
+        padding: 1rem 1.5rem;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 107, 107, 0.2);
+    }
+
+    .progress-container {
+        margin-bottom: 3rem;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        padding: 2rem;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 107, 107, 0.1);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 12px;
+        background: rgba(255, 107, 107, 0.1);
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ff6b6b, #ff8e8e, #ffb3b3);
+        background-size: 200% 100%;
+        width: 0%;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 6px;
+        position: relative;
+        box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+        animation: progressGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes progressGlow {
+        0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.4); }
+        50% { box-shadow: 0 0 30px rgba(255, 107, 107, 0.6); }
+    }
+
+    .progress-text {
+        font-size: 1.1rem;
+        color: #ff6b6b;
+        font-weight: 700;
+        text-shadow: 0 1px 3px rgba(255, 107, 107, 0.3);
+    }
+
+    .analysis-steps {
+        display: flex;
+        justify-content: space-between;
+        gap: 1.5rem;
+        position: relative;
+    }
+
+    .analysis-steps::before {
+        content: '';
+        position: absolute;
+        top: 30px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(255, 107, 107, 0.2), rgba(255, 142, 142, 0.2), rgba(255, 179, 179, 0.2));
+        z-index: 1;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        opacity: 0.3;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        z-index: 2;
+    }
+
+    .step.active {
+        opacity: 1;
+        transform: translateY(-5px);
+    }
+
+    .step i {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .step.active i {
+        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
+        transform: scale(1.1);
+    }
+
+    .step span {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-align: center;
+        color: #4b5563;
+        transition: all 0.3s ease;
+    }
+
+    .step.active span {
+        color: #ff6b6b;
+        font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+        .loading-content {
+            padding: 2.5rem 2rem;
+            max-width: 95%;
+        }
+        
+        .loading-title {
+            font-size: 1.75rem;
+        }
+        
+        .spinner-ring {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .analysis-steps {
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .step {
+            flex-direction: row;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .step i {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .analysis-steps::before {
+            display: none;
         }
     }
 </style>
@@ -736,8 +1114,12 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.disabled = true;
     };
 
-    // Form validation
+    // Form validation and loading overlay
     const form = document.getElementById('photo-analysis-form');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    
     form.addEventListener('submit', function(e) {
         const analysisType = document.querySelector('input[name="analysis_type"]:checked');
         const photo = photoInput.files[0];
@@ -753,7 +1135,58 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Please select a photo.');
             return;
         }
+
+        // Show loading overlay
+        showLoadingOverlay();
+        
+        // Simulate analysis progress (7-10 seconds)
+        simulateAnalysisProgress();
     });
+
+    function showLoadingOverlay() {
+        loadingOverlay.style.display = 'flex';
+        setTimeout(() => {
+            loadingOverlay.classList.add('show');
+        }, 10);
+    }
+
+    function simulateAnalysisProgress() {
+        let progress = 0;
+        const totalTime = 8000; // 8 seconds total
+        const interval = 100; // Update every 100ms
+        
+        const progressInterval = setInterval(() => {
+            progress += (interval / totalTime) * 100;
+            
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(progressInterval);
+            }
+            
+            // Update progress bar
+            progressFill.style.width = progress + '%';
+            progressText.textContent = Math.round(progress) + '%';
+            
+            // Update steps
+            if (progress < 30) {
+                updateStep(1);
+            } else if (progress < 70) {
+                updateStep(2);
+            } else {
+                updateStep(3);
+            }
+        }, interval);
+    }
+
+    function updateStep(stepNumber) {
+        // Remove active class from all steps
+        document.querySelectorAll('.step').forEach(step => {
+            step.classList.remove('active');
+        });
+        
+        // Add active class to current step
+        document.getElementById(`step-${stepNumber}`).classList.add('active');
+    }
 });
 </script>
 @endpush

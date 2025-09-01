@@ -67,9 +67,6 @@ class AuthController extends Controller
             'planting_date' => ['required', 'date'],
             'field_size' => ['required', 'numeric', 'min:0.1'],
             'field_size_unit' => ['required', 'in:acres,hectares'],
-            
-            // Terms agreement
-            'terms' => ['required', 'accepted'],
         ]);
 
         if ($validator->fails()) {
@@ -84,7 +81,6 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
-            'terms_accepted' => true,
         ]);
 
         // Create farm record

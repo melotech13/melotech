@@ -39,6 +39,10 @@
                         <i class="fas fa-seedling"></i>
                         <span>{{ $selectedFarm->watermelon_variety }}</span>
                     </div>
+                    <div class="stat-badge">
+                        <i class="fas fa-chart-line"></i>
+                        <span>{{ ucfirst($selectedFarm->cropGrowth->current_stage ?? 'seedling') }} Stage</span>
+                    </div>
                     @if($canUpdate)
                     <div class="action-status ready" style="background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.3);">
                         <i class="fas fa-check-circle"></i>
@@ -62,34 +66,115 @@
     </div>
 
     @if($selectedFarm)
-        @if($canUpdate)
-            <!-- Update Action -->
-            <div class="update-action-section">
-                <div class="action-card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-question-circle me-2"></i>
-                            Ready to Update Progress?
-                        </h3>
-                    </div>
-                    <div class="card-content text-center">
-                        <p class="mb-4">Answer simple questions about your crop condition to track progress</p>
-                        <a href="{{ route('crop-progress.questions') }}" class="btn btn-primary btn-lg">
-                            <i class="fas fa-play me-2"></i>Start Progress Update
-                        </a>
-                    </div>
+        <!-- Persistent Status Section - Always Visible -->
+        <div class="status-section">
+            <div class="status-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-clock me-2"></i>
+                        Progress Update Status
+                    </h3>
+                </div>
+                <div class="card-content">
+                    @if($canUpdate)
+                        <div class="status-ready">
+                            <div class="status-icon">
+                                <i class="fas fa-rocket text-success"></i>
+                            </div>
+                            <div class="status-content">
+                                <div class="status-header">
+                                    <h4 class="status-title text-success">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Ready to Update
+                                    </h4>
+                                    <div class="status-badge">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Available Now
+                                    </div>
+                                </div>
+                                <p class="status-description">
+                                    Answer stage-specific questions about your {{ ucfirst($selectedFarm->cropGrowth->current_stage ?? 'seedling') }} stage crop progress.
+                                </p>
+                                <div class="status-actions">
+                                    <a href="{{ route('crop-progress.questions') }}" class="btn btn-success btn-lg btn-pulse">
+                                        <i class="fas fa-play me-2"></i>
+                                        <span>Start Questions</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="status-waiting">
+                            <div class="status-icon">
+                                <i class="fas fa-hourglass-half text-warning"></i>
+                            </div>
+                            <div class="status-content">
+                                <h4 class="status-title text-warning">Next Update Coming Soon</h4>
+                                <p class="status-description">Please wait until the next scheduled update date to answer new questions.</p>
+                                
+                                <div class="countdown-section">
+                                    <div class="countdown-label">
+                                        <i class="fas fa-calendar-alt me-2"></i>
+                                        Next Update Available:
+                                    </div>
+                                    <div class="countdown-timer" id="countdown-timer">
+                                        <div class="countdown-date">
+                                            {{ $nextUpdateDate->format('l, F d, Y') }}
+                                        </div>
+                                        <div class="countdown-time">
+                                            {{ $nextUpdateDate->diffForHumans() }}
+                                        </div>
+                                        <div class="countdown-details">
+                                            <div class="countdown-display">
+                                                <span class="countdown-days" id="countdown-days">--</span>
+                                                <span class="countdown-unit">days</span>
+                                            </div>
+                                            <div class="countdown-separator">:</div>
+                                            <div class="countdown-display">
+                                                <span class="countdown-hours" id="countdown-hours">--</span>
+                                                <span class="countdown-unit">hours</span>
+                                            </div>
+                                            <div class="countdown-separator">:</div>
+                                            <div class="countdown-display">
+                                                <span class="countdown-minutes" id="countdown-minutes">--</span>
+                                                <span class="countdown-unit">minutes</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="status-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-calendar-week me-2"></i>
+                                        <strong>Next Week: Week {{ $nextUpdateDate ? \App\Models\CropProgressUpdate::getNextWeekNumber(auth()->user(), $selectedFarm) : 1 }}</strong>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Updates are available every 6 days to maintain accurate tracking
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
-        @endif
+        </div>
+
+
 
         <!-- Progress Table -->
         <div class="progress-table-section">
             <div class="table-card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="fas fa-table me-2"></i>
+                        <i class="fas fa-chart-line me-2"></i>
                         Progress History
                     </h3>
+                    <div class="card-actions">
+                        <button class="btn btn-outline-primary btn-sm" onclick="exportAllProgress()">
+                            <i class="fas fa-download me-2"></i>Export All
+                        </button>
+                    </div>
                 </div>
                 <div class="card-content">
                     <div class="table-responsive">
@@ -114,7 +199,7 @@
                                             <td>{{ $update->update_date->format('M d, Y') }}</td>
                                             <td><span class="badge bg-primary">{{ ucfirst($update->update_method) }}</span></td>
                                             <td>
-                                                <div class="progress" style="height: 20px;">
+                                                <div class="progress">
                                                     <div class="progress-bar bg-success" data-width="{{ $update->calculated_progress }}">
                                                         {{ $update->calculated_progress }}%
                                                     </div>
@@ -179,7 +264,7 @@
 
  <!-- Questions Summary Modal -->
  <div class="modal fade" id="questionsSummaryModal" tabindex="-1" aria-labelledby="questionsSummaryModalLabel" aria-hidden="true">
-     <div class="modal-dialog modal-lg">
+     <div class="modal-dialog modal-xl">
          <div class="modal-content">
              <div class="modal-header">
                  <h5 class="modal-title" id="questionsSummaryModalLabel">
@@ -263,97 +348,64 @@
         padding: 1.5rem;
     }
 
-    /* Table styling */
+    /* MUCH Larger Fixed Size Table styling */
     .table-responsive {
         overflow-x: auto;
+        overflow-y: auto;
         width: 100%;
-        height: 400px;
-        min-height: 400px;
-        max-height: 400px;
-        box-sizing: border-box;
+        height: 1000px;
+        min-height: 1000px;
+        max-height: 1000px;
         border: 1px solid #e5e7eb;
         border-radius: 8px;
         background: #ffffff;
+        position: relative;
+        z-index: 1;
     }
 
     .table {
         width: 100%;
         border-collapse: collapse;
-        height: 400px;
-        min-height: 400px;
-        max-height: 400px;
-        table-layout: fixed;
         margin: 0;
-    }
-
-    .table tbody {
-        height: 320px;
-        min-height: 320px;
-        max-height: 320px;
+        table-layout: fixed;
     }
 
     .table-card {
-        height: 500px;
-        min-height: 500px;
-        max-height: 500px;
         box-sizing: border-box;
-        overflow: hidden;
+        width: 100%;
+        max-width: 100%;
+        position: relative;
+        z-index: 1;
     }
 
     .card-content {
-        height: 450px;
-        min-height: 450px;
-        max-height: 450px;
         padding: 1.5rem;
         box-sizing: border-box;
-        overflow: hidden;
+        position: relative;
+        z-index: 1;
     }
 
-    /* Table headers */
+    /* Larger Table headers */
     .table th {
         background: #f8fafc;
         color: #374151;
         font-weight: 600;
         padding: 1rem;
-        border-bottom: 2px solid #e5e7eb;
-        font-size: 0.9rem;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 0.95rem;
         text-align: left;
-        height: 60px;
         vertical-align: top;
-        border-right: 1px solid #e5e7eb;
-        position: sticky;
-        top: 0;
-        z-index: 10;
     }
 
-    .table th:last-child {
-        border-right: none;
-    }
-
-    /* Table cells */
+    /* Larger Table cells */
     .table td {
         padding: 1rem;
         border-bottom: 1px solid #f3f4f6;
         vertical-align: top;
-        height: 80px;
-        border-right: 1px solid #f3f4f6;
-        padding-top: 1.25rem;
     }
 
-    .table td:last-child {
-        border-right: none;
-    }
-
-    /* Table rows */
+    /* Simplified Table rows */
     .table tbody tr {
-        height: 80px;
-        min-height: 80px;
-        max-height: 80px;
-        display: table-row;
-        vertical-align: top;
-    }
-
-    .table tbody tr:first-child {
         vertical-align: top;
     }
 
@@ -361,23 +413,18 @@
         border-bottom: none;
     }
 
-    /* No data row */
+    /* Simplified No data row */
     .no-data-row {
-        height: 320px;
-        min-height: 320px;
-        max-height: 320px;
         vertical-align: top;
     }
 
     .no-data-content {
-        height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;
         padding: 2rem;
         text-align: center;
-        padding-top: 3rem;
     }
 
     .no-data-content i {
@@ -399,17 +446,18 @@
 
     /* Progress bar */
     .progress {
-        height: 20px;
-        border-radius: 10px;
+        height: 18px;
+        border-radius: 9px;
         background-color: #f3f4f6;
         border: 1px solid #e5e7eb;
+        min-width: 100px;
     }
 
     .progress-bar {
-        border-radius: 10px;
-        font-size: 0.8rem;
+        border-radius: 9px;
+        font-size: 0.7rem;
         font-weight: 600;
-        line-height: 18px;
+        line-height: 16px;
     }
 
     /* Badge */
@@ -458,9 +506,428 @@
         color: #374151;
     }
 
-    /* Fix dropdown positioning - always appear below and aligned to the right */
+    /* Enhanced Modal Styling */
+    .modal-xl {
+        max-width: 1140px;
+    }
+
+    .modal {
+        z-index: 9999 !important;
+    }
+
+    .modal-backdrop {
+        z-index: 9998 !important;
+    }
+
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        overflow: hidden;
+        position: relative;
+        z-index: 10000 !important;
+    }
+
+    .modal-dialog {
+        z-index: 10001 !important;
+        position: relative;
+        margin: 1.75rem auto;
+        max-height: calc(100vh - 3.5rem);
+    }
+
+    .modal-dialog.modal-xl {
+        max-width: 1140px;
+        width: 95%;
+        margin: 1rem auto;
+    }
+
+    /* Ensure modal is above all other elements */
+    .modal.show {
+        display: block !important;
+        z-index: 9999 !important;
+    }
+
+    .modal.show .modal-dialog {
+        transform: none !important;
+    }
+
+    /* Force modal to be above taskbar and other elements */
+    .modal.fade.show {
+        z-index: 99999 !important;
+    }
+
+    .modal.fade.show .modal-dialog {
+        z-index: 100000 !important;
+    }
+
+    /* Ensure modal content is fully visible */
+    .modal-body {
+        max-height: calc(100vh - 250px);
+        overflow-y: auto;
+    }
+
+    /* Additional positioning fixes */
+    .modal-backdrop.show {
+        z-index: 99998 !important;
+    }
+
+    /* Force modal to top of viewport with proper spacing */
+    .modal.show .modal-dialog {
+        margin-top: 3rem !important;
+        margin-bottom: 3rem !important;
+        max-height: calc(100vh - 6rem);
+        overflow: hidden;
+    }
+
+    /* Ensure modal is not covering content */
+    .modal.show {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+
+    /* Force modal above all elements including taskbar */
+    .modal {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 99999 !important;
+    }
+
+    /* Ensure backdrop is also above everything */
+    .modal-backdrop {
+        z-index: 99998 !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    /* Force modal dialog positioning */
+    .modal-dialog {
+        position: relative !important;
+        z-index: 100000 !important;
+        margin: 3rem auto !important;
+        max-height: calc(100vh - 6rem) !important;
+    }
+
+    /* Additional modal positioning fixes */
+    .modal.show .modal-content {
+        z-index: 100001 !important;
+        position: relative !important;
+    }
+
+    /* Ensure modal body is scrollable and visible */
+    .modal.show .modal-body {
+        z-index: 100002 !important;
+        position: relative !important;
+        max-height: calc(100vh - 300px) !important;
+        overflow-y: auto !important;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .modal-title i {
+        font-size: 1.8rem;
+        color: #3b82f6;
+    }
+
+    .modal-body {
+        padding: 2rem;
+        max-height: 70vh;
+        overflow-y: auto;
+        position: relative;
+        z-index: 10002 !important;
+    }
+
+    .modal-body::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    .modal-footer {
+        background: #f8fafc;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        padding: 1.5rem 2rem;
+    }
+
+    .btn-close {
+        background-size: 1.5em;
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+    }
+
+    .btn-close:hover {
+        opacity: 1;
+    }
+
+    /* Enhanced AI Recommendations Styling */
+    .recommendations-container {
+        max-width: 100%;
+    }
+
+    .recommendations-header {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        border: 2px solid #3b82f6;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .recommendations-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+
+    .recommendations-header h5 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1e40af;
+        margin: 0 0 1rem 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .recommendations-header p {
+        font-size: 1.2rem;
+        color: #374151;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* Enhanced Recommendation Categories */
+    .recommendation-category {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        border-left: 8px solid #10b981;
+        box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .recommendation-category::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .recommendation-category:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 45px rgba(0,0,0,0.12);
+    }
+
+    .recommendation-category.alert {
+        border-left-color: #ef4444;
+        background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+    }
+
+    .recommendation-category.alert::before {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .recommendation-category.planning {
+        border-left-color: #3b82f6;
+        background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    }
+
+    .recommendation-category.planning::before {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+
+    .recommendation-category.tips {
+        border-left-color: #f59e0b;
+        background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+    }
+
+    .recommendation-category.tips::before {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .recommendation-category.weekly {
+        border-left-color: #8b5cf6;
+        background: linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%);
+    }
+
+    .recommendation-category.weekly::before {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+
+    .category-title {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin: 0 0 2rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .category-title i {
+        font-size: 2rem;
+        padding: 0.75rem;
+        border-radius: 12px;
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+
+    .category-title.text-danger i {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .category-title.text-primary i {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+
+    .category-title.text-info i {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+
+    .category-title.text-warning i {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+
+    .recommendation-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .recommendation-item {
+        padding: 1.25rem 0;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 1.15rem;
+        line-height: 1.7;
+        color: #374151;
+        font-weight: 500;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .recommendation-item:last-child {
+        border-bottom: none;
+    }
+
+    .recommendation-item:hover {
+        background: rgba(59, 130, 246, 0.02);
+        padding-left: 1rem;
+        border-radius: 8px;
+    }
+
+    .recommendation-item::before {
+        content: '•';
+        color: #3b82f6;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1;
+        margin-top: 0.25rem;
+    }
+
+    .recommendation-item.text-success {
+        color: #059669;
+        font-weight: 600;
+    }
+
+    .recommendation-item.text-success::before {
+        color: #10b981;
+    }
+
+    .recommendation-item.text-danger {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
+    .recommendation-item.text-danger::before {
+        color: #ef4444;
+    }
+
+    /* Responsive Design for Modal */
+    @media (max-width: 768px) {
+        .modal-xl {
+            max-width: 95vw;
+            margin: 1rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .recommendations-header {
+            padding: 1.5rem;
+        }
+
+        .recommendations-header h5 {
+            font-size: 1.5rem;
+        }
+
+        .recommendation-category {
+            padding: 1.5rem;
+        }
+
+        .category-title {
+            font-size: 1.3rem;
+        }
+
+        .recommendation-item {
+            font-size: 1rem;
+            padding: 1rem 0;
+        }
+    }
+
+    /* Enhanced dropdown positioning to prevent overlap */
     .table .dropdown {
         position: relative;
+        z-index: 20;
     }
 
     .table .dropdown-menu {
@@ -478,10 +945,18 @@
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         padding: 0.5rem 0;
+        max-height: 300px;
+        overflow-y: auto;
     }
 
     .table .dropdown-menu.show {
         display: block !important;
+    }
+
+    /* Ensure dropdowns are visible above table content */
+    .table .dropdown-toggle {
+        position: relative;
+        z-index: 21;
     }
 
     /* Table container styling */
@@ -538,38 +1013,110 @@
     /* Table column widths */
     .table th:nth-child(1),
     .table td:nth-child(1) {
-        width: 80px;
-        min-width: 80px;
+        width: 70px;
+        min-width: 70px;
     }
 
     .table th:nth-child(2),
     .table td:nth-child(2) {
-        width: 100px;
-        min-width: 100px;
+        width: 90px;
+        min-width: 90px;
     }
 
     .table th:nth-child(3),
     .table td:nth-child(3) {
-        width: 80px;
-        min-width: 80px;
+        width: 70px;
+        min-width: 70px;
     }
 
     .table th:nth-child(4),
     .table td:nth-child(4) {
-        width: 120px;
-        min-width: 120px;
+        width: 110px;
+        min-width: 110px;
     }
 
     .table th:nth-child(5),
     .table td:nth-child(5) {
-        width: 100px;
-        min-width: 100px;
+        width: 90px;
+        min-width: 90px;
     }
 
     .table th:nth-child(6),
     .table td:nth-child(6) {
-        width: 80px;
-        min-width: 80px;
+        width: 70px;
+        min-width: 70px;
+    }
+
+    /* Responsive table adjustments with MUCH larger fixed sizing */
+    @media (max-width: 768px) {
+        .table-responsive {
+            height: 800px;
+            min-height: 800px;
+            max-height: 800px;
+        }
+        
+        .table th,
+        .table td {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.8rem;
+        }
+        
+        .table th:nth-child(1),
+        .table td:nth-child(1) {
+            width: 60px;
+            min-width: 60px;
+        }
+
+        .table th:nth-child(2),
+        .table td:nth-child(2) {
+            width: 80px;
+            min-width: 80px;
+        }
+
+        .table th:nth-child(3),
+        .table td:nth-child(3) {
+            width: 60px;
+            min-width: 60px;
+        }
+
+        .table th:nth-child(4),
+        .table td:nth-child(4) {
+            width: 100px;
+            min-width: 100px;
+        }
+
+        .table th:nth-child(5),
+        .table td:nth-child(5) {
+            width: 80px;
+            min-width: 80px;
+        }
+
+        .table th:nth-child(6),
+        .table td:nth-child(6) {
+            width: 60px;
+            min-width: 60px;
+        }
+        
+        .progress-table-section {
+            margin-bottom: 1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .table-responsive {
+            height: 700px;
+            min-height: 700px;
+            max-height: 700px;
+        }
+        
+        .table-card .card-header {
+            padding: 1rem;
+        }
+        
+        .card-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
     }
 
         /* Unified Header */
@@ -848,13 +1395,530 @@
     
 
     
-    /* Override any height constraints that might hide content */
+    /* Ensure table content is not constrained by height */
     .table-responsive,
     .table-card,
     .card-content {
         min-height: auto !important;
         max-height: none !important;
         height: auto !important;
+    }
+
+    /* Status Section Styling */
+    .status-section {
+        margin-bottom: 2rem;
+    }
+
+    .status-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 20px;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+        border: 1px solid rgba(0,0,0,0.05);
+        overflow: visible;
+        width: 100%;
+        position: relative;
+        z-index: 1;
+        transition: all 0.3s ease;
+    }
+
+    .status-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 50px rgba(0,0,0,0.15);
+    }
+
+    .status-card .card-content {
+        height: auto;
+        min-height: auto;
+        max-height: none;
+        padding: 2rem;
+    }
+
+    .status-ready, .status-waiting {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .status-icon {
+        flex-shrink: 0;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .status-ready .status-icon {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        border: 2px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-waiting .status-icon {
+        background: rgba(251, 191, 36, 0.1);
+        color: #f59e0b;
+    }
+
+    .status-content {
+        flex: 1;
+    }
+
+    .status-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .status-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .status-badge {
+        background: #10b981;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .status-description {
+        color: #6b7280;
+        margin-bottom: 2rem;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    /* Fixed Size Table Styling */
+    .progress-table-section {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .table-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        overflow: visible;
+        width: 100%;
+        max-width: 100%;
+        position: relative;
+        z-index: 1;
+    }
+
+    .table-card .card-header {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .table-card .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        position: relative;
+        z-index: 3;
+    }
+
+    .table-card .card-content {
+        padding: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .table-responsive {
+        border-radius: 0 0 12px 12px;
+        overflow: auto;
+        height: 1000px;
+        min-height: 1000px;
+        max-height: 1000px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .table {
+        margin: 0;
+        border: none;
+        table-layout: fixed;
+    }
+
+    .table thead th {
+        background: #f8fafc;
+        color: #374151;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        vertical-align: top;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table tbody td {
+        padding: 1rem;
+        border: none;
+        border-bottom: 1px solid #f3f4f6;
+        vertical-align: top;
+        color: #374151;
+    }
+
+    .table tbody tr:hover {
+        background: #f9fafb;
+        transition: background-color 0.2s ease;
+    }
+
+    .badge {
+        font-weight: 600;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+    }
+
+    .progress {
+        border-radius: 10px;
+        background: #f3f4f6;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-bar {
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-bar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+
+    /* Enhanced button styling */
+    .btn {
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-outline-primary:hover {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        border-color: #3b82f6;
+        color: white;
+    }
+
+    .btn-outline-success:hover {
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-color: #10b981;
+        color: white;
+    }
+
+    /* Enhanced badge styling */
+    .badge.bg-info {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+        box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    }
+
+    .badge.bg-primary {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .badge.bg-success {
+        background: linear-gradient(135deg, #10b981, #059669) !important;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Enhanced dropdown styling */
+    .dropdown-menu {
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        padding: 0.5rem;
+    }
+
+    .dropdown-item {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+        background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+        color: #065f46;
+        transform: translateX(4px);
+    }
+
+    .status-actions {
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    .btn-pulse {
+        background: #10b981;
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .btn-pulse:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .countdown-section {
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin: 2rem 0;
+        border: 2px solid #10b981;
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .countdown-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #10b981, #34d399, #6ee7b7);
+    }
+
+    .countdown-label {
+        font-weight: 700;
+        color: #065f46;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .countdown-timer {
+        text-align: center;
+    }
+
+    .countdown-date {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #064e3b;
+        margin-bottom: 1rem;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .countdown-time {
+        font-size: 1.1rem;
+        color: #047857;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+
+    .countdown-details {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        border: 2px solid #10b981;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        margin-top: 1rem;
+    }
+
+    .countdown-display {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 80px;
+    }
+
+    .countdown-days, .countdown-hours, .countdown-minutes {
+        color: #065f46;
+        font-weight: 900;
+        font-size: 3.5rem;
+        line-height: 1;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-family: 'Arial Black', 'Helvetica Bold', sans-serif;
+        background: linear-gradient(135deg, #10b981, #059669);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .countdown-unit {
+        color: #047857;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .countdown-separator {
+        color: #10b981;
+        font-weight: 900;
+        font-size: 2.5rem;
+        line-height: 1;
+        margin-top: -0.5rem;
+    }
+
+    .status-info {
+        margin-top: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+
+    .info-item i {
+        width: 20px;
+        margin-right: 0.5rem;
+    }
+
+    /* Responsive Design for Status Section */
+    @media (max-width: 768px) {
+        .status-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .status-title {
+            font-size: 1.5rem;
+        }
+
+        .btn-pulse {
+            width: 100%;
+            padding: 1.25rem 2rem;
+        }
+
+        .status-ready, .status-waiting {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .status-icon {
+            align-self: center;
+        }
+
+        /* Countdown responsive adjustments */
+        .countdown-section {
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .countdown-details {
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+        }
+
+        .countdown-separator {
+            display: none;
+        }
+
+        .countdown-days, .countdown-hours, .countdown-minutes {
+            font-size: 2.5rem;
+        }
+
+        .countdown-unit {
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .countdown-section {
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .countdown-details {
+            padding: 0.75rem 1rem;
+        }
+
+        .countdown-days, .countdown-hours, .countdown-minutes {
+            font-size: 2rem;
+        }
+
+        .countdown-unit {
+            font-size: 0.75rem;
+        }
+
+        .countdown-date {
+            font-size: 1.2rem;
+        }
+
+        .countdown-time {
+            font-size: 1rem;
+        }
     }
 </style>
 @endpush
@@ -886,8 +1950,8 @@ function initializeCountdown() {
         const timeLeft = nextUpdateDate - now;
 
         if (timeLeft <= 0) {
-            countdownElement.textContent = 'Available now!';
-            location.reload(); // Reload to show update options
+            // Time is up, reload the page to show updated status
+            location.reload();
             return;
         }
 
@@ -895,12 +1959,24 @@ function initializeCountdown() {
         const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
 
-        if (days > 0) {
-            countdownElement.textContent = `${days}d ${hours}h ${minutes}m`;
-        } else if (hours > 0) {
-            countdownElement.textContent = `${hours}h ${minutes}m`;
-        } else {
-            countdownElement.textContent = `${minutes}m`;
+        // Update the countdown display elements in the status section
+        const daysElement = document.getElementById('countdown-days');
+        const hoursElement = document.getElementById('countdown-hours');
+        const minutesElement = document.getElementById('countdown-minutes');
+
+        if (daysElement) daysElement.textContent = days;
+        if (hoursElement) hoursElement.textContent = hours;
+        if (minutesElement) minutesElement.textContent = minutes;
+
+        // Also update the main countdown timer if it exists
+        if (countdownElement) {
+            if (days > 0) {
+                countdownElement.textContent = `${days}d ${hours}h ${minutes}m`;
+            } else if (hours > 0) {
+                countdownElement.textContent = `${hours}h ${minutes}m`;
+            } else {
+                countdownElement.textContent = `${minutes}m`;
+            }
         }
     }
 
@@ -1083,6 +2159,28 @@ function showQuestionsSummary(updateId, type) {
     // Show modal immediately
     modal.show();
     
+    // Ensure modal is properly positioned above taskbar
+    setTimeout(() => {
+        const modalElement = document.getElementById('questionsSummaryModal');
+        if (modalElement) {
+            modalElement.style.zIndex = '99999';
+            modalElement.style.display = 'block';
+            modalElement.style.position = 'fixed';
+            modalElement.style.top = '0';
+            modalElement.style.left = '0';
+            modalElement.style.width = '100%';
+            modalElement.style.height = '100%';
+        }
+        
+        // Also ensure modal dialog is properly positioned
+        const modalDialog = modalElement.querySelector('.modal-dialog');
+        if (modalDialog) {
+            modalDialog.style.zIndex = '100000';
+            modalDialog.style.marginTop = '3rem';
+            modalDialog.style.marginBottom = '3rem';
+        }
+    }, 100);
+    
     // Use mock data instead of API call
     const mockSummary = {
         update_date: '{{ $lastUpdate ? $lastUpdate->update_date->format("M d, Y") : "N/A" }}',
@@ -1156,10 +2254,32 @@ function showRecommendations(updateId) {
     const modalContent = document.getElementById('modalContent');
     
     // Set modal title
-    modalTitle.textContent = '🤖 AI Recommendations';
+    modalTitle.innerHTML = '<i class="fas fa-robot"></i> AI-Powered Recommendations';
     
     // Show modal immediately
     modal.show();
+    
+    // Ensure modal is properly positioned above taskbar
+    setTimeout(() => {
+        const modalElement = document.getElementById('questionsSummaryModal');
+        if (modalElement) {
+            modalElement.style.zIndex = '99999';
+            modalElement.style.display = 'block';
+            modalElement.style.position = 'fixed';
+            modalElement.style.top = '0';
+            modalElement.style.left = '0';
+            modalElement.style.width = '100%';
+            modalElement.style.height = '100%';
+        }
+        
+        // Also ensure modal dialog is properly positioned
+        const modalDialog = modalElement.querySelector('.modal-dialog');
+        if (modalDialog) {
+            modalDialog.style.zIndex = '100000';
+            modalDialog.style.marginTop = '3rem';
+            modalDialog.style.marginBottom = '3rem';
+        }
+    }, 100);
     
     // Show loading state
     modalContent.innerHTML = `
@@ -1200,18 +2320,18 @@ function showRecommendations(updateId) {
 function generateRecommendationsHTML(recommendations, summary) {
     let html = `
         <div class="recommendations-container">
-            <div class="recommendations-header text-center mb-4">
-                <h5 class="text-primary mb-2">🤖 AI-Powered Recommendations</h5>
-                <p class="text-muted mb-0">${summary}</p>
+            <div class="recommendations-header">
+                <h5>🤖 AI-Powered Recommendations</h5>
+                <p>${summary}</p>
             </div>
     `;
     
     // Add priority alerts
     if (recommendations.priority_alerts && recommendations.priority_alerts.length > 0) {
         html += `
-            <div class="recommendation-category alert mb-4">
+            <div class="recommendation-category alert">
                 <h6 class="category-title text-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <i class="fas fa-exclamation-triangle"></i>
                     Priority Alerts
                 </h6>
                 <ul class="recommendation-list">
@@ -1228,9 +2348,9 @@ function generateRecommendationsHTML(recommendations, summary) {
     // Add immediate actions
     if (recommendations.immediate_actions && recommendations.immediate_actions.length > 0) {
         html += `
-            <div class="recommendation-category mb-4">
+            <div class="recommendation-category">
                 <h6 class="category-title text-primary">
-                    <i class="fas fa-bolt me-2"></i>
+                    <i class="fas fa-bolt"></i>
                     Immediate Actions
                 </h6>
                 <ul class="recommendation-list">
@@ -1247,9 +2367,9 @@ function generateRecommendationsHTML(recommendations, summary) {
     // Add weekly plan
     if (recommendations.weekly_plan && recommendations.weekly_plan.length > 0) {
         html += `
-            <div class="recommendation-category mb-4">
+            <div class="recommendation-category weekly">
                 <h6 class="category-title text-info">
-                    <i class="fas fa-calendar-week me-2"></i>
+                    <i class="fas fa-calendar-week"></i>
                     Weekly Plan
                 </h6>
                 <ul class="recommendation-list">
@@ -1264,15 +2384,13 @@ function generateRecommendationsHTML(recommendations, summary) {
     // Add long term tips
     if (recommendations.long_term_tips && recommendations.long_term_tips.length > 0) {
         html += `
-            <div class="recommendation-category mb-4">
+            <div class="recommendation-category tips">
                 <h6 class="category-title text-warning">
-                    <i class="fas fa-lightbulb me-2"></i>
+                    <i class="fas fa-lightbulb"></i>
                     Long-term Tips
                 </h6>
                 <ul class="recommendation-list">
-                    ${recommendations.long_term_tips.map(item => `
-                        <li class="recommendation-item">${item}</li>
-                    `).join('')}
+                    <li class="recommendation-item">${recommendations.long_term_tips.join('</li><li class="recommendation-item">')}</li>
                 </ul>
             </div>
         `;
@@ -1415,6 +2533,31 @@ function printSummary() {
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
+}
+
+// Export all progress function
+function exportAllProgress() {
+    const exportBtn = event.target;
+    const originalText = exportBtn.innerHTML;
+    
+    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Exporting...';
+    exportBtn.disabled = true;
+    
+    try {
+        // Open the export page in a new window
+        const exportWindow = window.open('/crop-progress/export', '_blank');
+        
+        // Reset button after a delay
+        setTimeout(() => {
+            exportBtn.innerHTML = originalText;
+            exportBtn.disabled = false;
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Export failed:', error);
+        exportBtn.innerHTML = originalText;
+        exportBtn.disabled = false;
+    }
 }
 </script>
 @endpush

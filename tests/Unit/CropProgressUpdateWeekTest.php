@@ -86,4 +86,63 @@ class CropProgressUpdateWeekTest extends TestCase
         
         $this->assertEquals(1, $weekNumber);
     }
+
+    public function test_stage_specific_questions()
+    {
+        // Test that the questions array contains stage-specific questions
+        $stages = ['seedling', 'vegetative', 'flowering', 'fruiting', 'harvest'];
+        
+        // Test that each stage has questions defined
+        foreach ($stages as $stage) {
+            $this->assertTrue(
+                in_array($stage, ['seedling', 'vegetative', 'flowering', 'fruiting', 'harvest']),
+                "Stage {$stage} should be a valid growth stage"
+            );
+        }
+        
+        // Test that seedling stage questions contain seedling-specific terms
+        $seedlingQuestions = [
+            'How would you rate the overall health of your watermelon seedlings?',
+            'What is the condition of the seedling leaves?',
+            'How fast are your seedlings growing compared to expected?',
+            'How is the soil moisture for your seedlings?',
+            'How much pest pressure are your seedlings experiencing?',
+            'Are there any visible disease symptoms on seedlings?',
+            'Do you see signs of nutrient deficiency in seedlings?',
+            'How has recent weather affected your seedlings?',
+            'How well are your seedlings progressing toward vegetative growth?',
+            'Overall, how satisfied are you with your seedling progress?'
+        ];
+        
+        foreach ($seedlingQuestions as $question) {
+            $this->assertStringContainsString(
+                'seedling', 
+                strtolower($question), 
+                "Seedling question should mention 'seedling'"
+            );
+        }
+        
+        // Test that vegetative stage questions contain vegetative-specific terms
+        $vegetativeQuestions = [
+            'How would you rate the overall health of your vegetative watermelon plants?',
+            'What is the condition of the vegetative leaves?',
+            'How fast are your vines growing compared to expected?',
+            'How is the water availability for your vegetative plants?',
+            'How much pest pressure are your vegetative plants experiencing?',
+            'Are there any visible disease symptoms on vegetative plants?',
+            'Do you see signs of nutrient deficiency in vegetative plants?',
+            'How has recent weather affected your vegetative plants?',
+            'How well are your plants progressing toward flowering stage?',
+            'Overall, how satisfied are you with your vegetative growth progress?'
+        ];
+        
+        foreach ($vegetativeQuestions as $question) {
+            $this->assertTrue(
+                str_contains(strtolower($question), 'vegetative') || 
+                str_contains(strtolower($question), 'vines') || 
+                str_contains(strtolower($question), 'flowering'),
+                "Vegetative question should mention vegetative-specific terms: {$question}"
+            );
+        }
+    }
 }

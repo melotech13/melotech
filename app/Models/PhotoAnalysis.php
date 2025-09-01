@@ -19,7 +19,8 @@ class PhotoAnalysis extends Model
 
     protected $casts = [
         'analysis_date' => 'datetime',
-        'confidence_score' => 'decimal:2'
+        'confidence_score' => 'decimal:2',
+        'recommendations' => 'array'
     ];
 
     /**

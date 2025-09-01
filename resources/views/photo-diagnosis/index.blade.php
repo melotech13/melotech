@@ -660,12 +660,18 @@
         position: relative;
         height: 200px;
         overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f9fafb;
     }
 
     .analysis-image img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        display: block;
+        margin: 0 auto;
     }
 
     .analysis-type-badge {

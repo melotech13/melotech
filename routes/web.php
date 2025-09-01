@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\CropGrowthController;
 use App\Http\Controllers\PhotoDiagnosisController;
+
 use App\Models\User;
 
 Route::get('/', function () {
@@ -15,6 +16,8 @@ Route::get('/', function () {
     }
     return view('welcome');
 })->name('home');
+
+
 
 // Authentication routes
 Route::get('/register', [AuthController::class, 'showRegistration'])->name('register');
@@ -62,6 +65,7 @@ Route::middleware('auth')->group(function () {
                  // Crop Progress Update routes
              Route::get('/crop-progress', [App\Http\Controllers\CropProgressController::class, 'index'])->name('crop-progress.index');
              Route::get('/crop-progress/questions', [App\Http\Controllers\CropProgressController::class, 'showQuestions'])->name('crop-progress.questions');
+
              Route::post('/crop-progress/questions', [App\Http\Controllers\CropProgressController::class, 'storeQuestions'])->name('crop-progress.store-questions');
 
              Route::get('/crop-progress/export', [App\Http\Controllers\CropProgressController::class, 'exportProgress'])->name('crop-progress.export');

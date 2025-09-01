@@ -82,12 +82,56 @@ class CropProgressUpdate extends Model
 
         if (!$lastUpdate) {
             // New user - can access after 6 days from farm creation
-            $daysSincePlanting = Carbon::now()->diffInDays($farm->planting_date);
+            $plantingDate = $farm->planting_date->startOfDay();
+            $currentDate = Carbon::now()->startOfDay();
+            $daysSincePlanting = $currentDate->diffInDays($plantingDate, false);
+            
+            // If daysSincePlanting is negative, it means current date is after planting date
+            if ($daysSincePlanting < 0) {
+                $daysSincePlanting = abs($daysSincePlanting);
+            } else {
+                // Current date is before or on planting date
+                return false;
+            }
+            
+            // Log for debugging first update scenario
+            Log::info('First update check', [
+                'planting_date' => $plantingDate->format('Y-m-d H:i:s'),
+                'current_date' => $currentDate->format('Y-m-d H:i:s'),
+                'days_since_planting' => $daysSincePlanting,
+                'can_access' => $daysSincePlanting >= 6
+            ]);
+            
             return $daysSincePlanting >= 6;
         }
 
         // Check if 6 days have passed since last update
-        return Carbon::now()->diffInDays($lastUpdate->update_date) >= 6;
+        // Use startOfDay() to compare dates without time components
+        $lastUpdateDate = $lastUpdate->update_date->startOfDay();
+        $currentDate = Carbon::now()->startOfDay();
+        
+        // Calculate days since last update - ensure positive number
+        $daysSinceLastUpdate = $currentDate->diffInDays($lastUpdateDate, false);
+        
+        // If daysSinceLastUpdate is negative, it means current date is after last update date
+        // If it's positive, it means current date is before last update date
+        if ($daysSinceLastUpdate < 0) {
+            // Current date is after last update date, so we can access
+            $daysSinceLastUpdate = abs($daysSinceLastUpdate);
+        } else {
+            // Current date is before last update date, so we cannot access yet
+            return false;
+        }
+        
+        // Log for debugging
+        Log::info('Date comparison debug', [
+            'last_update_date' => $lastUpdateDate->format('Y-m-d H:i:s'),
+            'current_date' => $currentDate->format('Y-m-d H:i:s'),
+            'days_since_last_update' => $daysSinceLastUpdate,
+            'can_access' => $daysSinceLastUpdate >= 6
+        ]);
+        
+        return $daysSinceLastUpdate >= 6;
     }
 
     /**
@@ -103,11 +147,21 @@ class CropProgressUpdate extends Model
 
         if (!$lastUpdate) {
             // New user - first update available after 6 days
-            return $farm->planting_date->addDays(6);
+            return $farm->planting_date->addDays(6)->startOfDay();
         }
 
         // Next update available after 6 days from last update
-        return $lastUpdate->update_date->addDays(6);
+        // Use startOfDay() to ensure consistent date comparison
+        $nextUpdateDate = $lastUpdate->update_date->startOfDay()->addDays(6);
+        
+        // Log for debugging
+        Log::info('Next update date calculation', [
+            'last_update_date' => $lastUpdate->update_date->format('Y-m-d H:i:s'),
+            'next_update_date' => $nextUpdateDate->format('Y-m-d H:i:s'),
+            'current_date' => Carbon::now()->format('Y-m-d H:i:s')
+        ]);
+        
+        return $nextUpdateDate;
     }
 
     /**
@@ -197,6 +251,26 @@ class CropProgressUpdate extends Model
     /**
      * Get the week name (e.g., "Week 1", "Week 2")
      */
+    
+    /**
+     * Get the next week number for progress updates
+     */
+    public static function getNextWeekNumber(User $user, Farm $farm): int
+    {
+        $lastUpdate = self::where('user_id', $user->id)
+            ->where('farm_id', $farm->id)
+            ->where('status', 'completed')
+            ->latest('update_date')
+            ->first();
+
+        if (!$lastUpdate) {
+            // First update - start with week 1
+            return 1;
+        }
+
+        // Next week after last update
+        return $lastUpdate->getWeekNumber() + 1;
+    }
     public function getWeekName(): string
     {
         $weekNumber = $this->getWeekNumber();

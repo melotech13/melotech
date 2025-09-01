@@ -1265,10 +1265,19 @@
 
     <!-- Footer -->
     <footer class="bg-light py-4 mt-5">
-        <div class="container text-center">
-            <p class="text-muted mb-0">
-                &copy; {{ date('Y') }} MeloTech. All rights reserved.
-            </p>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="text-muted mb-0">
+                        &copy; {{ date('Y') }} MeloTech. All rights reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <ul class="list-inline mb-0">
+
+                    </ul>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -1280,6 +1289,8 @@
     
     <!-- Custom Scripts -->
     @stack('scripts')
+    
+
     
     <!-- User Dropdown Enhancement Script -->
     <script>

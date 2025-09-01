@@ -167,33 +167,44 @@
                 <i class="fas fa-bolt section-icon"></i>
                 Quick Actions
             </h2>
+            <p class="section-subtitle">Access all your farming tools and features quickly</p>
         </div>
         
         <div class="actions-grid">
-
+            <div class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-tractor"></i>
+                </div>
+                <h3 class="action-title">Manage Farms</h3>
+                <p class="action-description">Create, edit, and monitor your watermelon farms</p>
+                <a href="{{ route('crop-growth.index') }}" class="action-button">
+                    <i class="fas fa-cog"></i>
+                    Manage Farms
+                </a>
+            </div>
             
             <div class="action-card">
                 <div class="action-icon">
                     <i class="fas fa-camera"></i>
                 </div>
-                <h3 class="action-title">Upload Photos</h3>
-                <p class="action-description">Upload crop photos for AI analysis and health assessment</p>
-                <button class="action-button">
+                <h3 class="action-title">Photo Diagnosis</h3>
+                <p class="action-description">Upload crop photos for AI-powered health analysis</p>
+                <a href="{{ route('photo-diagnosis.index') }}" class="action-button">
                     <i class="fas fa-upload"></i>
                     Upload Photos
-                </button>
+                </a>
             </div>
             
             <div class="action-card">
                 <div class="action-icon">
-                    <i class="fas fa-brain"></i>
+                    <i class="fas fa-chart-line"></i>
                 </div>
-                <h3 class="action-title">AI Analysis</h3>
-                <p class="action-description">Get AI-powered insights and growth predictions</p>
-                <button class="action-button">
-                    <i class="fas fa-chart-bar"></i>
-                    View Analysis
-                </button>
+                <h3 class="action-title">Track Progress</h3>
+                <p class="action-description">Monitor crop growth stages and get recommendations</p>
+                <a href="{{ route('crop-progress.index') }}" class="action-button">
+                    <i class="fas fa-eye"></i>
+                    View Progress
+                </a>
             </div>
             
             <div class="action-card">
@@ -201,65 +212,105 @@
                     <i class="fas fa-cloud-sun"></i>
                 </div>
                 <h3 class="action-title">Weather Data</h3>
-                <p class="action-description">Check weather forecasts and adjust predictions</p>
-                <button class="action-button">
+                <p class="action-description">Check forecasts and weather-based farming tips</p>
+                <a href="{{ route('weather.index') }}" class="action-button">
                     <i class="fas fa-cloud"></i>
                     Weather Info
-                </button>
-            </div>
-            
-            <div class="action-card">
-                <div class="action-icon">
-                    <i class="fas fa-file-alt"></i>
-                </div>
-                <h3 class="action-title">Reports</h3>
-                <p class="action-description">Generate comprehensive farm reports</p>
-                <button class="action-button">
-                    <i class="fas fa-download"></i>
-                    Create Report
-                </button>
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Recent Activity -->
+    <!-- System Status & Quick Stats -->
     <div class="section">
         <div class="section-header">
             <h2 class="section-title">
-                <i class="fas fa-history section-icon"></i>
-                Recent Activity
+                <i class="fas fa-chart-pie section-icon"></i>
+                System Overview
             </h2>
+            <p class="section-subtitle">Monitor your farming system performance and key metrics</p>
         </div>
         
-        <div class="activity-card">
-            <div class="activity-list">
-                <div class="activity-item">
-                    <div class="activity-marker success"></div>
-                    <div class="activity-content">
-                        <h4 class="activity-title">Farm Setup Completed</h4>
-                        <p class="activity-description">Your farm has been successfully configured for AI analysis</p>
-                        <span class="activity-time">{{ now()->format('M d, Y H:i') }}</span>
-                    </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-seedling"></i>
                 </div>
-                
-                <div class="activity-item">
-                    <div class="activity-marker info"></div>
-                    <div class="activity-content">
-                        <h4 class="activity-title">AI System Ready</h4>
-                        <p class="activity-description">AI analysis system is now active and ready to process your crop photos</p>
-                        <span class="activity-time">{{ now()->subMinutes(5)->format('M d, Y H:i') }}</span>
-                    </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">{{ Auth::user()->farms->count() }}</h3>
+                    <p class="stat-label">Active Farms</p>
+                    <p class="stat-description">Watermelon farms under management</p>
                 </div>
-                
-                <div class="activity-item">
-                    <div class="activity-marker warning"></div>
-                    <div class="activity-content">
-                        <h4 class="activity-title">Weather Data Connected</h4>
-                        <p class="activity-description">Local weather data integration is now active for enhanced predictions</p>
-                        <span class="activity-time">{{ now()->subMinutes(10)->format('M d, Y H:i') }}</span>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">{{ App\Models\PhotoAnalysis::where('user_id', Auth::id())->count() }}</h3>
+                    <p class="stat-label">Photo Analyses</p>
+                    <p class="stat-description">AI-powered crop health assessments</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">{{ App\Models\CropProgressUpdate::where('user_id', Auth::id())->count() }}</h3>
+                    <p class="stat-label">Progress Updates</p>
+                    <p class="stat-description">Crop growth monitoring records</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-cloud-sun"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">{{ Auth::user()->farms->where('weather_enabled', true)->count() }}</h3>
+                    <p class="stat-label">Weather Monitoring</p>
+                    <p class="stat-description">Farms with weather integration</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional System Info -->
+        <div class="system-info-grid">
+            <div class="info-card">
+                <div class="info-header">
+                    <i class="fas fa-info-circle info-icon"></i>
+                    <h4>System Status</h4>
+                </div>
+                <div class="info-content">
+                    <div class="status-item">
+                        <span class="status-dot active"></span>
+                        <span>AI Analysis System</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-dot active"></span>
+                        <span>Weather API</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-dot active"></span>
+                        <span>Database Connection</span>
                     </div>
                 </div>
             </div>
+            
+            <div class="info-card">
+                <div class="info-header">
+                    <i class="fas fa-clock info-icon"></i>
+                    <h4>Last Updated</h4>
+                </div>
+                <div class="info-content">
+                    <p class="update-time">{{ now()->format('M d, Y H:i') }}</p>
+                    <p class="update-note">All systems operational</p>
+                </div>
+            </div>
+        </div>
         </div>
     </div>
 </div>
@@ -2736,9 +2787,10 @@ function displayHistoricalWeather(container, data) {
 }
 
 .section-header {
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
     border-bottom: 2px solid #f1f5f9;
+    text-align: center;
 }
 
 .section-title {
@@ -2750,6 +2802,14 @@ function displayHistoricalWeather(container, data) {
     align-items: center;
     gap: 0.75rem;
     letter-spacing: -0.025em;
+}
+
+.section-subtitle {
+    font-size: 1rem;
+    color: #64748b;
+    margin: 0.5rem 0 0 0;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 .section-icon {
@@ -2987,29 +3047,84 @@ function displayHistoricalWeather(container, data) {
 
 /* Actions Grid */
 .actions-grid {
-    display: flex;
-    gap: 2rem;
-    justify-content: center;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
     padding: 1rem 0;
 }
 
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .actions-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 0.5rem 0;
+    }
+    
+    .action-card {
+        padding: 1.5rem;
+        min-height: 260px;
+    }
+    
+    .action-icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 1.25rem;
+    }
+    
+    .action-title {
+        font-size: 1.1rem;
+    }
+    
+    .action-description {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Entrance animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.action-card {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.action-card:nth-child(1) { animation-delay: 0.1s; }
+.action-card:nth-child(2) { animation-delay: 0.2s; }
+.action-card:nth-child(3) { animation-delay: 0.3s; }
+.action-card:nth-child(4) { animation-delay: 0.4s; }
+
 .action-card {
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border-radius: 16px;
-    padding: 1.75rem;
+    border-radius: 20px;
+    padding: 1.5rem;
     text-align: center;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
     border: 1px solid #e2e8f0;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    flex-shrink: 0;
-    width: 220px;
-    min-height: 200px;
+    min-height: 240px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    backdrop-filter: blur(10px);
 }
 
 .action-card::before {
@@ -3021,33 +3136,73 @@ function displayHistoricalWeather(container, data) {
     height: 4px;
     background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
     transform: scaleX(0);
-    transition: transform 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.action-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+
+
+
 
 .action-card:hover::before {
     transform: scaleX(1);
 }
 
+.action-card:hover::after {
+    opacity: 1;
+}
+
 .action-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    transform: translateY(-8px);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+    border-color: #cbd5e1;
 }
 
 .action-icon {
     width: 60px;
     height: 60px;
     background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-    border-radius: 50%;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 1.25rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.3);
+    position: relative;
+}
+
+.action-icon::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius: 22px;
+    z-index: -1;
+    opacity: 0.3;
+    filter: blur(8px);
+    transition: opacity 0.4s ease;
 }
 
 .action-card:hover .action-icon {
-    transform: scale(1.1);
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 16px 40px rgba(59, 130, 246, 0.4);
+}
+
+.action-card:hover .action-icon::before {
+    opacity: 0.6;
+    filter: blur(12px);
 }
 
 .action-icon i {
@@ -3057,11 +3212,15 @@ function displayHistoricalWeather(container, data) {
 
 .action-title {
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: 800;
     color: #1e293b;
     margin-bottom: 0.75rem;
     line-height: 1.3;
     letter-spacing: -0.025em;
+    background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .action-description {
@@ -3071,6 +3230,7 @@ function displayHistoricalWeather(container, data) {
     font-size: 0.9rem;
     flex-grow: 1;
     font-weight: 500;
+    max-width: 100%;
 }
 
 .action-button {
@@ -3078,120 +3238,255 @@ function displayHistoricalWeather(container, data) {
     color: white;
     border: none;
     padding: 0.6rem 1.25rem;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     width: auto;
-    min-width: 130px;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+    min-width: 120px;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
     text-decoration: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
 }
 
 .action-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(59, 130, 246, 0.4);
+    color: white;
+    text-decoration: none;
 }
 
-/* Activity Section */
-.activity-card {
+.action-button:hover::before {
+    left: 100%;
+}
+
+.action-button:focus {
+    outline: 3px solid #3b82f6;
+    outline-offset: 3px;
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(59, 130, 246, 0.35);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+.stat-card {
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border-radius: 16px;
-    padding: 2rem;
+    padding: 1.5rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
     border: 1px solid #e2e8f0;
-}
-
-.activity-list {
+    transition: all 0.3s ease;
     position: relative;
+    overflow: hidden;
 }
 
-.activity-list::before {
+.stat-card::before {
     content: '';
     position: absolute;
-    left: 20px;
     top: 0;
-    bottom: 0;
-    width: 2px;
-    background: #e2e8f0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
 }
 
-.activity-item {
-    position: relative;
-    padding-left: 2.5rem;
-    margin-bottom: 1.5rem;
+.stat-card:hover::before {
+    transform: scaleX(1);
 }
 
-.activity-item:last-child {
-    margin-bottom: 0;
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
 }
 
-.activity-marker {
-    position: absolute;
-    left: 11px;
-    top: 0;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: 4px solid white;
-    box-shadow: 0 0 0 2px #e2e8f0;
-}
-
-.activity-marker.success {
-    background: #48bb78;
-}
-
-.activity-marker.info {
-    background: #4299e1;
-}
-
-.activity-marker.warning {
-    background: #ed8936;
-}
-
-.activity-content {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    padding: 1.5rem;
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
     border-radius: 12px;
-    border-left: 4px solid #3b82f6;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25);
 }
 
-.activity-content:hover {
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-    transform: translateX(4px);
+.stat-icon i {
+    font-size: 1.2rem;
+    color: white;
 }
 
-.activity-title {
+.stat-content {
+    text-align: left;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #475569;
+    margin: 0 0 0.25rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-description {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Responsive adjustments for stats */
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1.25rem;
+    }
+    
+    .stat-number {
+        font-size: 1.75rem;
+    }
+}
+
+/* System Info Grid */
+.system-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.info-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+.info-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.info-icon {
+    color: #3b82f6;
+    font-size: 1.1rem;
+}
+
+.info-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.info-content {
+    color: #64748b;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+}
+
+.status-dot.active {
+    background: #10b981;
+}
+
+.status-dot.inactive {
+    background: #ef4444;
+}
+
+.update-time {
     font-size: 1.1rem;
     font-weight: 700;
     color: #1e293b;
-    margin-bottom: 0.75rem;
-    letter-spacing: -0.025em;
+    margin: 0 0 0.5rem 0;
 }
 
-.activity-description {
-    color: #64748b;
-    margin-bottom: 0.75rem;
-    line-height: 1.5;
-    font-weight: 500;
-}
-
-.activity-time {
-    font-size: 0.875rem;
-    color: #94a3b8;
+.update-note {
+    font-size: 0.9rem;
+    color: #10b981;
+    margin: 0;
     font-weight: 600;
-    background: #f1f5f9;
-    padding: 0.25rem 0.75rem;
-    border-radius: 6px;
-    display: inline-block;
 }
+
+/* Responsive adjustments for system info */
+@media (max-width: 768px) {
+    .system-info-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+}
+
+
 
 
 

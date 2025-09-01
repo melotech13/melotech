@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Farm;
+use App\Models\PhotoAnalysis;
+use App\Models\CropProgressUpdate;
 
 /**
  * Class User
@@ -16,7 +18,6 @@ use App\Models\Farm;
  * @property string $email
  * @property string $password
  * @property string|null $phone
- * @property bool $terms_accepted
  * @property \Carbon\Carbon|null $email_verified_at
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
@@ -42,7 +43,6 @@ class User extends Authenticatable
         'email',
         'password',
         'phone',
-        'terms_accepted',
     ];
 
     /**
@@ -65,7 +65,6 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'terms_accepted' => 'boolean',
         ];
     }
 
@@ -77,5 +76,25 @@ class User extends Authenticatable
     public function farms(): HasMany
     {
         return $this->hasMany(Farm::class);
+    }
+
+    /**
+     * Get the photo analyses for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function photoAnalyses(): HasMany
+    {
+        return $this->hasMany(\App\Models\PhotoAnalysis::class);
+    }
+
+    /**
+     * Get the crop progress updates for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function cropProgressUpdates(): HasMany
+    {
+        return $this->hasMany(\App\Models\CropProgressUpdate::class);
     }
 }

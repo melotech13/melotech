@@ -162,47 +162,60 @@
 
 
 
-        <!-- Progress Table -->
-        <div class="progress-table-section">
-            <div class="table-card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-chart-line me-2"></i>
-                        Progress History
-                    </h3>
-                    <div class="card-actions">
-                        <button class="btn btn-outline-primary btn-sm" onclick="exportAllProgress()">
-                            <i class="fas fa-download me-2"></i>Export All
-                        </button>
+        <!-- Progress History -->
+        <section class="ph-section">
+            <div class="ph-card">
+                <div class="ph-header">
+                    <h3 class="ph-title"><i class="fas fa-chart-line me-2"></i>Progress History</h3>
+                    <div class="ph-actions">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-download me-2"></i>Export
+                            </button>
+                            <ul class="dropdown-menu">
+                                                        <li><a class="dropdown-item" href="{{ route('crop-progress.print') }}" target="_blank">
+                            <i class="fas fa-print me-2"></i>Print
+                        </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportAsExcel()">
+                                    <i class="fas fa-file-excel me-2"></i>Excel
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportAsPDF()">
+                                    <i class="fas fa-file-pdf me-2"></i>PDF
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="debugPDFLibraries()">
+                                    <i class="fas fa-bug me-2"></i>Debug PDF Libraries
+                                </a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                <div class="card-content">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Week</th>
-                                    <th>Date</th>
-                                    <th>Method</th>
-                                    <th>Progress</th>
-                                    <th>Next Update</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if(isset($progressUpdates) && $progressUpdates->count() > 0)
+                <div class="ph-body">
+                    <div class="ph-table-container">
+                        @if(isset($progressUpdates) && $progressUpdates->count() > 0)
+                            <table class="ph-table">
+                                <thead>
+                                    <tr>
+                                        <th>Week</th>
+                                        <th>Date</th>
+                                        <th>Method</th>
+                                        <th>Progress</th>
+                                        <th>Next Update</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     @foreach($progressUpdates as $update)
                                         <tr>
-                                            <td>
-                                                <span class="badge bg-info">{{ $update->getWeekName() }}</span>
-                                            </td>
+                                            <td><span class="ph-badge">{{ $update->getWeekName() }}</span></td>
                                             <td>{{ $update->update_date->format('M d, Y') }}</td>
-                                            <td><span class="badge bg-primary">{{ ucfirst($update->update_method) }}</span></td>
+                                            <td><span class="ph-badge ph-badge-primary">{{ ucfirst($update->update_method) }}</span></td>
                                             <td>
-                                                <div class="progress">
-                                                    <div class="progress-bar bg-success" data-width="{{ $update->calculated_progress }}">
-                                                        {{ $update->calculated_progress }}%
+                                                <div class="ph-progress-wrap">
+                                                    <div class="ph-progress">
+                                                        <div class="ph-progress-bar" style="width: {{ $update->calculated_progress }}%"></div>
                                                     </div>
+                                                    <span class="ph-progress-label">{{ $update->calculated_progress }}%</span>
                                                 </div>
                                             </td>
                                             <td>{{ $update->next_update_date->format('M d, Y') }}</td>
@@ -223,28 +236,133 @@
                                             </td>
                                         </tr>
                                     @endforeach
-                                @else
-                                    <tr class="no-data-row">
-                                        <td colspan="6" class="text-center py-5">
-                                            <div class="no-data-content">
-                                                <i class="fas fa-table fa-3x text-muted mb-3"></i>
-                                                <h5 class="text-muted">No Progress Updates Yet</h5>
-                                                <p class="text-muted mb-3">Complete your first progress update to see data here</p>
-                                                <a href="{{ route('crop-progress.questions') }}" class="btn btn-primary btn-sm">
-                                                    <i class="fas fa-plus me-2"></i>Start Progress Update
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endif
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        @else
+                            <div class="ph-empty">
+                                <i class="fas fa-table"></i>
+                                <h5>No progress updates yet</h5>
+                                <p>Complete your first progress update to see data here.</p>
+                                <a href="{{ route('crop-progress.questions') }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus me-2"></i>Start Progress Update
+                                </a>
+                            </div>
+                        @endif
                     </div>
-                    
-
                 </div>
             </div>
-        </div>
+        </section>
+
+@push('styles')
+<style>
+    .ph-section { margin-top: 2rem; margin-bottom: 2rem; }
+    .ph-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
+    .ph-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; background: #f8fafc; border-top-left-radius: 16px; border-top-right-radius: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .ph-title { margin: 0; font-size: 1.25rem; font-weight: 700; color: #1f2937; }
+    .ph-actions { display: flex; gap: 0.75rem; align-items: center; }
+    
+    /* Export dropdown styling */
+    .ph-actions .dropdown-toggle {
+        background: #ffffff;
+        border: 1px solid #3b82f6;
+        color: #3b82f6;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .ph-actions .dropdown-toggle:hover {
+        background: #3b82f6;
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .ph-actions .dropdown-menu {
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        padding: 0.5rem;
+        min-width: 180px;
+    }
+    
+    .ph-actions .dropdown-item {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        color: #374151;
+    }
+    
+    .ph-actions .dropdown-item:hover {
+        background: #f3f4f6;
+        color: #1f2937;
+        transform: translateX(4px);
+    }
+    
+    .ph-actions .dropdown-item i {
+        width: 16px;
+        text-align: center;
+    }
+    
+    /* Debug button styling */
+    .ph-actions .dropdown-divider {
+        margin: 0.5rem 0;
+        border-color: #e5e7eb;
+    }
+    
+    .ph-actions .dropdown-item[onclick*="debug"] {
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+    
+    .ph-actions .dropdown-item[onclick*="debug"]:hover {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .ph-body { padding: 1rem 1.5rem; }
+    .ph-table-container { height: 640px; min-height: 640px; max-height: 640px; overflow: auto; border: 1px solid #e5e7eb; border-radius: 10px; background: #ffffff; }
+
+    .ph-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .ph-table thead th { position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #374151; font-weight: 600; font-size: 0.95rem; text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; }
+    .ph-table tbody td { padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; vertical-align: top; color: #374151; }
+    .ph-table tbody tr:hover { background: #f9fafb; }
+
+    .ph-badge { display: inline-block; background: #e5f3ff; color: #1d4ed8; padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
+    .ph-badge-primary { background: #e5e7ff; color: #4338ca; }
+
+    .ph-progress-wrap { display: flex; align-items: center; gap: 0.5rem; }
+    .ph-progress { flex: 1; height: 10px; background: #f3f4f6; border-radius: 6px; overflow: hidden; border: 1px solid #e5e7eb; min-width: 120px; }
+    .ph-progress-bar { height: 100%; background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .ph-progress-label { font-size: 0.85rem; color: #374151; min-width: 40px; text-align: right; }
+
+    .ph-empty { height: 100%; min-height: 640px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; color: #6b7280; text-align: center; }
+    .ph-empty i { font-size: 2rem; color: #9ca3af; margin-bottom: 0.5rem; }
+    .ph-empty h5 { margin: 0; font-weight: 700; }
+    .ph-empty p { margin: 0 0 0.5rem 0; font-size: 0.9rem; }
+
+    @media (max-width: 480px) {
+        .ph-table-container { height: 520px; min-height: 520px; max-height: 520px; }
+        
+        .ph-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        
+        .ph-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+        
+        .ph-actions .dropdown-toggle {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+@endpush
      @else
          <!-- No Farms Message -->
          <div class="no-farms-section">
@@ -308,7 +426,7 @@
     }
 
     /* Card styling */
-    .action-card, .table-card, .no-farms-section {
+    .action-card, .no-farms-section {
         background: white;
         border-radius: 20px;
         box-shadow: 0 8px 25px rgba(0,0,0,0.08);
@@ -348,163 +466,7 @@
         padding: 1.5rem;
     }
 
-    /* MUCH Larger Fixed Size Table styling */
-    .table-responsive {
-        overflow-x: auto;
-        overflow-y: auto;
-        width: 100%;
-        height: 1000px;
-        min-height: 1000px;
-        max-height: 1000px;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        background: #ffffff;
-        position: relative;
-        z-index: 1;
-    }
-
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 0;
-        table-layout: fixed;
-    }
-
-    .table-card {
-        box-sizing: border-box;
-        width: 100%;
-        max-width: 100%;
-        position: relative;
-        z-index: 1;
-    }
-
-    .card-content {
-        padding: 1.5rem;
-        box-sizing: border-box;
-        position: relative;
-        z-index: 1;
-    }
-
-    /* Larger Table headers */
-    .table th {
-        background: #f8fafc;
-        color: #374151;
-        font-weight: 600;
-        padding: 1rem;
-        border-bottom: 1px solid #e5e7eb;
-        font-size: 0.95rem;
-        text-align: left;
-        vertical-align: top;
-    }
-
-    /* Larger Table cells */
-    .table td {
-        padding: 1rem;
-        border-bottom: 1px solid #f3f4f6;
-        vertical-align: top;
-    }
-
-    /* Simplified Table rows */
-    .table tbody tr {
-        vertical-align: top;
-    }
-
-    .table tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    /* Simplified No data row */
-    .no-data-row {
-        vertical-align: top;
-    }
-
-    .no-data-content {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        padding: 2rem;
-        text-align: center;
-    }
-
-    .no-data-content i {
-        color: #9ca3af;
-        margin-bottom: 1rem;
-    }
-
-    .no-data-content h5 {
-        color: #6b7280;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-    }
-
-    .no-data-content p {
-        color: #9ca3af;
-        margin-bottom: 1.5rem;
-        font-size: 0.9rem;
-    }
-
-    /* Progress bar */
-    .progress {
-        height: 18px;
-        border-radius: 9px;
-        background-color: #f3f4f6;
-        border: 1px solid #e5e7eb;
-        min-width: 100px;
-    }
-
-    .progress-bar {
-        border-radius: 9px;
-        font-size: 0.7rem;
-        font-weight: 600;
-        line-height: 16px;
-    }
-
-    /* Badge */
-    .badge {
-        font-size: 0.75rem;
-        padding: 0.5rem 0.75rem;
-        border-radius: 6px;
-        font-weight: 500;
-    }
-
-    /* Button */
-    .no-data-content .btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        border-radius: 6px;
-    }
-
-    /* Table hover */
-    .table-hover tbody tr:hover {
-        background-color: #f9fafb;
-        transition: background-color 0.2s ease;
-    }
-
-    /* Table cell content */
-    .table td .progress {
-        margin: 0;
-        width: 100%;
-    }
-
-    .table td .badge {
-        display: inline-block;
-        margin: 0;
-    }
-
-    /* Dropdown styling */
-    .table .dropdown-toggle {
-        border: 1px solid #d1d5db;
-        background-color: #ffffff;
-        color: #6b7280;
-        transition: all 0.2s ease;
-    }
-
-    .table .dropdown-toggle:hover {
-        background-color: #f9fafb;
-        border-color: #9ca3af;
-        color: #374151;
-    }
+    /* Table styling removed - replaced with new ph-* classes */
 
     /* Enhanced Modal Styling */
     .modal-xl {
@@ -959,22 +921,7 @@
         z-index: 21;
     }
 
-    /* Table container styling */
-    .table-responsive {
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .table-card {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        border: 1px solid #e5e7eb;
-    }
-
-    /* Font sizes */
-    .table th,
-    .table td {
-        font-size: 0.875rem;
-        line-height: 1.4;
-    }
+    /* Old table styling removed - replaced with new ph-* classes */
 
     /* Button styling */
     .btn {
@@ -1010,113 +957,10 @@
         border-radius: 12px;
     }
 
-    /* Table column widths */
-    .table th:nth-child(1),
-    .table td:nth-child(1) {
-        width: 70px;
-        min-width: 70px;
-    }
-
-    .table th:nth-child(2),
-    .table td:nth-child(2) {
-        width: 90px;
-        min-width: 90px;
-    }
-
-    .table th:nth-child(3),
-    .table td:nth-child(3) {
-        width: 70px;
-        min-width: 70px;
-    }
-
-    .table th:nth-child(4),
-    .table td:nth-child(4) {
-        width: 110px;
-        min-width: 110px;
-    }
-
-    .table th:nth-child(5),
-    .table td:nth-child(5) {
-        width: 90px;
-        min-width: 90px;
-    }
-
-    .table th:nth-child(6),
-    .table td:nth-child(6) {
-        width: 70px;
-        min-width: 70px;
-    }
-
-    /* Responsive table adjustments with MUCH larger fixed sizing */
-    @media (max-width: 768px) {
-        .table-responsive {
-            height: 800px;
-            min-height: 800px;
-            max-height: 800px;
-        }
-        
-        .table th,
-        .table td {
-            padding: 0.5rem 0.25rem;
-            font-size: 0.8rem;
-        }
-        
-        .table th:nth-child(1),
-        .table td:nth-child(1) {
-            width: 60px;
-            min-width: 60px;
-        }
-
-        .table th:nth-child(2),
-        .table td:nth-child(2) {
-            width: 80px;
-            min-width: 80px;
-        }
-
-        .table th:nth-child(3),
-        .table td:nth-child(3) {
-            width: 60px;
-            min-width: 60px;
-        }
-
-        .table th:nth-child(4),
-        .table td:nth-child(4) {
-            width: 100px;
-            min-width: 100px;
-        }
-
-        .table th:nth-child(5),
-        .table td:nth-child(5) {
-            width: 80px;
-            min-width: 80px;
-        }
-
-        .table th:nth-child(6),
-        .table td:nth-child(6) {
-            width: 60px;
-            min-width: 60px;
-        }
-        
-        .progress-table-section {
-            margin-bottom: 1rem;
-        }
-    }
+    /* Old table column widths and responsive styles removed - replaced with new ph-* classes */
 
     @media (max-width: 480px) {
-        .table-responsive {
-            height: 700px;
-            min-height: 700px;
-            max-height: 700px;
-        }
-        
-        .table-card .card-header {
-            padding: 1rem;
-        }
-        
-        .card-actions {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+        /* Old table styles removed - replaced with new ph-* classes */
     }
 
         /* Unified Header */
@@ -1396,8 +1240,6 @@
 
     
     /* Ensure table content is not constrained by height */
-    .table-responsive,
-    .table-card,
     .card-content {
         min-height: auto !important;
         max-height: none !important;
@@ -1501,104 +1343,7 @@
         line-height: 1.5;
     }
 
-    /* Fixed Size Table Styling */
-    .progress-table-section {
-        margin-top: 2rem;
-        margin-bottom: 2rem;
-        position: relative;
-        z-index: 1;
-    }
-
-    .table-card {
-        background: #ffffff;
-        border-radius: 12px;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        overflow: visible;
-        width: 100%;
-        max-width: 100%;
-        position: relative;
-        z-index: 1;
-    }
-
-    .table-card .card-header {
-        background: #f8fafc;
-        padding: 1.5rem;
-        border-bottom: 1px solid #e5e7eb;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-        position: relative;
-        z-index: 2;
-    }
-
-    .table-card .card-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin: 0;
-        display: flex;
-        align-items: center;
-    }
-
-    .card-actions {
-        display: flex;
-        gap: 0.75rem;
-        align-items: center;
-        position: relative;
-        z-index: 3;
-    }
-
-    .table-card .card-content {
-        padding: 0;
-        position: relative;
-        z-index: 1;
-    }
-
-    .table-responsive {
-        border-radius: 0 0 12px 12px;
-        overflow: auto;
-        height: 1000px;
-        min-height: 1000px;
-        max-height: 1000px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .table {
-        margin: 0;
-        border: none;
-        table-layout: fixed;
-    }
-
-    .table thead th {
-        background: #f8fafc;
-        color: #374151;
-        font-weight: 600;
-        font-size: 0.95rem;
-        border: none;
-        padding: 1rem;
-        border-bottom: 1px solid #e5e7eb;
-        vertical-align: top;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-
-    .table tbody td {
-        padding: 1rem;
-        border: none;
-        border-bottom: 1px solid #f3f4f6;
-        vertical-align: top;
-        color: #374151;
-    }
-
-    .table tbody tr:hover {
-        background: #f9fafb;
-        transition: background-color 0.2s ease;
-    }
+    /* Old table styling removed - replaced with new ph-* classes */
 
     .badge {
         font-weight: 600;
@@ -1925,6 +1670,15 @@
 
 @push('scripts')
 <script>
+// Debug function for PDF export
+function debugPDFLibraries() {
+    console.log('=== PDF Export Debug Info ===');
+    console.log('Server-side PDF generation is now used');
+    console.log('PDF route:', '{{ route("crop-progress.export-pdf") }}');
+    console.log('DomPDF library installed: Available via Laravel facade');
+    console.log('=============================');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize countdown timer if waiting for next update
     const countdownTimer = document.getElementById('countdown-timer');
@@ -1932,8 +1686,7 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeCountdown();
     }
     
-    // Initialize progress bars
-    initializeProgressBars();
+    // Progress bars are handled with simple CSS in the new table
 });
 
 function initializeCountdown() {
@@ -1986,8 +1739,8 @@ function initializeCountdown() {
 
 function exportToPDF(updateId) {
     // Prevent table shrinking during export
-    const tableContainer = document.querySelector('.table-responsive');
-    const tableCard = document.querySelector('.table-card');
+    const tableContainer = document.querySelector('.ph-table-container');
+    const tableCard = document.querySelector('.ph-card');
     
     if (tableContainer) {
         // Store original dimensions
@@ -2071,8 +1824,8 @@ function exportToPDF(updateId) {
 }
 
 function restoreTableDimensions() {
-    const tableContainer = document.querySelector('.table-responsive');
-    const tableCard = document.querySelector('.table-card');
+    const tableContainer = document.querySelector('.ph-table-container');
+    const tableCard = document.querySelector('.ph-card');
     
     if (tableContainer && tableContainer.dataset.originalWidth) {
         tableContainer.style.width = tableContainer.dataset.originalWidth;
@@ -2493,17 +2246,7 @@ function generateAnswerSummaryHTML(summary) {
     `;
 }
 
-function initializeProgressBars() {
-    // Find all progress bars with data-width attribute
-    const progressBars = document.querySelectorAll('.progress-bar[data-width]');
-    
-    progressBars.forEach(bar => {
-        const width = bar.getAttribute('data-width');
-        if (width && !isNaN(width)) {
-            bar.style.width = width + '%';
-        }
-    });
-}
+// Progress bars are now handled with simple CSS in the new table
 
 function printSummary() {
     const modalContent = document.getElementById('modalContent');
@@ -2535,29 +2278,823 @@ function printSummary() {
     printWindow.print();
 }
 
-// Export all progress function
-function exportAllProgress() {
-    const exportBtn = event.target;
-    const originalText = exportBtn.innerHTML;
+// Export functionality removed - table now focuses on displaying progress history
+
+// Export functions for Progress History table
+function exportAsPrint() {
+    const tableContainer = document.querySelector('.ph-table-container');
+    const printWindow = window.open('', '_blank');
     
-    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Exporting...';
-    exportBtn.disabled = true;
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Progress History - Print</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                    th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+                    th { background-color: #f8fafc; font-weight: bold; }
+                    .badge { background: #e5f3ff; color: #1d4ed8; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+                    .progress { width: 100px; height: 20px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
+                    .progress-bar { height: 100%; background: #22c55e; }
+                    h1 { color: #1f2937; margin-bottom: 20px; }
+                    .export-info { color: #6b7280; margin-bottom: 20px; font-size: 14px; }
+                </style>
+            </head>
+            <body>
+                <h1>Progress History Report</h1>
+                <div class="export-info">
+                    <p><strong>Farm:</strong> {{ $selectedFarm ? $selectedFarm->name : 'N/A' }}</p>
+                    <p><strong>Export Date:</strong> ${new Date().toLocaleDateString()}</p>
+                </div>
+                ${tableContainer.querySelector('table').outerHTML}
+            </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+}
+
+function exportAsExcel() {
+    const table = document.querySelector('.ph-table-container table');
+    if (!table) {
+        alert('No table data to export');
+        return;
+    }
+    
+    // Create CSV content
+    let csvContent = "data:text/csv;charset=utf-8,";
+    
+    // Add headers
+    const headers = [];
+    table.querySelectorAll('thead th').forEach(th => {
+        headers.push(th.textContent.trim());
+    });
+    csvContent += headers.join(',') + '\r\n';
+    
+    // Add data rows
+    table.querySelectorAll('tbody tr').forEach(row => {
+        const rowData = [];
+        row.querySelectorAll('td').forEach((td, index) => {
+            let cellText = '';
+            if (index === 0) { // Week column
+                cellText = td.querySelector('.ph-badge') ? td.querySelector('.ph-badge').textContent : '';
+            } else if (index === 2) { // Method column
+                cellText = td.querySelector('.ph-badge') ? td.querySelector('.ph-badge').textContent : '';
+            } else if (index === 3) { // Progress column
+                const progressBar = td.querySelector('.ph-progress-bar');
+                const progressLabel = td.querySelector('.ph-progress-label');
+                cellText = progressLabel ? progressLabel.textContent : '';
+            } else {
+                cellText = td.textContent.trim();
+            }
+            rowData.push('"' + cellText.replace(/"/g, '""') + '"');
+        });
+        csvContent += rowData.join(',') + '\r\n';
+    });
+    
+    // Create download link
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'progress_history.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function exportAsPDF() {
+    // Show loading state
+    const exportBtn = event.target.closest('.dropdown-item');
+    const originalText = exportBtn.innerHTML;
+    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating PDF...';
     
     try {
-        // Open the export page in a new window
-        const exportWindow = window.open('/crop-progress/export', '_blank');
+        // Use server-side PDF generation
+        const pdfUrl = '{{ route("crop-progress.export-pdf") }}';
         
-        // Reset button after a delay
+        // Create a temporary link to trigger the download
+        const link = document.createElement('a');
+        link.href = pdfUrl;
+        link.download = `progress_history_${new Date().toISOString().split('T')[0]}.pdf`;
+        link.style.display = 'none';
+        
+        // Add to DOM, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Reset button after a short delay
         setTimeout(() => {
             exportBtn.innerHTML = originalText;
-            exportBtn.disabled = false;
         }, 2000);
         
+        console.log('PDF download initiated via server-side generation');
+        
     } catch (error) {
-        console.error('Export failed:', error);
+        console.error('PDF export failed:', error);
         exportBtn.innerHTML = originalText;
-        exportBtn.disabled = false;
+        alert('PDF export failed. Please try again or use the Print option instead.');
     }
 }
+
+// Debug function for PDF export
+function debugPDFLibraries() {
+    console.log('=== PDF Export Debug Info ===');
+    console.log('Server-side PDF generation is now used');
+    console.log('PDF route:', '{{ route("crop-progress.export-pdf") }}');
+    console.log('DomPDF library installed: Available via Laravel facade');
+    console.log('=============================');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize countdown timer if waiting for next update
+    const countdownTimer = document.getElementById('countdown-timer');
+    if (countdownTimer) {
+        initializeCountdown();
+    }
+    
+    // Progress bars are handled with simple CSS in the new table
+});
+
+function initializeCountdown() {
+    const countdownElement = document.getElementById('countdown-timer');
+    const nextUpdateDate = new Date('{{ $nextUpdateDate ? $nextUpdateDate->format("Y-m-d H:i:s") : "" }}');
+    
+    if (!nextUpdateDate || isNaN(nextUpdateDate.getTime())) {
+        countdownElement.textContent = 'Calculating...';
+        return;
+    }
+
+    function updateCountdown() {
+        const now = new Date();
+        const timeLeft = nextUpdateDate - now;
+
+        if (timeLeft <= 0) {
+            // Time is up, reload the page to show updated status
+            location.reload();
+            return;
+        }
+
+        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+
+        // Update the countdown display elements in the status section
+        const daysElement = document.getElementById('countdown-days');
+        const hoursElement = document.getElementById('countdown-hours');
+        const minutesElement = document.getElementById('countdown-minutes');
+
+        if (daysElement) daysElement.textContent = days;
+        if (hoursElement) hoursElement.textContent = hours;
+        if (minutesElement) minutesElement.textContent = minutes;
+
+        // Also update the main countdown timer if it exists
+        if (countdownElement) {
+            if (days > 0) {
+                countdownElement.textContent = `${days}d ${hours}h ${minutes}m`;
+            } else if (hours > 0) {
+                countdownElement.textContent = `${hours}h ${minutes}m`;
+            } else {
+                countdownElement.textContent = `${minutes}m`;
+            }
+        }
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 60000); // Update every minute
+}
+
+function exportToPDF(updateId) {
+    // Prevent table shrinking during export
+    const tableContainer = document.querySelector('.ph-table-container');
+    const tableCard = document.querySelector('.ph-card');
+    
+    if (tableContainer) {
+        // Store original dimensions
+        tableContainer.dataset.originalWidth = tableContainer.style.width || '100%';
+        tableContainer.dataset.originalMinWidth = tableContainer.style.minWidth || '';
+        
+        // Ensure table maintains size
+        tableContainer.style.width = '100%';
+        tableContainer.style.minWidth = '100%';
+        tableContainer.style.flex = '1';
+    }
+    
+    if (tableCard) {
+        tableCard.style.minHeight = '400px';
+    }
+    
+    // Create a loading state
+    const exportBtn = event.target;
+    const originalText = exportBtn.innerHTML;
+    const originalWidth = exportBtn.offsetWidth;
+    const originalHeight = exportBtn.offsetHeight;
+    
+    // Set minimum dimensions to prevent layout shifts
+    exportBtn.style.minWidth = originalWidth + 'px';
+    exportBtn.style.minHeight = originalHeight + 'px';
+    
+    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating PDF...';
+    
+    try {
+        // Open the printable report in a new window
+        const printWindow = window.open(`/crop-progress/export/${updateId}`, '_blank');
+        
+        // Wait for the page to load, then trigger print
+        if (printWindow) {
+            printWindow.onload = function() {
+                // Small delay to ensure content is fully loaded
+                setTimeout(() => {
+                    printWindow.print();
+                    // Show success message
+                    showExportSuccess();
+                    // Reset button text and dimensions after a delay
+                    setTimeout(() => {
+                        exportBtn.innerHTML = originalText;
+                        exportBtn.style.minWidth = '';
+                        exportBtn.style.minHeight = '';
+                        // Restore table container dimensions
+                        restoreTableDimensions();
+                    }, 2000);
+                }, 1000);
+            };
+            
+            // Handle case where window fails to load
+            printWindow.onerror = function() {
+                exportBtn.innerHTML = originalText;
+                exportBtn.style.minWidth = '';
+                exportBtn.style.minHeight = '';
+                showExportError('Failed to load the report. Please try again or use the Print Report option.');
+            };
+        } else {
+            // Fallback if popup is blocked
+            exportBtn.innerHTML = originalText;
+            exportBtn.style.minWidth = '';
+            exportBtn.style.minHeight = '';
+            showExportInfo('Popup blocked. Opening export in new tab instead.');
+            // Use the hidden form as fallback
+            const form = document.getElementById(`export-form-${updateId}`);
+            if (form) {
+                form.submit();
+            } else {
+                // Last resort: redirect to the print page
+                window.location.href = `/crop-progress/export/${updateId}`;
+            }
+        }
+    } catch (error) {
+        console.error('Export error:', error);
+        exportBtn.innerHTML = originalText;
+        exportBtn.style.minWidth = '';
+        exportBtn.style.minHeight = '';
+        showExportError('An error occurred while exporting. Please try again.');
+    }
+}
+
+function restoreTableDimensions() {
+    const tableContainer = document.querySelector('.ph-table-container');
+    const tableCard = document.querySelector('.ph-card');
+    
+    if (tableContainer && tableContainer.dataset.originalWidth) {
+        tableContainer.style.width = tableContainer.dataset.originalWidth;
+        tableContainer.style.minWidth = tableContainer.dataset.originalMinWidth;
+        tableContainer.style.flex = '';
+    }
+    
+    if (tableCard) {
+        tableCard.style.minHeight = '';
+    }
+}
+
+function showExportSuccess() {
+    // Create a temporary success message
+    const successDiv = document.createElement('div');
+    successDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+    successDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    successDiv.innerHTML = `
+        <i class="fas fa-check-circle me-2"></i>
+        PDF generated successfully! Print dialog opened.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(successDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (successDiv.parentNode) {
+            successDiv.remove();
+        }
+    }, 5000);
+}
+
+function showExportError(message) {
+    // Create a temporary error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+    errorDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    errorDiv.innerHTML = `
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(errorDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (errorDiv.parentNode) {
+            errorDiv.remove();
+        }
+    }, 5000);
+}
+
+function showExportInfo(message) {
+    // Create a temporary info message
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'alert alert-info alert-dismissible fade show position-fixed';
+    infoDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    infoDiv.innerHTML = `
+        <i class="fas fa-info-circle me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(infoDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (infoDiv.parentNode) {
+            infoDiv.remove();
+        }
+    }, 5000);
+}
+
+function showQuestionsSummary(updateId, type) {
+    const modal = new bootstrap.Modal(document.getElementById('questionsSummaryModal'));
+    const modalTitle = document.getElementById('modalTitle');
+    const modalContent = document.getElementById('modalContent');
+    
+    // Set modal title
+    modalTitle.textContent = '📊 Progress Summary';
+    
+    // Show modal immediately
+    modal.show();
+    
+    // Ensure modal is properly positioned above taskbar
+    setTimeout(() => {
+        const modalElement = document.getElementById('questionsSummaryModal');
+        if (modalElement) {
+            modalElement.style.zIndex = '99999';
+            modalElement.style.display = 'block';
+            modalElement.style.position = 'fixed';
+            modalElement.style.top = '0';
+            modalElement.style.left = '0';
+            modalElement.style.width = '100%';
+            modalElement.style.height = '100%';
+        }
+        
+        // Also ensure modal dialog is properly positioned
+        const modalDialog = modalElement.querySelector('.modal-dialog');
+        if (modalDialog) {
+            modalDialog.style.zIndex = '100000';
+            modalDialog.style.marginTop = '3rem';
+            modalDialog.style.marginBottom = '3rem';
+        }
+    }, 100);
+    
+    // Use mock data instead of API call
+    const mockSummary = {
+        update_date: '{{ $lastUpdate ? $lastUpdate->update_date->format("M d, Y") : "N/A" }}',
+        progress: '{{ $lastUpdate ? $lastUpdate->calculated_progress : 0 }}',
+        method: '{{ $lastUpdate ? ucfirst($lastUpdate->update_method) : "N/A" }}',
+        questions: [
+            {
+                question: 'Plant Health:',
+                answer: 'Good',
+                explanation: 'Plants are showing healthy growth patterns'
+            },
+            {
+                question: 'Leaf Condition:',
+                answer: 'Good',
+                explanation: 'Leaves are green and well-formed'
+            },
+            {
+                question: 'Growth Rate:',
+                answer: 'Slower',
+                explanation: 'Growth has slowed due to seasonal changes'
+            },
+            {
+                question: 'Water Availability:',
+                answer: 'Excellent',
+                explanation: 'Adequate water supply maintained'
+            },
+            {
+                question: 'Pest Pressure:',
+                answer: 'Low',
+                explanation: 'Minimal pest activity observed'
+            },
+            {
+                question: 'Disease Issues:',
+                answer: 'Minor',
+                explanation: 'Some minor leaf spots detected'
+            },
+            {
+                question: 'Nutrient Deficiency:',
+                answer: 'Moderate',
+                explanation: 'Slight yellowing indicates nutrient needs'
+            },
+            {
+                question: 'Weather Impact:',
+                answer: 'Positive',
+                explanation: 'Favorable weather conditions'
+            },
+            {
+                question: 'Stage Progression:',
+                answer: 'On_track',
+                explanation: 'Development progressing as expected'
+            },
+            {
+                question: 'Overall Satisfaction:',
+                answer: 'Satisfied',
+                explanation: 'Crop performance meets expectations'
+            }
+        ]
+    };
+    
+    // Display content based on type
+    if (type === 'full') {
+        modalContent.innerHTML = generateFullSummaryHTML(mockSummary);
+    } else {
+        modalContent.innerHTML = generateAnswerSummaryHTML(mockSummary);
+    }
+}
+
+function showRecommendations(updateId) {
+    const modal = new bootstrap.Modal(document.getElementById('questionsSummaryModal'));
+    const modalTitle = document.getElementById('modalTitle');
+    const modalContent = document.getElementById('modalContent');
+    
+    // Set modal title
+    modalTitle.innerHTML = '<i class="fas fa-robot"></i> AI-Powered Recommendations';
+    
+    // Show modal immediately
+    modal.show();
+    
+    // Ensure modal is properly positioned above taskbar
+    setTimeout(() => {
+        const modalElement = document.getElementById('questionsSummaryModal');
+        if (modalElement) {
+            modalElement.style.zIndex = '99999';
+            modalElement.style.display = 'block';
+            modalElement.style.position = 'fixed';
+            modalElement.style.top = '0';
+            modalElement.style.left = '0';
+            modalElement.style.width = '100%';
+            modalElement.style.height = '100%';
+        }
+        
+        // Also ensure modal dialog is properly positioned
+        const modalDialog = modalElement.querySelector('.modal-dialog');
+        if (modalDialog) {
+            modalDialog.style.zIndex = '100000';
+            modalDialog.style.marginTop = '3rem';
+            modalDialog.style.marginBottom = '3rem';
+        }
+    }, 100);
+    
+    // Show loading state
+    modalContent.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading AI recommendations...</p>
+        </div>
+    `;
+    
+    // Fetch recommendations from the server
+    fetch(`/crop-progress/${updateId}/recommendations`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                modalContent.innerHTML = generateRecommendationsHTML(data.recommendations, data.recommendation_summary);
+            } else {
+                modalContent.innerHTML = `
+                    <div class="text-center text-danger">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                        <p>Unable to load recommendations. Please try again.</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching recommendations:', error);
+            modalContent.innerHTML = `
+                <div class="text-center text-danger">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                    <p>Error loading recommendations. Please try again.</p>
+                </div>
+            `;
+        });
+}
+
+function generateRecommendationsHTML(recommendations, summary) {
+    let html = `
+        <div class="recommendations-container">
+            <div class="recommendations-header">
+                <h5>🤖 AI-Powered Recommendations</h5>
+                <p>${summary}</p>
+            </div>
+    `;
+    
+    // Add priority alerts
+    if (recommendations.priority_alerts && recommendations.priority_alerts.length > 0) {
+        html += `
+            <div class="recommendation-category alert">
+                <h6 class="category-title text-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Priority Alerts
+                </h6>
+                <ul class="recommendation-list">
+                    ${recommendations.priority_alerts.map(item => `
+                        <li class="recommendation-item ${item.includes('✅') ? 'text-success' : 'text-danger'}">
+                            ${item}
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Add immediate actions
+    if (recommendations.immediate_actions && recommendations.immediate_actions.length > 0) {
+        html += `
+            <div class="recommendation-category">
+                <h6 class="category-title text-primary">
+                    <i class="fas fa-bolt"></i>
+                    Immediate Actions
+                </h6>
+                <ul class="recommendation-list">
+                    ${recommendations.immediate_actions.map(item => `
+                        <li class="recommendation-item ${item.includes('✅') ? 'text-success' : ''}">
+                            ${item}
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Add weekly plan
+    if (recommendations.weekly_plan && recommendations.weekly_plan.length > 0) {
+        html += `
+            <div class="recommendation-category weekly">
+                <h6 class="category-title text-info">
+                    <i class="fas fa-calendar-week"></i>
+                    Weekly Plan
+                </h6>
+                <ul class="recommendation-list">
+                    ${recommendations.weekly_plan.map(item => `
+                        <li class="recommendation-item">${item}</li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Add long term tips
+    if (recommendations.long_term_tips && recommendations.long_term_tips.length > 0) {
+        html += `
+            <div class="recommendation-category tips">
+                <h6 class="category-title text-warning">
+                    <i class="fas fa-lightbulb"></i>
+                    Long-term Tips
+                </h6>
+                <ul class="recommendation-list">
+                    <li class="recommendation-item">${recommendations.long_term_tips.join('</li><li class="recommendation-item">')}</li>
+                </ul>
+            </div>
+        `;
+    }
+    
+    html += `
+        </div>
+    `;
+    
+    return html;
+}
+
+function generateFullSummaryHTML(summary) {
+    return `
+        <div class="summary-container">
+            <div class="summary-header text-center mb-4">
+                <h5 class="text-primary mb-2">📊 Progress Summary</h5>
+                <p class="text-muted mb-0">Updated on ${summary.update_date}</p>
+            </div>
+            
+            <div class="row">
+                <!-- Left Column -->
+                <div class="col-md-6">
+                    <div class="summary-stats mb-4">
+                        <div class="stat-card text-center p-3 bg-primary bg-opacity-10 rounded mb-3">
+                            <div class="stat-icon mb-2">
+                                <i class="fas fa-chart-line fa-2x text-primary"></i>
+                            </div>
+                            <div class="stat-value text-primary fw-bold fs-4">${summary.progress}%</div>
+                            <div class="stat-label text-muted">Progress</div>
+                        </div>
+                        
+                        <div class="stat-card text-center p-3 bg-success bg-opacity-10 rounded">
+                            <div class="stat-icon mb-2">
+                                <i class="fas fa-clipboard-check fa-2x text-success"></i>
+                            </div>
+                            <div class="stat-value text-success fw-bold fs-4">${summary.method}</div>
+                            <div class="stat-label text-muted">Method</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column -->
+                <div class="col-md-6">
+                    <div class="summary-status">
+                        <h6 class="text-secondary mb-3">🌱 Current Status:</h6>
+                        <div class="status-grid">
+                            <div class="status-item d-flex align-items-center mb-2">
+                                <i class="fas fa-leaf text-success me-3"></i>
+                                <span>Plants are healthy and growing well</span>
+                            </div>
+                            <div class="status-item d-flex align-items-center mb-2">
+                                <i class="fas fa-tint text-info me-3"></i>
+                                <span>Water supply is adequate</span>
+                            </div>
+                            <div class="status-item d-flex align-items-center mb-2">
+                                <i class="fas fa-clock text-warning me-3"></i>
+                                <span>Growth is on schedule</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary-note mt-4 p-3 bg-light rounded text-center">
+                <i class="fas fa-info-circle text-info me-2"></i>
+                <span class="text-muted">Your crops are progressing well! Keep up the good work.</span>
+            </div>
+        </div>
+    `;
+}
+
+function generateAnswerSummaryHTML(summary) {
+    return `
+        <div class="summary-container">
+            <div class="summary-header mb-4">
+                <h6 class="text-primary mb-2">Answer Summary</h6>
+                <p class="text-muted mb-0">Date: ${summary.update_date}</p>
+            </div>
+            
+            <div class="row">
+                ${summary.questions.map((q, index) => `
+                    <div class="col-md-6 mb-3">
+                        <div class="answer-item p-3 border rounded h-100">
+                            <div class="d-flex align-items-center">
+                                <div class="question-answer">
+                                    <strong class="question-label d-block mb-1">${q.question}</strong>
+                                    <span class="answer-value badge bg-primary">${q.answer}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="summary-footer mt-4 p-3 bg-light rounded text-center">
+                <strong>Total Progress:</strong> ${summary.progress}%
+            </div>
+        </div>
+    `;
+}
+
+// Progress bars are now handled with simple CSS in the new table
+
+function printSummary() {
+    const modalContent = document.getElementById('modalContent');
+    const printWindow = window.open('', '_blank');
+    
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Questions Summary</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    .question-item { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+                    .question-text { color: #2563eb; margin-bottom: 10px; }
+                    .answer-text { font-weight: bold; }
+                    .explanation-text { color: #6b7280; font-style: italic; }
+                    .summary-footer { background: #f9fafb; padding: 15px; border-radius: 5px; margin-top: 20px; }
+                    .badge { background: #2563eb; color: white; padding: 5px 10px; border-radius: 3px; }
+                </style>
+            </head>
+            <body>
+                <h2>Questions Summary</h2>
+                ${modalContent.innerHTML}
+            </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+}
+
+// Export functionality removed - table now focuses on displaying progress history
+
+// Export functions for Progress History table
+function exportAsPrint() {
+    const tableContainer = document.querySelector('.ph-table-container');
+    const printWindow = window.open('', '_blank');
+    
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Progress History - Print</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                    th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+                    th { background-color: #f8fafc; font-weight: bold; }
+                    .badge { background: #e5f3ff; color: #1d4ed8; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+                    .progress { width: 100px; height: 20px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
+                    .progress-bar { height: 100%; background: #22c55e; }
+                    h1 { color: #1f2937; margin-bottom: 20px; }
+                    .export-info { color: #6b7280; margin-bottom: 20px; font-size: 14px; }
+                </style>
+            </head>
+            <body>
+                <h1>Progress History Report</h1>
+                <div class="export-info">
+                    <p><strong>Farm:</strong> {{ $selectedFarm ? $selectedFarm->name : 'N/A' }}</p>
+                    <p><strong>Export Date:</strong> ${new Date().toLocaleDateString()}</p>
+                </div>
+                ${tableContainer.querySelector('table').outerHTML}
+            </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+}
+
+function exportAsExcel() {
+    const table = document.querySelector('.ph-table-container table');
+    if (!table) {
+        alert('No table data to export');
+        return;
+    }
+    
+    // Create CSV content
+    let csvContent = "data:text/csv;charset=utf-8,";
+    
+    // Add headers
+    const headers = [];
+    table.querySelectorAll('thead th').forEach(th => {
+        headers.push(th.textContent.trim());
+    });
+    csvContent += headers.join(',') + '\r\n';
+    
+    // Add data rows
+    table.querySelectorAll('tbody tr').forEach(row => {
+        const rowData = [];
+        row.querySelectorAll('td').forEach((td, index) => {
+            let cellText = '';
+            if (index === 0) { // Week column
+                cellText = td.querySelector('.ph-badge') ? td.querySelector('.ph-badge').textContent : '';
+            } else if (index === 2) { // Method column
+                cellText = td.querySelector('.ph-badge') ? td.querySelector('.ph-badge').textContent : '';
+            } else if (index === 3) { // Progress column
+                const progressBar = td.querySelector('.ph-progress-bar');
+                const progressLabel = td.querySelector('.ph-progress-label');
+                cellText = progressLabel ? progressLabel.textContent : '';
+            } else {
+                cellText = td.textContent.trim();
+            }
+            rowData.push('"' + cellText.replace(/"/g, '""') + '"');
+        });
+        csvContent += rowData.join(',') + '\r\n';
+    });
+    
+    // Create download link
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'progress_history.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+
 </script>
 @endpush

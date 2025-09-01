@@ -858,6 +858,66 @@ class CropProgressController extends Controller
     }
 
     /**
+     * Export progress history as PDF
+     */
+    public function exportPDF()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $farm = $user->farms()->first();
+        
+        if (!$farm) {
+            abort(404, 'No farm found');
+        }
+
+        $progressUpdates = CropProgressUpdate::where('user_id', $user->id)
+            ->where('farm_id', $farm->id)
+            ->orderBy('update_date', 'desc')
+            ->get();
+
+        $data = [
+            'farm' => $farm,
+            'progressUpdates' => $progressUpdates,
+            'exportDate' => Carbon::now()->format('M d, Y H:i:s')
+        ];
+
+        // Generate PDF using DomPDF
+        $pdf = \PDF::loadView('crop-progress.pdf-report', $data);
+        
+        $fileName = 'progress_history_' . Carbon::now()->format('Y-m-d') . '.pdf';
+        
+        return $pdf->download($fileName);
+    }
+
+    public function printReport()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $farm = $user->farms()->first();
+        
+        if (!$farm) {
+            abort(404, 'No farm found');
+        }
+
+        $progressUpdates = CropProgressUpdate::where('user_id', $user->id)
+            ->where('farm_id', $farm->id)
+            ->orderBy('update_date', 'desc')
+            ->get();
+
+        $data = [
+            'farm' => $farm,
+            'progressUpdates' => $progressUpdates,
+            'exportDate' => Carbon::now()->format('M d, Y H:i:s')
+        ];
+
+        // Add cache control headers to prevent caching issues
+        return response()->view('crop-progress.pdf-report', $data)
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
+    }
+
+    /**
      * Get AI recommendations for a specific progress update
      */
     public function getRecommendations(int $updateId): JsonResponse

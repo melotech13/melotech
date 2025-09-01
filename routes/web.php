@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\CropGrowthController;
 use App\Http\Controllers\PhotoDiagnosisController;
+use App\Http\Controllers\ProfileController;
 
 use App\Models\User;
 
@@ -45,6 +46,11 @@ Route::middleware('auth')->group(function () {
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.settings');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    
     // Weather routes
     Route::get('/weather/farm/{farmId}', [App\Http\Controllers\WeatherController::class, 'getFarmWeather'])->name('weather.farm');
     Route::get('/weather/user-farm', [App\Http\Controllers\WeatherController::class, 'getUserFarmWeather'])->name('weather.user-farm');
@@ -70,6 +76,21 @@ Route::middleware('auth')->group(function () {
 
              Route::get('/crop-progress/export', [App\Http\Controllers\CropProgressController::class, 'exportProgress'])->name('crop-progress.export');
              Route::get('/crop-progress/export/{id}', [App\Http\Controllers\CropProgressController::class, 'exportSingleUpdate'])->name('crop-progress.export-single');
+             Route::get('/crop-progress/export-pdf', [App\Http\Controllers\CropProgressController::class, 'exportPDF'])->name('crop-progress.export-pdf');
+Route::get('/crop-progress/print', [App\Http\Controllers\CropProgressController::class, 'printReport'])->name('crop-progress.print');
+Route::get('/crop-progress/print-test', function() {
+    return view('crop-progress.pdf-report', [
+        'farm' => (object)[
+            'farm_name' => 'Test Farm',
+            'watermelon_variety' => 'Test Variety',
+            'farm_size' => '1.0',
+            'province' => 'Test Province',
+            'municipality' => 'Test Municipality'
+        ],
+        'progressUpdates' => collect([]),
+        'exportDate' => now()->format('M d, Y H:i:s')
+    ]);
+})->name('crop-progress.print-test');
              Route::get('/crop-progress/{id}/recommendations', [App\Http\Controllers\CropProgressController::class, 'getRecommendations'])->name('crop-progress.recommendations');
     
     // Photo Diagnosis routes

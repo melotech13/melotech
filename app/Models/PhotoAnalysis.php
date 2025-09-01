@@ -36,7 +36,7 @@ class PhotoAnalysis extends Model
      */
     public function getAnalysisTypeLabelAttribute(): string
     {
-        return ucfirst($this->analysis_type);
+        return $this->analysis_type ? ucfirst($this->analysis_type) : 'Unknown';
     }
 
     /**
@@ -44,7 +44,7 @@ class PhotoAnalysis extends Model
      */
     public function getIdentifiedTypeLabelAttribute(): string
     {
-        return ucfirst($this->identified_type);
+        return $this->identified_type ? ucfirst($this->identified_type) : 'Unknown Type';
     }
 
     /**

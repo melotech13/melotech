@@ -1549,157 +1549,164 @@ function displayWeatherData(container, weatherData) {
     const farmingTips = getFarmingTips(current, extendedForecast);
     
     container.innerHTML = `
-        <div class="weather-grid">
-            <!-- Today's Weather - Farmer Friendly -->
-            <div class="weather-card current-weather">
-                <div class="weather-header">
-                    <div class="header-content">
-                        <h3 class="weather-title">🌤️ Today's Weather</h3>
-                        <div class="weather-date">${new Date().toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            month: 'long', 
-                            day: 'numeric',
-                            year: 'numeric',
-                            timeZone: 'Asia/Manila'
-                        })}</div>
-                        <span class="weather-location">📍 ${farm.location}</span>
-                    </div>
-                    <div class="weather-icon-large">
-                        <img src="https://openweathermap.org/img/wn/${current.icon}@2x.png" alt="${current.description}">
-                    </div>
-                </div>
-                
-                                    <div class="weather-main">
-                    <div class="temp-display">
-                                        <span class="temp-value">${Math.round(current.temperature)}°C</span>
-                <span class="temp-feels-like">Feels like ${Math.round(current.feels_like)}°C</span>
-                    </div>
-                    <div class="weather-description">
-                        <span>${current.description}</span>
-                        <small class="data-source" style="display: block; color: #64748b; font-size: 0.75rem; margin-top: 4px;">
-                            ${current.data_source || 'OpenWeatherMap'} • Updated: ${getTimeAgo(current.timestamp)}
-                        </small>
-                    </div>
-                </div>
-                
-                <div class="weather-metrics">
-                    <div class="metric-item">
-                        <div class="metric-icon">
-                            <i class="fas fa-cloud-rain"></i>
+        <div class="weather-sections-container">
+            <!-- Today's Weather Section -->
+            <div class="weather-section today-weather-section">
+                <div class="weather-card current-weather">
+                    <div class="weather-header">
+                        <div class="header-content">
+                            <h3 class="weather-title">🌤️ Today's Weather</h3>
+                            <div class="weather-date">${new Date().toLocaleDateString('en-US', { 
+                                weekday: 'long', 
+                                month: 'long', 
+                                day: 'numeric',
+                                year: 'numeric',
+                                timeZone: 'Asia/Manila'
+                            })}</div>
+                            <span class="weather-location">📍 ${farm.location}</span>
                         </div>
-                        <div class="metric-content">
-                            <span class="metric-value">${getRainChance(current)}%</span>
-                            <span class="metric-label">Rain Chance <small style="color: #64748b; font-size: 0.7rem;">(will it rain today?)</small></span>
-                            <span class="metric-status ${getRainChanceClass(current)}">${getRainChanceText(current)}</span>
+                        <div class="weather-icon-large">
+                            <img src="https://openweathermap.org/img/wn/${current.icon}@2x.png" alt="${current.description}">
                         </div>
                     </div>
-                    <div class="metric-item">
-                        <div class="metric-icon">
-                            <i class="fas fa-wind"></i>
+                    
+                    <div class="weather-main">
+                        <div class="temp-display">
+                            <span class="temp-value">${Math.round(current.temperature)}°C</span>
+                            <span class="temp-feels-like">Feels like ${Math.round(current.feels_like)}°C</span>
                         </div>
-                        <div class="metric-content">
-                            <span class="metric-value">${Math.round(current.wind_speed)} km/h</span>
-                            <span class="metric-label">Wind</span>
-                            <span class="metric-status ${getWindStatusClass(current.wind_speed)}">${getWindStatus(current.wind_speed)}</span>
-                        </div>
-                    </div>
-                    <div class="metric-item">
-                        <div class="metric-icon">
-                            <i class="fas fa-thermometer-half"></i>
-                        </div>
-                        <div class="metric-content">
-                            <span class="metric-value">${Math.round(current.feels_like)}°C</span>
-                            <span class="metric-label">Feels Like</span>
-                            <span class="metric-status ${getFeelsLikeStatusClass(current.feels_like)}">${getFeelsLikeStatus(current.feels_like)}</span>
+                        <div class="weather-description">
+                            <span>${current.description}</span>
+                            <small class="data-source" style="display: block; color: #64748b; font-size: 0.75rem; margin-top: 4px;">
+                                ${current.data_source || 'OpenWeatherMap'} • Updated: ${getTimeAgo(current.timestamp)}
+                            </small>
                         </div>
                     </div>
-                </div>
-                
-                <div class="farming-tips">
-                    <h4>🚜 Today's Farming Tips</h4>
-                    <div class="tips-list">
-                        ${farmingTips.current.map(tip => `
-                            <div class="tip-item">
-                                <i class="fas fa-check-circle"></i>
-                                <span>${tip}</span>
+                    
+                    <div class="weather-metrics">
+                        <div class="metric-item">
+                            <div class="metric-icon">
+                                <i class="fas fa-cloud-rain"></i>
                             </div>
-                        `).join('')}
+                            <div class="metric-content">
+                                <span class="metric-value">${getRainChance(current)}%</span>
+                                <span class="metric-label">Rain Chance <small style="color: #64748b; font-size: 0.7rem;">(will it rain today?)</small></span>
+                                <span class="metric-status ${getRainChanceClass(current)}">${getRainChanceText(current)}</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon">
+                                <i class="fas fa-wind"></i>
+                            </div>
+                            <div class="metric-content">
+                                <span class="metric-value">${Math.round(current.wind_speed)} km/h</span>
+                                <span class="metric-label">Wind</span>
+                                <span class="metric-status ${getWindStatusClass(current.wind_speed)}">${getWindStatus(current.wind_speed)}</span>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-icon">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                            <div class="metric-content">
+                                <span class="metric-value">${Math.round(current.feels_like)}°C</span>
+                                <span class="metric-label">Feels Like</span>
+                                <span class="metric-status ${getFeelsLikeStatusClass(current.feels_like)}">${getFeelsLikeStatus(current.feels_like)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="farming-tips">
+                        <h4>🚜 Today's Farming Tips</h4>
+                        <div class="tips-list">
+                            ${farmingTips.current.map(tip => `
+                                <div class="tip-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>${tip}</span>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- 5-Day Weather Outlook - Farmer Friendly -->
-            <div class="weather-card forecast-weather">
-                <div class="weather-header">
-                    <h3 class="weather-title">📅 10-Day Weather Plan</h3>
-                </div>
-                
-                <div class="forecast-overview">
-                    <div class="overview-stats">
-                        <div class="stat-item">
-                            <span class="stat-value">${Math.round(getTemperatureRangeValue(extendedForecast))}°C</span>
-                            <span class="stat-label">Temp Range</span>
+
+            <!-- 10-Day Weather Plan Section -->
+            <div class="weather-section forecast-weather-section">
+                <div class="weather-card forecast-weather">
+                    <div class="weather-header">
+                        <h3 class="weather-title">📅 10-Day Weather Plan</h3>
+                    </div>
+                    
+                    <div class="forecast-overview">
+                        <div class="overview-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">${Math.round(getTemperatureRangeValue(extendedForecast))}°C</span>
+                                <span class="stat-label">Temp Range</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">${getRainyDays(extendedForecast)}</span>
+                                <span class="stat-label">Rainy Days</span>
+                            </div>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-value">${getRainyDays(extendedForecast)}</span>
-                            <span class="stat-label">Rainy Days</span>
+                    </div>
+                    
+                    <div class="forecast-list-compact">
+                        <div class="forecast-row">
+                            ${extendedForecast.slice(0, 5).map(day => `
+                                <div class="forecast-day-compact">
+                                    <div class="day-header-compact">
+                                        <span class="day-name-compact">${getDayName(day.date, day.day_name)}</span>
+                                        <span class="day-date-compact">${formatDate(day.date)}</span>
+                                    </div>
+                                    <div class="day-weather-compact">
+                                        <i class="${getWeatherIcon(day.icon)} day-icon-compact" title="Weather: ${day.description}"></i>
+                                        <span class="day-temp-compact">${Math.round(day.temperature)}°C</span>
+                                    </div>
+                                    <div class="day-metrics-compact">
+                                        <span class="metric-compact">🌧️${getRainChanceForDay(day)}%</span>
+                                        <span class="metric-compact">💨${Math.round(day.wind_speed)}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="forecast-row">
+                            ${extendedForecast.slice(5, 10).map(day => `
+                                <div class="forecast-day-compact">
+                                    <div class="day-header-compact">
+                                        <span class="day-name-compact">${getDayName(day.date, day.day_name)}</span>
+                                        <span class="day-date-compact">${formatDate(day.date)}</span>
+                                    </div>
+                                    <div class="day-weather-compact">
+                                        <i class="${getWeatherIcon(day.icon)} day-icon-compact" title="Weather: ${day.description}"></i>
+                                        <span class="day-temp-compact">${Math.round(day.temperature)}°C</span>
+                                    </div>
+                                    <div class="day-metrics-compact">
+                                        <span class="metric-compact">🌧️${getRainChanceForDay(day)}%</span>
+                                        <span class="metric-compact">💨${Math.round(day.wind_speed)}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
-                </div>
-                
-                <div class="forecast-list-compact">
-                    <div class="forecast-row">
-                        ${extendedForecast.slice(0, 5).map(day => `
-                            <div class="forecast-day-compact">
-                                <div class="day-header-compact">
-                                    <span class="day-name-compact">${getDayName(day.date, day.day_name)}</span>
-                                    <span class="day-date-compact">${formatDate(day.date)}</span>
+                    
+                    <div class="weekly-tips">
+                        <h4>📋 Weekly Plan</h4>
+                        <div class="weekly-tips-list">
+                            ${farmingTips.weekly.map(tip => `
+                                <div class="weekly-tip-item">
+                                    <i class="fas fa-arrow-right"></i>
+                                    <span>${tip}</span>
                                 </div>
-                                <div class="day-weather-compact">
-                                    <i class="${getWeatherIcon(day.icon)} day-icon-compact" title="Weather: ${day.description}"></i>
-                                    <span class="day-temp-compact">${Math.round(day.temperature)}°C</span>
-                                </div>
-                                <div class="day-metrics-compact">
-                                    <span class="metric-compact">🌧️${getRainChanceForDay(day)}%</span>
-                                    <span class="metric-compact">💨${Math.round(day.wind_speed)}</span>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="forecast-row">
-                        ${extendedForecast.slice(5, 10).map(day => `
-                            <div class="forecast-day-compact">
-                                <div class="day-header-compact">
-                                    <span class="day-name-compact">${getDayName(day.date, day.day_name)}</span>
-                                    <span class="day-date-compact">${formatDate(day.date)}</span>
-                                </div>
-                                <div class="day-weather-compact">
-                                    <i class="${getWeatherIcon(day.icon)} day-icon-compact" title="Weather: ${day.description}"></i>
-                                    <span class="day-temp-compact">${Math.round(day.temperature)}°C</span>
-                                </div>
-                                <div class="day-metrics-compact">
-                                    <span class="metric-compact">🌧️${getRainChanceForDay(day)}%</span>
-                                    <span class="metric-compact">💨${Math.round(day.wind_speed)}</span>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                
-                <div class="weekly-tips">
-                    <h4>📋 Weekly Plan</h4>
-                    <div class="weekly-tips-list">
-                        ${farmingTips.weekly.map(tip => `
-                            <div class="weekly-tip-item">
-                                <i class="fas fa-arrow-right"></i>
-                                <span>${tip}</span>
-                            </div>
-                        `).join('')}
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Weather Alerts - Simplified for Farmers -->
-            ${alerts && alerts.length > 0 ? `
+        </div>
+        
+        <!-- Weather Alerts Section (if any) -->
+        ${alerts && alerts.length > 0 ? `
+        <div class="weather-section alerts-weather-section">
             <div class="weather-card alerts-weather">
                 <div class="weather-header">
                     <h3 class="weather-title">⚠️ Weather Alerts</h3>
@@ -1728,10 +1735,8 @@ function displayWeatherData(container, weatherData) {
                     `).join('')}
                 </div>
             </div>
-            ` : ''}
         </div>
-        
-
+        ` : ''}
     `;
     
 
@@ -2658,6 +2663,25 @@ function displayHistoricalWeather(container, data) {
     padding-top: 1.5rem !important;
 }
 
+/* Responsive container padding for balanced spacing */
+@media (max-width: 1200px) {
+    .dashboard-container {
+        padding: 0 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 0 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-container {
+        padding: 0 1rem;
+    }
+}
+
 /* Welcome Section */
 .welcome-section {
     background: linear-gradient(135deg, #1e40af 0%, #3b82f6 25%, #60a5fa 50%, #93c5fd 75%, #dbeafe 100%);
@@ -2668,6 +2692,21 @@ function displayHistoricalWeather(container, data) {
     position: relative;
     overflow: hidden;
     box-shadow: 0 20px 40px rgba(30, 64, 175, 0.3);
+}
+
+/* Responsive welcome section padding for balanced spacing */
+@media (max-width: 768px) {
+    .welcome-section {
+        padding: 2rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-section {
+        padding: 1.5rem 1.25rem;
+        margin-bottom: 1.25rem;
+    }
 }
 
 .welcome-section::before {
@@ -2786,11 +2825,51 @@ function displayHistoricalWeather(container, data) {
     border: 1px solid #f1f5f9;
 }
 
+/* Responsive section padding for balanced spacing */
+@media (max-width: 768px) {
+    .section {
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .section {
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
 .section-header {
     margin-bottom: 2.5rem;
     padding-bottom: 1.5rem;
     border-bottom: 2px solid #f1f5f9;
     text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+/* Responsive section headers */
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        text-align: left;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-header {
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
 }
 
 .section-title {
@@ -2802,6 +2881,23 @@ function displayHistoricalWeather(container, data) {
     align-items: center;
     gap: 0.75rem;
     letter-spacing: -0.025em;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Responsive section titles */
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 1.5rem;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-title {
+        font-size: 1.25rem;
+        gap: 0.375rem;
+    }
 }
 
 .section-subtitle {
@@ -2819,6 +2915,20 @@ function displayHistoricalWeather(container, data) {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    flex-shrink: 0;
+}
+
+/* Responsive section icons */
+@media (max-width: 768px) {
+    .section-icon {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-icon {
+        font-size: 1.1rem;
+    }
 }
 
 /* Farm Grid */
@@ -3058,34 +3168,117 @@ function displayHistoricalWeather(container, data) {
     .actions-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 1.5rem;
+        padding: 1rem 0;
     }
 }
 
 @media (max-width: 768px) {
     .actions-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        padding: 0.75rem 0;
+    }
+    
+    .action-card {
+        padding: 1.25rem;
+        min-height: 220px;
+    }
+    
+    .action-icon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 1rem;
+    }
+    
+    .action-title {
+        font-size: 1rem;
+    }
+    
+    .action-description {
+        font-size: 0.85rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .action-button {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        min-width: auto;
+    }
+    
+    .action-button i {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
         padding: 0.5rem 0;
     }
     
     .action-card {
-        padding: 1.5rem;
-        min-height: 260px;
+        padding: 1rem;
+        min-height: 200px;
     }
     
     .action-icon {
-        width: 60px;
-        height: 60px;
-        margin-bottom: 1.25rem;
+        width: 45px;
+        height: 45px;
+        margin-bottom: 0.75rem;
     }
     
     .action-title {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
     }
     
     .action-description {
-        font-size: 0.9rem;
-        margin-bottom: 1.5rem;
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    
+    .action-button {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        min-width: auto;
+    }
+    
+    .action-button i {
+        font-size: 0.75rem;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+    .actions-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0.75rem 0;
+    }
+    
+    .action-card {
+        padding: 1.25rem;
+        min-height: 180px;
+    }
+    
+    .action-icon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 1rem;
+    }
+    
+    .action-title {
+        font-size: 1rem;
+    }
+    
+    .action-description {
+        font-size: 0.85rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .action-button {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
     }
 }
 
@@ -3500,41 +3693,282 @@ function displayHistoricalWeather(container, data) {
     transform: scale(1.05);
 }
 
-/* Weather Section */
+/* Weather Section - Fully Responsive Like Growth Progress */
 .weather-actions {
     display: flex;
     gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Weather Sections Container */
+.weather-sections-container {
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+/* Weather Sections - Responsive Layout */
+.weather-section {
+    width: 100%;
+}
+
+/* Desktop/Laptop Layout - Display in grid like Farm Overview */
+@media (min-width: 769px) {
+    .weather-sections-container {
+        display: flex;
+        gap: 2rem;
+        align-items: flex-start;
+    }
+    
+    .weather-section {
+        flex: 1;
+        margin-bottom: 0;
+    }
+    
+    .alerts-weather-section {
+        width: 100%;
+        margin: 0 0 2rem 0;
+    }
+}
+
+/* Tablet and Mobile Layout - Stack vertically */
+@media (max-width: 768px) {
+    .weather-sections-container {
+        display: block;
+    }
+    
+    .weather-section {
+        display: block;
+        width: 100%;
+        margin-bottom: 1.5rem;
+    }
+    
+    .today-weather-section {
+        margin-bottom: 2rem;
+    }
+    
+    .forecast-weather-section {
+        margin-bottom: 2rem;
+    }
+    
+    .alerts-weather-section {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .weather-section {
+        margin-bottom: 1rem;
+    }
+    
+    .today-weather-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .forecast-weather-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .alerts-weather-section {
+        margin-bottom: 0.75rem;
+    }
+}
+
+.weather-actions .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.weather-actions .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .weather-container {
     min-height: 200px;
+    width: 100%;
 }
 
 .weather-loading {
     text-align: center;
     padding: 2rem;
     color: #64748b;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.weather-loading .spinner-border {
+    margin-bottom: 1rem;
+}
+
+.weather-loading p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #64748b;
 }
 
 .weather-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    align-items: stretch;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Responsive breakpoints for weather grid */
+@media (max-width: 1023px) {
+    .weather-grid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+/* Weather cards within sections */
+.weather-section .weather-card {
+    width: 100%;
+    max-width: none;
+}
+
+@media (max-width: 768px) {
+
+    
+    .weather-card {
+        padding: 1.5rem;
+    }
+    
+    .weather-header {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
+    
+    .weather-metrics {
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .metric-item {
+        padding: 0.75rem;
+        gap: 0.75rem;
+    }
+    
+    .metric-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+    
+    .temp-value {
+        font-size: 2.5rem;
+    }
+    
+    .weather-icon-large img {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .weather-actions {
+        gap: 0.5rem;
+    }
+    
+    .weather-actions .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .weather-loading {
+        padding: 1.75rem;
+        min-height: 180px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    
+    .weather-card {
+        padding: 1rem;
+    }
+    
+    .weather-header {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .weather-title {
+        font-size: 1.1rem;
+    }
+    
+    .temp-value {
+        font-size: 2rem;
+    }
+    
+    .weather-metrics {
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .metric-item {
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .metric-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+    
+    .metric-value {
+        font-size: 1rem;
+    }
+    
+    .metric-label {
+        font-size: 0.8rem;
+    }
+    
+    .weather-actions {
+        gap: 0.25rem;
+    }
+    
+    .weather-actions .btn {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .weather-actions .btn i {
+        font-size: 0.75rem;
+    }
+    
+    .weather-loading {
+        padding: 1.5rem;
+        min-height: 150px;
+    }
+    
+    .weather-loading p {
+        font-size: 0.875rem;
+    }
 }
 
 .weather-card {
-    background: #ffffff;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border-radius: 16px;
-    padding: 1.25rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid #f1f5f9;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
     transition: all 0.3s ease;
     height: 100%;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
+    min-height: 300px;
 }
 
 .weather-card::before {
@@ -3545,6 +3979,12 @@ function displayHistoricalWeather(container, data) {
     right: 0;
     height: 3px;
     background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.weather-card:hover::before {
+    transform: scaleX(1);
 }
 
 .current-weather {
@@ -3560,30 +4000,61 @@ function displayHistoricalWeather(container, data) {
 }
 
 .weather-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 .weather-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid #f1f5f9;
     flex-shrink: 0;
+    gap: 1rem;
 }
 
 .header-content {
     flex: 1;
+    min-width: 0;
 }
 
 .weather-title {
     font-size: 1.25rem;
     font-weight: 700;
     color: #1e293b;
-    margin: 0 0 0.25rem 0;
+    margin: 0 0 0.5rem 0;
     letter-spacing: -0.025em;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Responsive weather header */
+@media (max-width: 768px) {
+    .weather-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
+    
+    .weather-title {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .weather-header {
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .weather-title {
+        font-size: 1rem;
+    }
 }
 
 .weather-date {
@@ -3598,11 +4069,53 @@ function displayHistoricalWeather(container, data) {
     font-size: 0.9rem;
     color: #64748b;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Responsive weather info */
+@media (max-width: 768px) {
+    .weather-date {
+        font-size: 0.8rem;
+    }
+    
+    .weather-location {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .weather-date {
+        font-size: 0.75rem;
+    }
+    
+    .weather-location {
+        font-size: 0.8rem;
+    }
 }
 
 .weather-icon-large img {
     width: 48px;
     height: 48px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Responsive weather icon */
+@media (max-width: 768px) {
+    .weather-icon-large img {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .weather-icon-large img {
+        width: 36px;
+        height: 36px;
+    }
 }
 
 .weather-main {
@@ -3613,6 +4126,10 @@ function displayHistoricalWeather(container, data) {
 .temp-display {
     text-align: center;
     margin-bottom: 0.5rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
 }
 
 .temp-value {
@@ -3622,6 +4139,7 @@ function displayHistoricalWeather(container, data) {
     line-height: 1;
     display: block;
     margin-bottom: 0.25rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .temp-feels-like {
@@ -3630,12 +4148,38 @@ function displayHistoricalWeather(container, data) {
     font-weight: 500;
 }
 
+/* Responsive temperature display */
+@media (max-width: 768px) {
+    .temp-display {
+        padding: 0.75rem;
+    }
+    
+    .temp-value {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .temp-display {
+        padding: 0.5rem;
+    }
+    
+    .temp-value {
+        font-size: 2rem;
+    }
+    
+    .temp-feels-like {
+        font-size: 0.9rem;
+    }
+}
+
 .weather-description {
     text-align: center;
-    padding: 0.5rem;
+    padding: 0.75rem;
     background: #f8fafc;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
+    margin-bottom: 1rem;
 }
 
 .weather-description span {
@@ -3643,6 +4187,29 @@ function displayHistoricalWeather(container, data) {
     color: #475569;
     font-weight: 600;
     text-transform: capitalize;
+}
+
+/* Responsive weather description */
+@media (max-width: 768px) {
+    .weather-description {
+        padding: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .weather-description span {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .weather-description {
+        padding: 0.375rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .weather-description span {
+        font-size: 0.9rem;
+    }
 }
 
 .weather-desc .description {
@@ -3655,57 +4222,145 @@ function displayHistoricalWeather(container, data) {
 .weather-metrics {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
     flex: 1;
+}
+
+/* Responsive weather metrics */
+@media (max-width: 768px) {
+    .weather-metrics {
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .weather-metrics {
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
 }
 
 .metric-item {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
+    gap: 1rem;
+    padding: 1rem;
     background: #f8fafc;
-    border-radius: 8px;
+    border-radius: 12px;
     border: 1px solid #e2e8f0;
     transition: all 0.2s ease;
+    min-height: 60px;
 }
 
 .metric-item:hover {
     background: #f1f5f9;
     transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive metric items */
+@media (max-width: 768px) {
+    .metric-item {
+        padding: 0.75rem;
+        gap: 0.75rem;
+        min-height: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .metric-item {
+        padding: 0.5rem;
+        gap: 0.5rem;
+        min-height: 45px;
+    }
 }
 
 .metric-icon {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-    border-radius: 8px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 0.8rem;
+    font-size: 1rem;
     flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+/* Responsive metric icons */
+@media (max-width: 768px) {
+    .metric-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .metric-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+        border-radius: 6px;
+    }
 }
 
 .metric-content {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem;
     flex: 1;
+    min-width: 0;
 }
 
 .metric-value {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     color: #1e293b;
     font-weight: 700;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .metric-label {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #64748b;
     font-weight: 500;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Responsive metric content */
+@media (max-width: 768px) {
+    .metric-content {
+        gap: 0.375rem;
+    }
+    
+    .metric-value {
+        font-size: 1.1rem;
+    }
+    
+    .metric-label {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .metric-content {
+        gap: 0.25rem;
+    }
+    
+    .metric-value {
+        font-size: 1rem;
+    }
+    
+    .metric-label {
+        font-size: 0.85rem;
+    }
 }
 
 .metric-status {
@@ -3740,8 +4395,8 @@ function displayHistoricalWeather(container, data) {
     flex-shrink: 0;
     background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
     border: 1px solid #bbf7d0;
-    border-radius: 8px;
-    padding: 0.75rem;
+    border-radius: 12px;
+    padding: 1.5rem;
 }
 
 .farming-tips h4 {
@@ -3764,16 +4419,17 @@ function displayHistoricalWeather(container, data) {
 .tip-item {
     display: flex;
     align-items: flex-start;
-    gap: 0.5rem;
-    padding: 0.5rem;
+    gap: 0.75rem;
+    padding: 1rem;
     background: white;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid #bbf7d0;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: #166534;
-    line-height: 1.4;
+    line-height: 1.5;
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+    margin-bottom: 0.75rem;
 }
 
 .tip-item:hover {
@@ -3796,7 +4452,7 @@ function displayHistoricalWeather(container, data) {
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 1rem;
+    padding: 1.5rem;
 }
 
 .weekly-tips h4 {
@@ -3819,16 +4475,17 @@ function displayHistoricalWeather(container, data) {
 .weekly-tip-item {
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.75rem;
+    gap: 1rem;
+    padding: 1rem;
     background: white;
     border-radius: 10px;
     border: 1px solid #e2e8f0;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #475569;
-    line-height: 1.4;
+    line-height: 1.5;
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 0.75rem;
 }
 
 .weekly-tip-item:hover {
@@ -3934,18 +4591,33 @@ function displayHistoricalWeather(container, data) {
 
 /* Enhanced Forecast Overview - Compact */
 .forecast-overview {
-    margin-bottom: 0.5rem;
-    padding: 0.375rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-radius: 6px;
+    border-radius: 12px;
     border: 1px solid #e2e8f0;
     flex-shrink: 0;
+}
+
+/* Responsive forecast overview */
+@media (max-width: 768px) {
+    .forecast-overview {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .forecast-overview {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
 }
 
 .overview-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.375rem;
+    gap: 1rem;
 }
 
 .overview-stats .stat-item {
@@ -3953,13 +4625,13 @@ function displayHistoricalWeather(container, data) {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 0.125rem;
-    padding: 0.375rem;
+    gap: 0.5rem;
+    padding: 1rem;
     background: white;
-    border-radius: 6px;
+    border-radius: 10px;
     border: 1px solid #e2e8f0;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .overview-stats .stat-item:hover {
@@ -4039,28 +4711,73 @@ function displayHistoricalWeather(container, data) {
 .forecast-list-compact {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 0.5rem 0;
-    margin-bottom: 0.75rem;
+    gap: 1rem;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+}
+
+/* Responsive forecast list compact */
+@media (max-width: 768px) {
+    .forecast-list-compact {
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        margin-bottom: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .forecast-list-compact {
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+        margin-bottom: 0.5rem;
+    }
 }
 
 .forecast-row {
     display: flex;
-    gap: 0.5rem;
+    gap: 1rem;
     justify-content: space-between;
+}
+
+/* Responsive forecast rows */
+@media (max-width: 768px) {
+    .forecast-row {
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .forecast-row {
+        gap: 0.5rem;
+    }
 }
 
 .forecast-day-compact {
     flex: 1;
     min-width: 0;
-    max-width: calc(20% - 0.4rem);
+    max-width: calc(20% - 0.8rem);
     background: #f8fafc;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid #e2e8f0;
-    padding: 0.5rem;
+    padding: 1rem;
     text-align: center;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive forecast day compact */
+@media (max-width: 768px) {
+    .forecast-day-compact {
+        max-width: calc(20% - 0.6rem);
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .forecast-day-compact {
+        max-width: calc(20% - 0.4rem);
+        padding: 0.5rem;
+    }
 }
 
 .forecast-day-compact:hover {
@@ -4413,6 +5130,51 @@ function displayHistoricalWeather(container, data) {
 .farm-actions {
     display: flex;
     gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.farm-actions .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.farm-actions .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive farm actions */
+@media (max-width: 768px) {
+    .farm-actions {
+        gap: 0.5rem;
+    }
+    
+    .farm-actions .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .farm-actions {
+        gap: 0.25rem;
+    }
+    
+    .farm-actions .btn {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .farm-actions .btn i {
+        font-size: 0.75rem;
+    }
 }
 
 .insights-actions {
@@ -5299,12 +6061,9 @@ function displayHistoricalWeather(container, data) {
 @media (max-width: 991.98px) {
     .dashboard-container {
         max-width: 100%;
-        padding: 1.25rem 1rem;
     }
     
-    .welcome-section {
-        padding: 2rem 1.5rem;
-    }
+
     
     .welcome-content {
         flex-direction: column;
@@ -5322,16 +6081,19 @@ function displayHistoricalWeather(container, data) {
     .header-stats {
         justify-content: center;
     }
+    
+
+    
+    .weather-card {
+        padding: 1.75rem;
+    }
 }
 
+
+
 @media (max-width: 768px) {
-    .dashboard-container {
-        padding: 1rem 0.75rem;
-    }
     
-    .welcome-section {
-        padding: 1.5rem 1rem;
-    }
+
     
     .welcome-title {
         font-size: 1.75rem;
@@ -5366,6 +6128,49 @@ function displayHistoricalWeather(container, data) {
         grid-template-columns: 1fr;
     }
     
+
+    
+    .farming-tips,
+    .weekly-tips {
+        padding: 1rem;
+    }
+    
+    .tip-item,
+    .weekly-tip-item {
+        padding: 0.75rem;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .forecast-overview {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .overview-stats {
+        gap: 0.75rem;
+    }
+    
+    .overview-stats .stat-item {
+        padding: 0.75rem;
+        gap: 0.25rem;
+    }
+    
+    .forecast-list-compact {
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        margin-bottom: 0.75rem;
+    }
+    
+    .forecast-row {
+        gap: 0.75rem;
+    }
+    
+    .forecast-day-compact {
+        padding: 0.75rem;
+        max-width: calc(20% - 0.6rem);
+    }
+    
     .weather-row {
         grid-template-columns: repeat(2, 1fr);
         gap: 0.75rem;
@@ -5379,6 +6184,7 @@ function displayHistoricalWeather(container, data) {
     .actions-grid {
         gap: 1rem;
         justify-content: flex-start;
+        padding: 0.75rem 0;
     }
     
     .action-card {
@@ -5391,17 +6197,7 @@ function displayHistoricalWeather(container, data) {
         font-size: 1.25rem;
     }
     
-    .weather-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-    
-    .current-weather,
-    .forecast-weather {
-        padding: 1.25rem;
-        min-height: auto;
-        height: auto;
-    }
+
     
     .insights-grid {
         grid-template-columns: 1fr;
@@ -5527,6 +6323,105 @@ function displayHistoricalWeather(container, data) {
         font-size: 0.9rem;
     }
     
+    .weather-card {
+        padding: 1rem;
+    }
+    
+    .weather-header {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .weather-title {
+        font-size: 1.1rem;
+    }
+    
+    .temp-value {
+        font-size: 2.5rem;
+    }
+    
+    .weather-metrics {
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .metric-item {
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .metric-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+    
+    .metric-value {
+        font-size: 1.1rem;
+    }
+    
+    .metric-label {
+        font-size: 0.85rem;
+    }
+    
+    .farming-tips,
+    .weekly-tips {
+        padding: 0.75rem;
+    }
+    
+    .tip-item,
+    .weekly-tip-item {
+        padding: 0.5rem;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .forecast-overview {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .overview-stats {
+        gap: 0.5rem;
+    }
+    
+    .overview-stats .stat-item {
+        padding: 0.5rem;
+        gap: 0.25rem;
+    }
+    
+    .forecast-list-compact {
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .forecast-row {
+        gap: 0.5rem;
+    }
+    
+    .forecast-day-compact {
+        padding: 0.5rem;
+        max-width: calc(20% - 0.4rem);
+    }
+    
+    .day-name-compact {
+        font-size: 0.7rem;
+    }
+    
+    .day-date-compact {
+        font-size: 0.65rem;
+    }
+    
+    .day-temp-compact {
+        font-size: 0.9rem;
+    }
+    
+    .metric-compact {
+        font-size: 0.65rem;
+    }
+    
     .action-description {
         font-size: 0.8rem;
     }
@@ -5537,30 +6432,7 @@ function displayHistoricalWeather(container, data) {
         min-width: 100px;
     }
     
-    /* Very Small Screen Weather Adjustments */
-    .weather-main {
-        text-align: center;
-    }
-    
-    .temp-value {
-        font-size: 2.5rem;
-    }
-    
-    .weather-icon-large img {
-        width: 48px;
-        height: 48px;
-    }
-    
-    .metric-item {
-        padding: 0.4rem;
-        gap: 0.5rem;
-    }
-    
-    .metric-icon {
-        width: 28px;
-        height: 28px;
-        font-size: 0.75rem;
-    }
+
     
     .forecast-day {
         padding: 0.75rem;
@@ -5589,6 +6461,8 @@ function displayHistoricalWeather(container, data) {
     position: relative;
     overflow: hidden;
 }
+
+
 
 .weather-card::before {
     content: '';

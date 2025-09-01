@@ -75,6 +75,12 @@ class PhotoDiagnosisController extends Controller
         // Analyze the photo using free AI API (Hugging Face)
         $analysisResult = $this->analyzePhoto($request->file('photo'), $request->analysis_type);
         
+        // Validate analysis result before creating record
+        if (empty($analysisResult['identified_type']) || empty($analysisResult['confidence_score'])) {
+            Log::error('Analysis result is incomplete', $analysisResult);
+            return back()->withErrors(['photo' => 'Analysis failed. Please try again with a different photo.']);
+        }
+
         // Create the photo analysis record
         $photoAnalysis = PhotoAnalysis::create([
             'user_id' => $user->id,

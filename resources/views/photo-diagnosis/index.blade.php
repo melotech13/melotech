@@ -174,9 +174,16 @@
                         @foreach($analyses->take(6) as $analysis)
                             <div class="analysis-card">
                                 <div class="analysis-image">
-                                    <img src="{{ Storage::url($analysis->photo_path) }}" 
-                                         alt="Analysis Photo" 
-                                         class="img-fluid">
+                                    @if($analysis->photo_path && Storage::disk('public')->exists($analysis->photo_path))
+                                        <img src="{{ Storage::url($analysis->photo_path) }}" 
+                                             alt="Analysis Photo" 
+                                             class="img-fluid">
+                                    @else
+                                        <div class="no-image-placeholder">
+                                            <i class="fas fa-image fa-3x text-muted"></i>
+                                            <p class="text-muted mt-2">Photo not available</p>
+                                        </div>
+                                    @endif
                                     <div class="analysis-type-badge">
                                         <i class="fas fa-{{ $analysis->analysis_type === 'leaves' ? 'leaf' : 'seedling' }}"></i>
                                         {{ ucfirst($analysis->analysis_type) }}
@@ -672,6 +679,28 @@
         object-fit: cover;
         display: block;
         margin: 0 auto;
+    }
+
+    .no-image-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        color: #6c757d;
+        padding: 1rem;
+    }
+
+    .no-image-placeholder i {
+        margin-bottom: 0.5rem;
+    }
+
+    .no-image-placeholder p {
+        margin: 0;
+        font-size: 0.875rem;
     }
 
     .analysis-type-badge {

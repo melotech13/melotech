@@ -61,9 +61,16 @@
                     </div>
                     <div class="card-content">
                         <div class="photo-display">
-                            <img src="{{ Storage::url($photoAnalysis->photo_path) }}" 
-                                 alt="Analysis Photo" 
-                                 class="analysis-photo">
+                            @if($photoAnalysis->photo_path && Storage::disk('public')->exists($photoAnalysis->photo_path))
+                                <img src="{{ Storage::url($photoAnalysis->photo_path) }}" 
+                                     alt="Analysis Photo" 
+                                     class="analysis-photo">
+                            @else
+                                <div class="no-image-placeholder">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                    <p class="text-muted mt-2">Photo not available</p>
+                                </div>
+                            @endif
                             <div class="photo-badge">
                                 <span class="badge badge-{{ $photoAnalysis->analysis_type === 'leaves' ? 'success' : 'info' }}">
                                     <i class="fas fa-{{ $photoAnalysis->analysis_type === 'leaves' ? 'leaf' : 'seedling' }} me-1"></i>

@@ -193,6 +193,10 @@
                 <div class="ph-body">
                     <div class="ph-table-container">
                         @if(isset($progressUpdates) && $progressUpdates->count() > 0)
+                            <div class="ph-scroll-indicator">
+                                <i class="fas fa-arrows-alt-h"></i>
+                                <span>Swipe to view more columns</span>
+                            </div>
                             <table class="ph-table">
                                 <thead>
                                     <tr>
@@ -322,10 +326,40 @@
     }
     
     .ph-body { padding: 1rem 1.5rem; }
-    .ph-table-container { height: 640px; min-height: 640px; max-height: 640px; overflow: auto; border: 1px solid #e5e7eb; border-radius: 10px; background: #ffffff; }
+    .ph-table-container { 
+        height: 640px; 
+        min-height: 640px; 
+        max-height: 640px; 
+        overflow: auto; 
+        border: 1px solid #e5e7eb; 
+        border-radius: 10px; 
+        background: #ffffff;
+        position: relative;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 #f1f5f9;
+    }
+    
+    .ph-table-container::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .ph-table-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    
+    .ph-table-container::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    
+    .ph-table-container::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
 
-    .ph-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    .ph-table thead th { position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #374151; font-weight: 600; font-size: 0.95rem; text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; }
+    .ph-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+    .ph-table thead th { position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #374151; font-weight: 600; font-size: 0.95rem; text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
     .ph-table tbody td { padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; vertical-align: top; color: #374151; }
     .ph-table tbody tr:hover { background: #f9fafb; }
 
@@ -337,18 +371,78 @@
     .ph-progress-bar { height: 100%; background: linear-gradient(135deg, #22c55e, #16a34a); }
     .ph-progress-label { font-size: 0.85rem; color: #374151; min-width: 40px; text-align: right; }
 
+    .ph-scroll-indicator {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #e5e7eb;
+        color: #6b7280;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .ph-scroll-indicator i {
+        color: #3b82f6;
+        font-size: 1rem;
+    }
+    
     .ph-empty { height: 100%; min-height: 640px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; color: #6b7280; text-align: center; }
     .ph-empty i { font-size: 2rem; color: #9ca3af; margin-bottom: 0.5rem; }
     .ph-empty h5 { margin: 0; font-weight: 700; }
     .ph-empty p { margin: 0 0 0.5rem 0; font-size: 0.9rem; }
 
-    @media (max-width: 480px) {
-        .ph-table-container { height: 520px; min-height: 520px; max-height: 520px; }
+    /* Responsive table styles */
+    @media (max-width: 1200px) {
+        .ph-table-container {
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+        
+        .ph-table {
+            min-width: 900px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .ph-scroll-indicator {
+            display: flex;
+        }
+        
+        .ph-table-container {
+            height: 520px;
+            min-height: 520px;
+            max-height: 520px;
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+        
+        .ph-table {
+            min-width: 800px;
+        }
+        
+        .ph-table thead th,
+        .ph-table tbody td {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .ph-progress {
+            min-width: 100px;
+        }
+        
+        .ph-progress-label {
+            min-width: 35px;
+            font-size: 0.8rem;
+        }
         
         .ph-header {
             flex-direction: column;
             gap: 1rem;
             align-items: flex-start;
+            padding: 1rem 1.25rem;
         }
         
         .ph-actions {
@@ -359,6 +453,112 @@
         .ph-actions .dropdown-toggle {
             width: 100%;
             justify-content: center;
+        }
+        
+        .ph-body {
+            padding: 0.75rem 1.25rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .ph-table-container {
+            height: 480px;
+            min-height: 480px;
+            max-height: 480px;
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+        
+        .ph-table {
+            min-width: 750px;
+        }
+        
+        .ph-table thead th,
+        .ph-table tbody td {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.8rem;
+        }
+        
+        .ph-progress {
+            min-width: 80px;
+        }
+        
+        .ph-progress-label {
+            min-width: 30px;
+            font-size: 0.75rem;
+        }
+        
+        .ph-badge {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .ph-header {
+            padding: 0.75rem 1rem;
+        }
+        
+        .ph-body {
+            padding: 0.5rem 1rem;
+        }
+        
+        .ph-title {
+            font-size: 1.1rem;
+        }
+    }
+    
+    @media (max-width: 360px) {
+        .ph-table-container {
+            height: 450px;
+            min-height: 450px;
+            max-height: 450px;
+        }
+        
+        .ph-table {
+            min-width: 700px;
+        }
+        
+        .ph-table thead th,
+        .ph-table tbody td {
+            padding: 0.35rem 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .ph-progress {
+            min-width: 70px;
+        }
+        
+        .ph-progress-label {
+            min-width: 25px;
+            font-size: 0.7rem;
+        }
+        
+        .ph-badge {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.7rem;
+        }
+        
+        /* Add touch-friendly scrolling */
+        .ph-table-container {
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+    }
+    
+    /* Additional mobile optimizations */
+    @media (max-width: 480px) {
+        .ph-table-container {
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+        
+        /* Make dropdowns more touch-friendly */
+        .ph-actions .dropdown-menu {
+            min-width: 200px;
+        }
+        
+        .ph-actions .dropdown-item {
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
         }
     }
 </style>

@@ -27,7 +27,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
-        /* Navigation Bar Styles */
+        /* Navigation Bar Styles - Fully Bootstrap Compliant */
         .navbar {
             background: linear-gradient(135deg, #2E8B57 0%, #90EE90 100%);
             backdrop-filter: blur(20px);
@@ -38,10 +38,9 @@
             top: 0;
             left: 0;
             right: 0;
-            z-index: 9999;
+            z-index: 1030;
             transition: all 0.3s ease;
-            height: 80px;
-            box-sizing: border-box;
+            min-height: 80px;
         }
 
         .navbar-brand {
@@ -53,7 +52,6 @@
             color: white !important;
             text-decoration: none;
             transition: all 0.3s ease;
-            height: 100%;
             margin-right: 2rem;
         }
 
@@ -77,74 +75,17 @@
             font-weight: 800;
         }
 
+        /* Bootstrap-compliant navbar navigation */
         .navbar-nav {
             gap: 0.5rem;
-            margin-left: 1rem;
+            align-items: center;
         }
 
-        /* Responsive navbar spacing */
-        @media (max-width: 991.98px) {
-            .navbar-brand {
-                margin-right: 1rem;
-            }
-            
-            .navbar-nav {
-                margin-left: 0.5rem;
-            }
-
-            /* Mobile navigation adjustments */
-            .navbar-collapse:not(:has(.navbar-nav)) {
-                justify-content: flex-end !important;
-            }
+        .navbar-nav .nav-item {
+            margin: 0;
         }
 
-        @media (max-width: 767.98px) {
-            .navbar-brand {
-                margin-right: 0.5rem;
-            }
-            
-            .navbar-nav {
-                margin-left: 0.25rem;
-            }
-
-            /* Mobile user menu positioning */
-            .user-menu {
-                margin-left: 0 !important;
-            }
-
-            /* Ensure proper spacing on mobile when nav links are hidden */
-            .navbar-collapse:not(:has(.navbar-nav)) {
-                justify-content: center !important;
-            }
-            
-
-        }
-
-        /* Additional navbar spacing fixes */
-        .navbar .container {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-
-        .navbar-collapse {
-            margin-left: 1rem !important;
-        }
-
-        .navbar-nav .nav-item:first-child .nav-link {
-            margin-left: 0.5rem;
-        }
-
-        /* Navigation layout adjustments for non-authenticated users */
-        .navbar-collapse:not(:has(.navbar-nav)) {
-            justify-content: flex-end !important;
-        }
-
-        /* Ensure user menu is properly positioned when nav links are hidden */
-        .user-menu {
-            margin-left: auto !important;
-        }
-
-        .nav-link {
+        .navbar-nav .nav-link {
             color: white !important;
             font-weight: 500;
             padding: 0.75rem 1rem !important;
@@ -154,31 +95,34 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            white-space: nowrap;
         }
 
-        .nav-link:hover {
+        .navbar-nav .nav-link:hover {
             color: #f0f8f0 !important;
             background: rgba(255, 255, 255, 0.15);
             transform: translateY(-1px);
         }
 
-        .nav-link.active {
+        .navbar-nav .nav-link.active {
             color: #f0f8f0 !important;
             background: rgba(255, 255, 255, 0.2);
             font-weight: 600;
         }
 
-        .nav-link i {
+        .navbar-nav .nav-link i {
             font-size: 1.1rem;
             width: 20px;
             text-align: center;
         }
 
+        /* Bootstrap-compliant navbar toggler */
         .navbar-toggler {
             border: none;
             padding: 0.5rem;
             border-radius: 8px;
             transition: all 0.3s ease;
+            color: white;
         }
 
         .navbar-toggler:focus {
@@ -194,108 +138,15 @@
             display: none !important;
         }
 
+        /* User menu styling */
         .user-menu {
-            display: flex !important;
+            display: flex;
             align-items: center;
             gap: 1rem;
             margin-left: auto;
-            visibility: visible !important;
-            opacity: 1 !important;
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 1rem;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            color: white;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .user-info:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: #f0f8f0;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        .logout-btn {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white !important;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .logout-btn:hover {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            color: white !important;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-
-        /* Auth buttons styling */
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-outline-primary {
-            background: transparent;
-            border: 2px solid #3b82f6;
-            color: #3b82f6 !important;
-            border-radius: 8px;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-        }
-
-        .btn-outline-primary:hover {
-            background: #3b82f6;
-            color: white !important;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        /* User Dropdown Styles */
+        /* User dropdown button */
         .user-dropdown-btn {
             background: rgba(255, 255, 255, 0.15) !important;
             border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -335,6 +186,20 @@
             transform: rotate(180deg);
         }
 
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* Bootstrap-compliant dropdown menu */
         .user-dropdown-menu {
             background: white !important;
             border: none !important;
@@ -423,146 +288,71 @@
             color: #b91c1c !important;
         }
 
-        /* Responsive dropdown styles */
-        @media (max-width: 767.98px) {
-            .user-dropdown-btn {
-                min-width: 140px !important;
-                padding: 0.5rem 0.75rem !important;
-            }
-
-            .user-dropdown-btn .user-name {
-                display: none;
-            }
-
-            .user-dropdown-menu {
-                min-width: 250px !important;
-                right: 0 !important;
-                left: auto !important;
-            }
-        }
-
-        /* Force visibility for auth buttons */
-        .navbar .btn-primary,
-        .navbar .btn-outline-primary {
-            display: inline-flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            position: relative !important;
-            z-index: 10 !important;
-        }
-
-        /* Ensure navbar collapse works properly */
-        .navbar-collapse {
-            flex-basis: 100% !important;
-            flex-grow: 1 !important;
-        }
-
-        /* Force user menu to be visible and positioned correctly */
-        .navbar .user-menu {
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            position: relative !important;
-            z-index: 10 !important;
-        }
-
-        /* Enhanced Navigation Organization */
-        .navbar-nav {
-            display: flex !important;
+        /* Bootstrap-compliant auth buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            display: flex;
             align-items: center;
-            gap: 1rem;
-            flex-wrap: nowrap;
-            max-width: 100%;
-            padding: 0.5rem 0;
+            gap: 0.5rem;
+            text-decoration: none;
         }
 
-
-
-        .nav-item {
-            margin: 0;
-            flex-shrink: 0;
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
-        .nav-link {
-            white-space: nowrap;
-            font-size: 1rem;
-            padding: 0.75rem 1rem !important;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-
-        /* Ensure proper spacing and no overlap */
-        .navbar-collapse {
-            flex: 1;
-            justify-content: space-between;
+        .btn-outline-primary {
+            background: transparent;
+            border: 2px solid #3b82f6;
+            color: #3b82f6 !important;
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+            display: flex;
             align-items: center;
-            min-width: 0;
-            overflow: visible;
-            height: 100%;
+            gap: 0.5rem;
+            text-decoration: none;
         }
 
-        /* Responsive navigation adjustments */
-        @media (max-width: 768px) {
-            .navbar-nav {
-                gap: 0.5rem;
-            }
-            
-            .nav-link {
-                padding: 0.5rem 0.75rem !important;
-                font-size: 0.9rem;
-            }
+        .btn-outline-primary:hover {
+            background: #3b82f6;
+            color: white !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
+        /* Responsive Design - Bootstrap Breakpoints */
         @media (max-width: 991.98px) {
-            .navbar-nav {
-                flex-direction: column;
-                align-items: stretch;
-                width: 100%;
-                margin-bottom: 1rem;
-            }
-            
-            .nav-item {
-                margin: 0.25rem 0;
-            }
-            
-            .nav-link {
-                justify-content: center;
-                padding: 0.75rem 1rem !important;
-            }
-            
-            .user-menu {
-                width: 100%;
-                justify-content: center;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-        }
-
-        @media (max-width: 767.98px) {
             .navbar-brand {
-                font-size: 1.1rem;
+                margin-right: 1rem;
+                font-size: 1.25rem;
             }
             
             .navbar-brand .logo {
-                width: 28px;
-                height: 28px;
+                width: 32px;
+                height: 32px;
             }
-            
-            .nav-link {
-                font-size: 0.85rem;
-                padding: 0.6rem 0.8rem !important;
-            }
-        }
 
-        /* Responsive adjustments */
-        @media (max-width: 991.98px) {
             .navbar-nav {
                 margin-top: 1rem;
                 gap: 0.25rem;
+                width: 100%;
             }
 
-            .nav-link {
+            .navbar-nav .nav-item {
+                margin: 0.25rem 0;
+            }
+
+            .navbar-nav .nav-link {
+                justify-content: center;
                 padding: 0.75rem 1rem !important;
                 border-radius: 8px;
             }
@@ -572,27 +362,289 @@
                 align-items: stretch;
                 margin-top: 1rem;
                 gap: 0.5rem;
-            }
-
-            .user-info {
-                justify-content: center;
-            }
-
-            .btn-primary,
-            .btn-outline-primary {
-                justify-content: center;
                 width: 100%;
             }
+
+            /* Only apply full-width styling to user dropdown, not auth buttons */
+            .user-menu .user-dropdown-btn {
+                justify-content: center;
+                width: 100%;
+                min-width: auto !important;
+            }
+
+            /* Responsive auth buttons on mobile */
+            .auth-buttons-responsive {
+                margin-right: 1rem !important;
+                display: flex !important;
+                visibility: visible !important;
+            }
+            
+            .auth-buttons-responsive .auth-btn {
+                padding: 0.375rem 0.75rem !important;
+                font-size: 0.875rem !important;
+                display: inline-flex !important;
+                visibility: visible !important;
+            }
+            
+            .auth-buttons-responsive .auth-text {
+                display: inline !important;
+            }
+
+
         }
 
         @media (max-width: 767.98px) {
             .navbar-brand {
-                font-size: 1.25rem;
+                font-size: 1.1rem;
+                margin-right: 0.5rem;
+            }
+            
+            .navbar-brand .logo {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .navbar-nav .nav-link {
+                font-size: 0.85rem;
+                padding: 0.6rem 0.8rem !important;
             }
 
+            .user-menu .user-dropdown-btn {
+                min-width: 140px !important;
+                padding: 0.5rem 0.75rem !important;
+            }
+
+            .user-menu .user-dropdown-btn .user-name {
+                display: none;
+            }
+
+            .user-dropdown-menu {
+                min-width: 250px !important;
+                right: 0 !important;
+                left: auto !important;
+            }
+
+            /* Mobile auth button adjustments for smaller screens */
+            .auth-buttons-mobile .d-flex.gap-2 {
+                gap: 0.5rem !important;
+            }
+
+            .auth-buttons-mobile .btn {
+                font-size: 0.85rem;
+                padding: 0.5rem 0.75rem;
+                max-width: 120px;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .navbar {
+                padding: 0.75rem 0;
+                min-height: 70px;
+            }
+
+            .navbar-brand {
+                font-size: 1rem;
+            }
+            
             .navbar-brand .logo {
-                width: 32px;
-                height: 32px;
+                width: 24px;
+                height: 24px;
+            }
+
+            .navbar-nav .nav-link {
+                font-size: 0.8rem;
+                padding: 0.5rem 0.75rem !important;
+            }
+
+            /* Ensure auth buttons are still visible on very small screens */
+            .user-menu .d-flex.gap-2 {
+                gap: 0.25rem !important;
+            }
+
+            .user-menu .d-flex.gap-2 .btn {
+                font-size: 0.75rem;
+                padding: 0.4rem 0.6rem;
+                max-width: 100px;
+            }
+
+            .user-menu .d-flex.gap-2 .btn i {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Ensure content doesn't overlap with fixed navbar */
+        body {
+            padding-top: 80px;
+        }
+
+        .main-content {
+            min-height: calc(100vh - 80px);
+            padding: 2rem 0;
+        }
+
+        /* Additional responsive adjustments */
+        .navbar-collapse {
+            flex-basis: 100%;
+            flex-grow: 1;
+        }
+
+        .navbar .container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        /* Ensure proper spacing and alignment */
+        .navbar-nav .nav-item:first-child .nav-link {
+            margin-left: 0;
+        }
+
+        /* Force visibility for all navbar elements */
+        .navbar .btn-primary,
+        .navbar .btn-outline-primary,
+        .navbar .user-menu,
+        .navbar-nav .nav-link {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        /* Ensure auth buttons are always visible and properly styled */
+        .auth-buttons-responsive {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: relative !important;
+            z-index: 1000 !important;
+        }
+        
+        .auth-buttons-responsive .d-flex.gap-2 {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            flex-direction: row !important;
+            align-items: center !important;
+        }
+        
+        /* Override any potential hiding */
+        .auth-buttons-responsive,
+        .auth-buttons-responsive * {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        .auth-buttons-responsive .auth-btn {
+            display: inline-flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        /* Large screen responsive behavior */
+        @media (min-width: 992px) {
+            .auth-buttons-responsive {
+                display: flex !important;
+                visibility: visible !important;
+            }
+            
+            .auth-buttons-responsive .auth-btn {
+                padding: 0.5rem 1rem !important;
+                font-size: 1rem !important;
+                display: inline-flex !important;
+                visibility: visible !important;
+            }
+            
+            .auth-buttons-responsive .auth-text {
+                display: inline !important;
+            }
+        }
+
+        .user-menu .d-flex.gap-2 .btn {
+            display: inline-flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            white-space: nowrap !important;
+        }
+
+        /* Responsive Auth Buttons - Always Visible */
+        .auth-buttons-responsive {
+            display: flex !important;
+            align-items: center !important;
+            margin-left: auto !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .auth-buttons-responsive .d-flex.gap-2 {
+            gap: 0.5rem !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        .auth-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            white-space: nowrap !important;
+            transition: all 0.3s ease !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            text-decoration: none !important;
+        }
+
+        .auth-btn i {
+            font-size: 0.875rem !important;
+            margin-right: 0.25rem !important;
+        }
+
+        .auth-text {
+            display: inline !important;
+        }
+
+        .auth-buttons-mobile .d-flex.gap-2 {
+            gap: 0.5rem !important;
+        }
+
+        .auth-buttons-mobile .btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0.375rem 0.75rem !important;
+            font-size: 0.875rem !important;
+            border-radius: 0.375rem !important;
+            white-space: nowrap !important;
+            min-width: auto !important;
+        }
+
+        .auth-buttons-mobile .btn i {
+            font-size: 0.875rem !important;
+        }
+
+        /* Responsive adjustments for mobile auth buttons */
+        @media (max-width: 575.98px) {
+            .auth-buttons-responsive {
+                margin-right: 0.5rem !important;
+                display: flex !important;
+                visibility: visible !important;
+            }
+
+            .auth-buttons-responsive .d-flex.gap-2 {
+                gap: 0.25rem !important;
+                display: flex !important;
+            }
+
+            .auth-buttons-responsive .auth-btn {
+                padding: 0.25rem 0.5rem !important;
+                font-size: 0.75rem !important;
+                display: inline-flex !important;
+                visibility: visible !important;
+            }
+
+            .auth-buttons-responsive .auth-btn i {
+                font-size: 0.75rem !important;
+            }
+            
+            .auth-buttons-responsive .auth-text {
+                display: inline !important;
             }
         }
 
@@ -732,6 +784,9 @@
             gap: 1rem;
             letter-spacing: -0.025em;
             color: white;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
         }
 
         .welcome-section .welcome-title i {
@@ -746,6 +801,8 @@
             font-weight: 400;
             line-height: 1.6;
             color: white;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .welcome-section .welcome-circle {
@@ -1033,6 +1090,10 @@
 
         /* Responsive adjustments for welcome section */
         @media (max-width: 991.98px) {
+            .welcome-section {
+                padding: 2rem 1.5rem;
+            }
+            
             .welcome-section .welcome-content {
                 flex-direction: column;
                 align-items: flex-start;
@@ -1046,6 +1107,21 @@
 
             .welcome-section .welcome-title {
                 font-size: 1.875rem;
+            }
+            
+            .welcome-section .welcome-subtitle {
+                font-size: 1rem;
+            }
+            
+            .welcome-section .header-stats {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: flex-start;
+            }
+            
+            .welcome-section .stat-badge {
+                font-size: 0.875rem;
+                padding: 0.5rem 0.75rem;
             }
         }
 
@@ -1077,24 +1153,45 @@
 
         @media (max-width: 767.98px) {
             .welcome-section {
-                padding: 2rem 1.5rem;
+                padding: 1.5rem 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .welcome-section .welcome-content {
+                gap: 1rem;
             }
 
             .welcome-section .welcome-title {
                 font-size: 1.5rem;
+                gap: 0.75rem;
+                margin-bottom: 0.75rem;
             }
 
             .welcome-section .welcome-title i {
                 font-size: 1.5rem;
             }
 
+            .welcome-section .welcome-subtitle {
+                font-size: 0.95rem;
+                margin-bottom: 0.75rem;
+            }
+
             .welcome-section .welcome-circle {
-                width: 70px;
-                height: 70px;
+                width: 60px;
+                height: 60px;
             }
 
             .welcome-section .welcome-circle i {
-                font-size: 1.75rem;
+                font-size: 1.5rem;
+            }
+            
+            .welcome-section .header-stats {
+                gap: 0.5rem;
+            }
+            
+            .welcome-section .stat-badge {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.6rem;
             }
 
             .unified-header {
@@ -1130,11 +1227,68 @@
                 font-size: 1.75rem;
             }
         }
+        
+        /* Extra small devices (phones) */
+        @media (max-width: 575.98px) {
+            .welcome-section {
+                padding: 1rem 0.75rem;
+                margin-bottom: 1rem;
+                border-radius: 16px;
+            }
+
+            .welcome-section .welcome-content {
+                gap: 0.75rem;
+            }
+
+            .welcome-section .welcome-title {
+                font-size: 1.25rem;
+                gap: 0.5rem;
+                margin-bottom: 0.5rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .welcome-section .welcome-title i {
+                font-size: 1.25rem;
+            }
+
+            .welcome-section .welcome-subtitle {
+                font-size: 0.875rem;
+                margin-bottom: 0.5rem;
+                line-height: 1.4;
+            }
+
+            .welcome-section .welcome-circle {
+                width: 50px;
+                height: 50px;
+            }
+
+            .welcome-section .welcome-circle i {
+                font-size: 1.25rem;
+            }
+            
+            .welcome-section .header-stats {
+                gap: 0.4rem;
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .welcome-section .stat-badge {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.5rem;
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .welcome-section .welcome-visual {
+                align-self: center;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
             <!-- Brand/Logo -->
             <a class="navbar-brand" href="{{ Auth::check() ? route('dashboard') : route('home') }}">
@@ -1148,9 +1302,9 @@
             </button>
 
             <!-- Navigation Links -->
-            <div class="collapse navbar-collapse" id="navbarNav" style="display: flex !important; justify-content: space-between !important; align-items: center !important;">
+            <div class="collapse navbar-collapse" id="navbarNav">
                 @if(Auth::check())
-                    <ul class="navbar-nav me-auto">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <!-- Dashboard -->
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
@@ -1205,7 +1359,7 @@
                                 <span class="user-name">{{ auth()->user()->name }}</span>
                                 <i class="fas fa-chevron-down ms-2"></i>
                             </button>
-                            <ul class="dropdown-menu user-dropdown-menu" aria-labelledby="userDropdown">
+                            <ul class="dropdown-menu user-dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 <li class="dropdown-header">
                                     <div class="dropdown-user-info">
                                         <div class="dropdown-user-avatar">
@@ -1242,19 +1396,29 @@
                                 </li>
                             </ul>
                         </div>
-                    @else
-                        <!-- Login/Register buttons for non-authenticated users -->
-                        <a href="{{ route('login') }}" class="btn btn-primary" style="display: inline-flex !important; visibility: visible !important; opacity: 1 !important;">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Login
-                        </a>
-                        <a href="{{ route('register') }}" class="btn btn-outline-primary" style="display: inline-flex !important; visibility: visible !important; opacity: 1 !important;">
-                            <i class="fas fa-user-plus"></i>
-                            Register
-                        </a>
                     @endif
                 </div>
             </div>
+
+            <!-- Auth Buttons for non-authenticated users (Always Visible) -->
+            @if(!Auth::check())
+                <div class="auth-buttons-responsive">
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('login') }}" class="btn btn-primary auth-btn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span class="auth-text">Login</span>
+                        </a>
+                        <a href="{{ route('register') }}" class="btn btn-outline-primary auth-btn">
+                            <i class="fas fa-user-plus"></i>
+                            <span class="auth-text">Register</span>
+                        </a>
+                    </div>
+                </div>
+            @endif
+                </div>
+            </div>
+
+
         </div>
     </nav>
 

@@ -6,10 +6,13 @@ use App\Models\User;
 use App\Models\Farm;
 use App\Models\PhotoAnalysis;
 use App\Models\CropProgressUpdate;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminController extends Controller
 {
@@ -240,9 +243,49 @@ class AdminController extends Controller
     /**
      * Show all farms.
      */
-    public function farms()
+    public function farms(Request $request)
     {
-        $farms = Farm::with('user')->paginate(15);
+        $perPage = (int) $request->get('per_page', 15);
+        $perPage = max(5, min($perPage, 100));
+        $search = $request->get('q', '');
+        $filter = $request->get('filter', 'all');
+
+        // Build query with search functionality
+        $query = Farm::with('user');
+
+        // Apply search filter
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('farm_name', 'like', '%' . $search . '%')
+                  ->orWhere('watermelon_variety', 'like', '%' . $search . '%')
+                  ->orWhere('province_name', 'like', '%' . $search . '%')
+                  ->orWhere('city_municipality_name', 'like', '%' . $search . '%')
+                  ->orWhere('barangay_name', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', '%' . $search . '%')
+                               ->orWhere('email', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
+        // Apply status filter
+        switch ($filter) {
+            case 'active':
+                $query->whereNotNull('planting_date');
+                break;
+            case 'inactive':
+                $query->whereNull('planting_date');
+                break;
+            case 'recent':
+                $query->where('created_at', '>=', now()->subDays(30));
+                break;
+            case 'all':
+            default:
+                // No additional filter
+                break;
+        }
+
+        $farms = $query->orderBy('farm_name')->paginate($perPage)->withQueryString();
 
         // Stats to mirror Users page style
         $stats = [
@@ -252,7 +295,7 @@ class AdminController extends Controller
             'recent_additions' => Farm::where('created_at', '>=', now()->subDays(30))->count(),
         ];
 
-        return view('admin.farms.index', compact('farms', 'stats'));
+        return view('admin.farms.index', compact('farms', 'stats', 'perPage', 'search', 'filter'));
     }
 
     /**
@@ -382,6 +425,339 @@ class AdminController extends Controller
     public function settings()
     {
         return view('admin.settings');
+    }
+
+    /**
+     * Show notifications page.
+     */
+    public function notifications()
+    {
+        $user = Auth::user();
+        
+        // Get notifications from database, or create sample data if none exist
+        $notifications = $user->notifications()->orderBy('created_at', 'desc')->get();
+        
+        // If no notifications exist, create some sample data
+        if ($notifications->isEmpty()) {
+            $this->createSampleNotifications($user);
+            $notifications = $user->notifications()->orderBy('created_at', 'desc')->get();
+        }
+
+        return view('admin.notifications', compact('notifications'));
+    }
+
+    /**
+     * Mark all notifications as read.
+     */
+    public function markAllNotificationsRead()
+    {
+        $user = Auth::user();
+        $user->notifications()->unread()->update(['read' => true]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'All notifications marked as read!',
+            'unread_count' => 0
+        ]);
+    }
+
+    /**
+     * Get unread notification count.
+     */
+    public function getUnreadCount()
+    {
+        $user = Auth::user();
+        $count = $user->notifications()->unread()->count();
+        
+        return response()->json(['unread_count' => $count]);
+    }
+
+    /**
+     * Get notifications for dropdown.
+     */
+    public function getDropdownNotifications()
+    {
+        $user = Auth::user();
+        $notifications = $user->notifications()
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+        
+        return response()->json([
+            'notifications' => $notifications,
+            'unread_count' => $user->notifications()->unread()->count()
+        ]);
+    }
+
+    /**
+     * Create sample notifications for testing.
+     */
+    private function createSampleNotifications($user)
+    {
+        $sampleNotifications = [
+            [
+                'type' => 'system',
+                'title' => 'System Maintenance Scheduled',
+                'message' => 'Scheduled maintenance will occur on Sunday at 2:00 AM. Expected downtime: 30 minutes.',
+                'read' => false,
+                'action_url' => route('admin.settings')
+            ],
+            [
+                'type' => 'user',
+                'title' => 'New User Registration',
+                'message' => 'John Doe has registered a new account and created their first farm.',
+                'read' => false,
+                'action_url' => route('admin.users.index')
+            ],
+            [
+                'type' => 'farm',
+                'title' => 'Farm Progress Update',
+                'message' => 'Green Valley Farm has updated their crop progress to flowering stage.',
+                'read' => true,
+                'action_url' => route('admin.farms.index')
+            ],
+            [
+                'type' => 'system',
+                'title' => 'Database Backup Completed',
+                'message' => 'Daily database backup has been completed successfully.',
+                'read' => true,
+                'action_url' => null
+            ],
+            [
+                'type' => 'user',
+                'title' => 'User Profile Updated',
+                'message' => 'Jane Smith has updated their profile information.',
+                'read' => true,
+                'action_url' => route('admin.users.index')
+            ],
+            [
+                'type' => 'farm',
+                'title' => 'New Farm Registration',
+                'message' => 'Sunrise Farm has been registered by Mike Johnson.',
+                'read' => true,
+                'action_url' => route('admin.farms.index')
+            ]
+        ];
+
+        foreach ($sampleNotifications as $notification) {
+            $user->notifications()->create($notification);
+        }
+    }
+
+    /**
+     * Update admin profile settings.
+     */
+    public function updateSettings(Request $request)
+    {
+        $user = Auth::user();
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        $user->update($validated);
+
+        return redirect()->route('admin.settings')
+            ->with('success', 'Profile updated successfully.');
+    }
+
+    /**
+     * Update admin password.
+     */
+    public function updatePassword(Request $request)
+    {
+        $user = Auth::user();
+        
+        $validated = $request->validate([
+            'current_password' => 'required|current_password',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['password'])
+        ]);
+
+        return redirect()->route('admin.settings')
+            ->with('success', 'Password updated successfully.');
+    }
+
+    /**
+     * Export users as PDF
+     */
+    public function exportUsersPDF()
+    {
+        $users = User::with('farms')
+            ->orderByRaw("CASE WHEN role = 'admin' THEN 0 ELSE 1 END")
+            ->orderBy('name')
+            ->get();
+
+        $data = [
+            'users' => $users,
+            'exportDate' => Carbon::now()->format('M d, Y H:i:s'),
+            'totalUsers' => $users->count(),
+            'adminCount' => $users->where('role', 'admin')->count(),
+            'userCount' => $users->where('role', 'user')->count(),
+        ];
+
+        // Generate PDF using DomPDF
+        $pdf = Pdf::loadView('admin.users.pdf-report', $data);
+        
+        $fileName = 'users_management_' . Carbon::now()->format('Y-m-d') . '.pdf';
+        
+        return $pdf->download($fileName);
+    }
+
+    /**
+     * Print users report
+     */
+    public function printUsers()
+    {
+        $users = User::with('farms')
+            ->orderByRaw("CASE WHEN role = 'admin' THEN 0 ELSE 1 END")
+            ->orderBy('name')
+            ->get();
+
+        $data = [
+            'users' => $users,
+            'exportDate' => Carbon::now()->format('M d, Y H:i:s'),
+            'totalUsers' => $users->count(),
+            'adminCount' => $users->where('role', 'admin')->count(),
+            'userCount' => $users->where('role', 'user')->count(),
+        ];
+
+        // Add cache control headers to prevent caching issues
+        return response()->view('admin.users.pdf-report', $data)
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
+    }
+
+    /**
+     * Export farms as PDF
+     */
+    public function exportFarmsPDF(Request $request)
+    {
+        $search = $request->get('q', '');
+        $filter = $request->get('filter', 'all');
+        
+        // Build query with search functionality (same as farms method)
+        $query = Farm::with('user');
+
+        // Apply search filter
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('farm_name', 'like', '%' . $search . '%')
+                  ->orWhere('watermelon_variety', 'like', '%' . $search . '%')
+                  ->orWhere('province_name', 'like', '%' . $search . '%')
+                  ->orWhere('city_municipality_name', 'like', '%' . $search . '%')
+                  ->orWhere('barangay_name', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', '%' . $search . '%')
+                               ->orWhere('email', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
+        // Apply status filter
+        switch ($filter) {
+            case 'active':
+                $query->whereNotNull('planting_date');
+                break;
+            case 'inactive':
+                $query->whereNull('planting_date');
+                break;
+            case 'recent':
+                $query->where('created_at', '>=', now()->subDays(30));
+                break;
+            case 'all':
+            default:
+                // No additional filter
+                break;
+        }
+
+        $farms = $query->orderBy('farm_name')->get();
+
+        $data = [
+            'farms' => $farms,
+            'exportDate' => Carbon::now()->format('M d, Y H:i:s'),
+            'totalFarms' => $farms->count(),
+            'uniqueOwners' => $farms->pluck('user_id')->unique()->count(),
+            'activeFarms' => $farms->whereNotNull('planting_date')->count(),
+            'searchTerm' => $search,
+        ];
+
+        // Generate PDF using DomPDF
+        $pdf = Pdf::loadView('admin.farms.pdf-report', $data);
+        
+        $fileName = 'farms_management_' . Carbon::now()->format('Y-m-d') . '.pdf';
+        if (!empty($search)) {
+            $fileName = 'farms_management_' . str_replace(' ', '_', $search) . '_' . Carbon::now()->format('Y-m-d') . '.pdf';
+        }
+        
+        return $pdf->download($fileName);
+    }
+
+    /**
+     * Print farms report
+     */
+    public function printFarms(Request $request)
+    {
+        $search = $request->get('q', '');
+        $filter = $request->get('filter', 'all');
+        
+        // Build query with search functionality (same as farms method)
+        $query = Farm::with('user');
+
+        // Apply search filter
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('farm_name', 'like', '%' . $search . '%')
+                  ->orWhere('watermelon_variety', 'like', '%' . $search . '%')
+                  ->orWhere('province_name', 'like', '%' . $search . '%')
+                  ->orWhere('city_municipality_name', 'like', '%' . $search . '%')
+                  ->orWhere('barangay_name', 'like', '%' . $search . '%')
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', '%' . $search . '%')
+                               ->orWhere('email', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+
+        // Apply status filter
+        switch ($filter) {
+            case 'active':
+                $query->whereNotNull('planting_date');
+                break;
+            case 'inactive':
+                $query->whereNull('planting_date');
+                break;
+            case 'recent':
+                $query->where('created_at', '>=', now()->subDays(30));
+                break;
+            case 'all':
+            default:
+                // No additional filter
+                break;
+        }
+
+        $farms = $query->orderBy('farm_name')->get();
+
+        $data = [
+            'farms' => $farms,
+            'exportDate' => Carbon::now()->format('M d, Y H:i:s'),
+            'totalFarms' => $farms->count(),
+            'uniqueOwners' => $farms->pluck('user_id')->unique()->count(),
+            'activeFarms' => $farms->whereNotNull('planting_date')->count(),
+            'searchTerm' => $search,
+        ];
+
+        // Add cache control headers to prevent caching issues
+        return response()->view('admin.farms.pdf-report', $data)
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
 }

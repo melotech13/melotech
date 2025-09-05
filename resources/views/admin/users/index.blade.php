@@ -93,7 +93,23 @@
                 </select>
             </form>
         </div>
-        <div class="action-bar-right">
+        <div class="action-bar-right d-flex align-items-center gap-2">
+            <div class="dropdown">
+                <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-download me-2"></i>Export
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ route('admin.users.print') }}" target="_blank">
+                        <i class="fas fa-print me-2"></i>Print
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" onclick="exportUsersAsExcel()">
+                        <i class="fas fa-file-excel me-2"></i>Excel
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" onclick="exportUsersAsPDF()">
+                        <i class="fas fa-file-pdf me-2"></i>PDF
+                    </a></li>
+                </ul>
+            </div>
             <a href="{{ route('admin.users.create') }}" class="btn btn-primary admin-btn">
                 <i class="fas fa-user-plus me-2"></i>
                 Add User
@@ -121,7 +137,8 @@
                  data-email="{{ strtolower($user->email) }}" 
                  data-phone="{{ strtolower($user->phone ?? '') }}" 
                  data-role="{{ strtolower($user->role) }}" 
-                 data-verified="{{ $user->email_verified_at ? 1 : 0 }}">
+                 data-verified="{{ $user->email_verified_at ? 1 : 0 }}"
+                 data-created="{{ $user->created_at->format('M d, Y') }}">
                 <div class="user-card-left">
                     <div class="user-avatar-small d-flex align-items-center justify-content-center">
                         <span>{{ strtoupper(substr($user->name, 0, 1)) }}</span>
@@ -135,7 +152,6 @@
                         <div class="field-label">Email</div>
                         <div class="cell-with-action">
                             <span class="email-value text-truncate" title="{{ $user->email }}">{{ $user->email }}</span>
-                            <button type="button" class="btn btn-light btn-sm copy-btn" data-copy="{{ $user->email }}" title="Copy email"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
                     <div class="user-field">
@@ -157,7 +173,6 @@
                         <div class="cell-with-action">
                             @if($user->phone)
                                 <span class="phone-value text-truncate" title="{{ $user->phone }}">{{ $user->phone }}</span>
-                                <button type="button" class="btn btn-light btn-sm copy-btn" data-copy="{{ $user->phone }}" title="Copy phone"><i class="fas fa-copy"></i></button>
                             @else
                                 <span class="phone-missing">N/A</span>
                             @endif
@@ -487,5 +502,85 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
 });
+
+// Export functions for User Management table
+function exportUsersAsExcel() {
+    const userCards = document.querySelectorAll('.user-card');
+    if (userCards.length === 0) {
+        alert('No user data to export');
+        return;
+    }
+    
+    // Create CSV content
+    let csvContent = "data:text/csv;charset=utf-8,";
+    
+    // Add headers
+    const headers = ['Name', 'Email', 'Phone', 'Role', 'Farm Name', 'Registered Date'];
+    csvContent += headers.join(',') + '\r\n';
+    
+    // Add data rows
+    userCards.forEach(card => {
+        const name = card.querySelector('.user-name')?.textContent?.trim() || '';
+        const email = card.querySelector('.email-value')?.textContent?.trim() || '';
+        const phone = card.querySelector('.phone-value')?.textContent?.trim() || 'N/A';
+        const role = card.querySelector('.badge')?.textContent?.trim() || '';
+        const farmName = card.querySelector('.farm-value')?.textContent?.trim() || 'N/A';
+        const registered = card.getAttribute('data-created') || '';
+        
+        const rowData = [
+            `"${name.replace(/"/g, '""')}"`,
+            `"${email.replace(/"/g, '""')}"`,
+            `"${phone.replace(/"/g, '""')}"`,
+            `"${role.replace(/"/g, '""')}"`,
+            `"${farmName.replace(/"/g, '""')}"`,
+            `"${registered.replace(/"/g, '""')}"`
+        ];
+        csvContent += rowData.join(',') + '\r\n';
+    });
+    
+    // Create download link
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'users_management.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function exportUsersAsPDF() {
+    const exportBtn = event.target.closest('.dropdown-item');
+    const originalText = exportBtn.innerHTML;
+    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating PDF...';
+    
+    try {
+        // Use server-side PDF generation
+        const pdfUrl = '{{ route("admin.users.export-pdf") }}';
+        
+        // Create a temporary link to trigger the download
+        const link = document.createElement('a');
+        link.href = pdfUrl;
+        link.download = `users_management_${new Date().toISOString().split('T')[0]}.pdf`;
+        link.style.display = 'none';
+        
+        // Add to DOM, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Reset button after a short delay
+        setTimeout(() => {
+            exportBtn.innerHTML = originalText;
+        }, 2000);
+        
+        console.log('PDF download initiated via server-side generation');
+        
+    } catch (error) {
+        console.error('PDF export failed:', error);
+        exportBtn.innerHTML = originalText;
+        alert('PDF export failed. Please try again or use the Print option instead.');
+    }
+}
+
 </script>
 @endsection

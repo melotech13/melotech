@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Farm;
 use App\Models\PhotoAnalysis;
 use App\Models\CropProgressUpdate;
+use App\Models\Notification;
 
 /**
  * Class User
@@ -118,5 +119,15 @@ class User extends Authenticatable
     public function cropProgressUpdates(): HasMany
     {
         return $this->hasMany(\App\Models\CropProgressUpdate::class);
+    }
+
+    /**
+     * Get the notifications for the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
     }
 }

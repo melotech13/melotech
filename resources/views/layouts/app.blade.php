@@ -182,13 +182,8 @@
             margin-right: auto;
         }
 
-        .user-dropdown-btn .fa-chevron-down {
-            font-size: 0.75rem;
-            transition: transform 0.3s ease;
-        }
-
-        .user-dropdown-btn.show .fa-chevron-down {
-            transform: rotate(180deg);
+        .user-dropdown-btn::after {
+            display: none !important;
         }
 
         .user-avatar {
@@ -1386,7 +1381,6 @@
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </div>
                                 <span class="user-name">{{ auth()->user()->name }}</span>
-                                <i class="fas fa-chevron-down ms-2"></i>
                             </button>
                             <ul class="dropdown-menu user-dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 <li class="dropdown-header">
@@ -1525,26 +1519,12 @@
         const dropdownMenu = document.querySelector('.user-dropdown-menu');
         
         if (userDropdown && dropdownMenu) {
-            // Add smooth animations
-            userDropdown.addEventListener('click', function() {
-                // Toggle chevron rotation
-                const chevron = this.querySelector('.fa-chevron-down');
-                if (chevron) {
-                    chevron.style.transform = this.classList.contains('show') ? 'rotate(0deg)' : 'rotate(180deg)';
-                }
-            });
-            
             // Close dropdown when clicking outside
             document.addEventListener('click', function(event) {
                 if (!userDropdown.contains(event.target) && !dropdownMenu.contains(event.target)) {
                     const bsDropdown = bootstrap.Dropdown.getInstance(userDropdown);
                     if (bsDropdown) {
                         bsDropdown.hide();
-                    }
-                    // Reset chevron rotation
-                    const chevron = userDropdown.querySelector('.fa-chevron-down');
-                    if (chevron) {
-                        chevron.style.transform = 'rotate(0deg)';
                     }
                 }
             });

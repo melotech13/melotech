@@ -289,6 +289,221 @@
             font-size: 0.75rem;
         }
 
+
+        /* Notification Bell Styles */
+        .notification-bell {
+            position: relative;
+            margin-right: 1rem;
+        }
+
+        .notification-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: var(--transition);
+            position: relative;
+            border: none;
+            cursor: pointer;
+        }
+
+        .notification-link:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        .notification-link:focus {
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
+        .notification-link i {
+            font-size: 1.1rem;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--bg-primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Simple Notifications Styles */
+        .notification-item-simple.unread {
+            background-color: rgba(13, 110, 253, 0.05);
+            border-left: 3px solid #0d6efd;
+        }
+
+        .notification-icon-simple {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            font-size: 1.1rem;
+        }
+
+        .notification-item-simple:hover {
+            background-color: #f8f9fa;
+        }
+
+        .notification-item-simple:last-child .border-bottom {
+            border-bottom: none !important;
+        }
+
+        /* Notification Dropdown Styles */
+        .notification-dropdown {
+            width: 350px;
+            max-height: 400px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 0;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .notification-header .dropdown-header {
+            margin: 0;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .notification-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .notification-item-dropdown {
+            display: flex;
+            align-items: flex-start;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .notification-item-dropdown:hover {
+            background: var(--bg-secondary);
+        }
+
+        .notification-item-dropdown.unread {
+            background: rgba(13, 110, 253, 0.05);
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .notification-item-dropdown:last-child {
+            border-bottom: none;
+        }
+
+        .notification-icon-dropdown {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .notification-icon-dropdown i {
+            font-size: 0.9rem;
+        }
+
+        .notification-content-dropdown {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-title-dropdown {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            line-height: 1.3;
+        }
+
+        .notification-message-dropdown {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .notification-time-dropdown {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .notification-footer {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        /* Scrollbar for notification list */
+        .notification-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .notification-list::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .notification-list::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .notification-list::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
         /* Content Area */
         .admin-content {
             flex: 1;
@@ -487,17 +702,17 @@
                             <span class="nav-link-text">Statistics</span>
                         </a>
                     </div>
+                    <div class="nav-item">
+                        <a href="{{ route('admin.notifications') }}" class="nav-link {{ request()->routeIs('admin.notifications') ? 'active' : '' }}">
+                            <i class="fas fa-bell"></i>
+                            <span class="nav-link-text">Notifications</span>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- System Section -->
                 <div class="nav-section">
                     <div class="nav-section-title">System</div>
-                    <div class="nav-item">
-                        <a href="{{ route('dashboard') }}" class="nav-link">
-                            <i class="fas fa-home"></i>
-                            <span class="nav-link-text">Main Site</span>
-                        </a>
-                    </div>
                     <div class="nav-item">
                         <a href="{{ route('admin.settings') }}" class="nav-link {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
                             <i class="fas fa-cog"></i>
@@ -528,13 +743,29 @@
                     <h1 class="page-title">@yield('page-title', 'Admin Dashboard')</h1>
                 </div>
                 <div class="header-right">
-                    <div class="user-menu">
-                        <div class="user-avatar">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                        </div>
-                        <div class="user-info">
-                            <div class="user-name">{{ auth()->user()->name }}</div>
-                            <div class="user-role">Administrator</div>
+                    <div class="notification-bell">
+                        <div class="dropdown">
+                            <button class="notification-link dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge">3</span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown">
+                                <div class="notification-header">
+                                    <h6 class="dropdown-header">Notifications</h6>
+                                    <a href="{{ route('admin.notifications') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                                </div>
+                                <div class="notification-list" id="notificationList">
+                                    <div class="text-center p-3">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading notifications...
+                                    </div>
+                                </div>
+                                <div class="notification-footer">
+                                    <button class="btn btn-sm btn-outline-secondary w-100" id="markAllReadDropdown">
+                                        <i class="fas fa-check-double me-1"></i>
+                                        Mark All as Read
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -561,6 +792,7 @@
                 @yield('content')
             </div>
         </main>
+
     </div>
 
     <!-- Bootstrap JS -->
@@ -623,6 +855,160 @@
             if (content) {
                 content.classList.add('fade-in');
             }
+
+            // Load notifications on page load
+            loadNotifications();
+            
+            // Load notifications every 30 seconds for real-time updates
+            setInterval(loadNotifications, 30000);
+
+            // Notification dropdown functionality
+            const markAllReadDropdown = document.getElementById('markAllReadDropdown');
+            if (markAllReadDropdown) {
+                markAllReadDropdown.addEventListener('click', function() {
+                    // Disable button to prevent multiple clicks
+                    markAllReadDropdown.disabled = true;
+                    markAllReadDropdown.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+                    
+                    // Make AJAX request to backend
+                    fetch('{{ route("admin.notifications.mark-all-read") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Reload notifications to reflect changes
+                            loadNotifications();
+                            
+                            // Show success message
+                            const alert = document.createElement('div');
+                            alert.className = 'alert alert-success alert-dismissible fade show';
+                            alert.innerHTML = `
+                                <i class="fas fa-check-circle me-2"></i>
+                                ${data.message}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            `;
+                            document.querySelector('.admin-content').insertBefore(alert, document.querySelector('.admin-content').firstChild);
+                        } else {
+                            throw new Error(data.message || 'Failed to mark notifications as read');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Show error message
+                        const alert = document.createElement('div');
+                        alert.className = 'alert alert-danger alert-dismissible fade show';
+                        alert.innerHTML = `
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Error: ${error.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        document.querySelector('.admin-content').insertBefore(alert, document.querySelector('.admin-content').firstChild);
+                    })
+                    .finally(() => {
+                        // Re-enable button
+                        markAllReadDropdown.disabled = false;
+                        markAllReadDropdown.innerHTML = '<i class="fas fa-check-double me-1"></i>Mark All as Read';
+                    });
+                });
+            }
+
+            // Function to load notifications from backend
+            function loadNotifications() {
+                fetch('{{ route("admin.notifications.dropdown") }}')
+                .then(response => response.json())
+                .then(data => {
+                    updateNotificationDropdown(data.notifications);
+                    updateNotificationBadge(data.unread_count);
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                });
+            }
+
+            // Function to update notification dropdown content
+            function updateNotificationDropdown(notifications) {
+                const notificationList = document.getElementById('notificationList');
+                
+                if (notifications.length === 0) {
+                    notificationList.innerHTML = '<div class="text-center p-3 text-muted">No notifications</div>';
+                    return;
+                }
+
+                let html = '';
+                notifications.forEach(notification => {
+                    const timeAgo = getTimeAgo(notification.created_at);
+                    const iconClass = getNotificationIcon(notification.type);
+                    const unreadClass = !notification.read ? 'unread' : '';
+                    
+                    html += `
+                        <div class="notification-item-dropdown ${unreadClass}" data-id="${notification.id}">
+                            <div class="notification-icon-dropdown">
+                                <i class="${iconClass}"></i>
+                            </div>
+                            <div class="notification-content-dropdown">
+                                <div class="notification-title-dropdown">${notification.title}</div>
+                                <div class="notification-message-dropdown">${notification.message}</div>
+                                <div class="notification-time-dropdown">${timeAgo}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                notificationList.innerHTML = html;
+            }
+
+            // Function to update notification badge
+            function updateNotificationBadge(count) {
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    if (count > 0) {
+                        badge.textContent = count;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            }
+
+            // Function to get notification icon based on type
+            function getNotificationIcon(type) {
+                const icons = {
+                    'system': 'fas fa-cog text-info',
+                    'user': 'fas fa-user text-success',
+                    'farm': 'fas fa-seedling text-warning',
+                    'default': 'fas fa-bell text-primary'
+                };
+                return icons[type] || icons.default;
+            }
+
+            // Function to get time ago string
+            function getTimeAgo(dateString) {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffInSeconds = Math.floor((now - date) / 1000);
+                
+                if (diffInSeconds < 60) return 'Just now';
+                if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+                if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+                if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+                return date.toLocaleDateString();
+            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                const dropdown = document.querySelector('.notification-dropdown');
+                const button = document.querySelector('#notificationDropdown');
+                
+                if (dropdown && button && !button.contains(event.target) && !dropdown.contains(event.target)) {
+                    const bsDropdown = new bootstrap.Dropdown(button);
+                    bsDropdown.hide();
+                }
+            });
 
             // Dashboard animations and interactions
             console.log('Initializing dashboard animations...');

@@ -54,6 +54,68 @@
     </div>
 </div>
 
+@if(session('success'))
+    <div class="alert alert-success d-flex align-items-center mt-2" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <div>{{ session('success') }}</div>
+    </div>
+@endif
+@if(session('error'))
+    <div class="alert alert-danger d-flex align-items-center mt-2" role="alert">
+        <i class="fas fa-triangle-exclamation me-2"></i>
+        <div>{{ session('error') }}</div>
+    </div>
+@endif
+
+<!-- Actions: search, filter, export -->
+<div class="action-bar animate-fade-in-up" style="animation-delay: .2s;">
+    <div class="action-bar-left d-flex align-items-center gap-2">
+        <div class="input-group" style="max-width: 420px;">
+            <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+            <input type="text" class="form-control border-start-0 admin-search" id="farmSearch" placeholder="Search farms by name, variety, location, or owner" aria-label="Search farms" value="{{ $search ?? '' }}">
+        </div>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle admin-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-filter me-2"></i>Filter
+            </button>
+            <ul class="dropdown-menu">
+                <li><button class="dropdown-item" data-filter-status="all"><i class="fas fa-circle text-muted me-2"></i>All Farms</button></li>
+                <li><button class="dropdown-item" data-filter-status="active"><i class="fas fa-seedling text-success me-2"></i>Active Farms</button></li>
+                <li><button class="dropdown-item" data-filter-status="inactive"><i class="fas fa-pause-circle text-warning me-2"></i>Inactive Farms</button></li>
+                <li><button class="dropdown-item" data-filter-status="recent"><i class="fas fa-clock text-info me-2"></i>Recent (30 days)</button></li>
+            </ul>
+        </div>
+        <form method="GET" class="d-flex align-items-center ms-2" action="{{ route('admin.farms.index') }}">
+            <input type="hidden" name="q" value="{{ $search ?? '' }}">
+            <input type="hidden" name="filter" value="{{ $filter ?? '' }}">
+            <label class="me-2 text-muted small">Per page</label>
+            <select name="per_page" class="form-select form-select-sm" onchange="this.form.submit()">
+                @foreach([10,15,25,50,100] as $size)
+                    <option value="{{ $size }}" {{ ($perPage ?? request('per_page', 15)) == $size ? 'selected' : '' }}>{{ $size }}</option>
+                @endforeach
+            </select>
+        </form>
+    </div>
+    <div class="action-bar-right d-flex align-items-center gap-2">
+        <div class="dropdown">
+            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-download me-2"></i>Export
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ route('admin.farms.print') }}?{{ http_build_query(request()->query()) }}" target="_blank">
+                    <i class="fas fa-print me-2"></i>Print
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportFarmsAsExcel()">
+                    <i class="fas fa-file-excel me-2"></i>Excel
+                </a></li>
+                <li><a class="dropdown-item" href="{{ route('admin.farms.export-pdf') }}?{{ http_build_query(request()->query()) }}">
+                    <i class="fas fa-file-pdf me-2"></i>PDF
+                </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
 <!-- Farms List (Users-like UI) -->
 <div class="users-grid-card animate-fade-in-up" style="animation-delay:.25s;">
     <div class="users-grid-header">
@@ -72,7 +134,13 @@
             data-id="{{ $farm->id }}"
             data-name="{{ strtolower($farm->farm_name) }}"
             data-owner="{{ strtolower($farm->user->name) }}"
-            data-location="{{ strtolower($farm->city_municipality_name . ', ' . $farm->province_name) }}">
+            data-location="{{ strtolower($farm->city_municipality_name . ', ' . $farm->province_name) }}"
+            data-variety="{{ $farm->watermelon_variety ?: 'N/A' }}"
+            data-field-size="{{ $farm->field_size ? $farm->field_size . ' ' . $farm->field_size_unit : 'N/A' }}"
+            data-planting-date="{{ $farm->planting_date ? $farm->planting_date->format('M d, Y') : 'N/A' }}"
+            data-created-date="{{ $farm->created_at->format('M d, Y') }}"
+            data-status="{{ $farm->planting_date ? 'active' : 'inactive' }}"
+            data-created="{{ $farm->created_at->format('Y-m-d') }}">
             <div class="user-card-left">
                 <div class="user-avatar-small d-flex align-items-center justify-content-center">
                     <span><i class="fas fa-seedling"></i></span>
@@ -138,23 +206,121 @@
         </div>
     @endforelse
 
-    <div class="pagination-container">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <div class="text-muted small">
-                Showing <strong>{{ $farms->firstItem() ?? 0 }}</strong>–<strong>{{ $farms->lastItem() ?? 0 }}</strong> of <strong>{{ $farms->total() }}</strong> records
-            </div>
-            <div class="d-flex justify-content-center flex-grow-1">
-                {{ $farms->links() }}
+            <div class="pagination-container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="text-muted small">
+                    Showing <strong>{{ $farms->firstItem() ?? 0 }}</strong>–<strong>{{ $farms->lastItem() ?? 0 }}</strong> of <strong>{{ $farms->total() }}</strong> records
+                </div>
+                <div class="d-flex justify-content-center flex-grow-1">
+                    {{ $farms->appends(['per_page' => $perPage ?? request('per_page', 15), 'q' => $search ?? '', 'filter' => $filter ?? 'all'])->links() }}
+                </div>
             </div>
         </div>
-    </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('farmSearch');
+    const farmCards = Array.from(document.querySelectorAll('.farm-card'));
+
+    function filterFarms() {
+        const term = (searchInput?.value || '').toLowerCase();
+        const statusFilter = window.currentStatusFilter || 'all';
+        
+        farmCards.forEach((card, index) => {
+            const farmName = card.getAttribute('data-name') || '';
+            const owner = card.getAttribute('data-owner') || '';
+            const location = card.getAttribute('data-location') || '';
+            const variety = card.getAttribute('data-variety') || '';
+            const status = card.getAttribute('data-status') || '';
+            const created = card.getAttribute('data-created') || '';
+            
+            // Check search term match
+            const textMatches = !term.trim() || 
+                              farmName.includes(term) || 
+                              owner.includes(term) || 
+                              location.includes(term) || 
+                              variety.includes(term);
+            
+            // Check status filter match
+            let statusMatches = true;
+            if (statusFilter === 'active') {
+                statusMatches = status === 'active';
+            } else if (statusFilter === 'inactive') {
+                statusMatches = status === 'inactive';
+            } else if (statusFilter === 'recent') {
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                const createdDate = new Date(created);
+                statusMatches = createdDate >= thirtyDaysAgo;
+            }
+            
+            const isVisible = textMatches && statusMatches;
+            
+            if (isVisible) {
+                card.style.display = '';
+                card.style.animationDelay = `${index * 0.03}s`;
+                card.classList.add('fade-in');
+            } else {
+                card.style.display = 'none';
+                card.classList.remove('fade-in');
+            }
+        });
+    }
+
+    // Add search event listener
+    if (searchInput) {
+        searchInput.addEventListener('input', filterFarms);
+        
+        // Auto-submit form on Enter key
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const form = document.createElement('form');
+                form.method = 'GET';
+                form.action = '{{ route("admin.farms.index") }}';
+                
+                const searchInput = document.createElement('input');
+                searchInput.type = 'hidden';
+                searchInput.name = 'q';
+                searchInput.value = this.value;
+                form.appendChild(searchInput);
+                
+                const filterInput = document.createElement('input');
+                filterInput.type = 'hidden';
+                filterInput.name = 'filter';
+                filterInput.value = window.currentStatusFilter || 'all';
+                form.appendChild(filterInput);
+                
+                const perPageInput = document.createElement('input');
+                perPageInput.type = 'hidden';
+                perPageInput.name = 'per_page';
+                perPageInput.value = '{{ $perPage ?? request("per_page", 15) }}';
+                form.appendChild(perPageInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
+
+    // Status filter dropdown
+    document.querySelectorAll('[data-filter-status]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            window.currentStatusFilter = this.getAttribute('data-filter-status');
+            filterFarms();
+            
+            // Update button text to show current filter
+            const dropdownToggle = this.closest('.dropdown').querySelector('.dropdown-toggle');
+            const icon = this.querySelector('i').outerHTML;
+            const text = this.textContent.trim();
+            dropdownToggle.innerHTML = icon + ' ' + text;
+        });
+    });
+
     // Staggered fade-in for farm cards
-    const cards = Array.from(document.querySelectorAll('.farm-card'));
-    cards.forEach((card, index) => {
+    farmCards.forEach((card, index) => {
         card.style.animationDelay = `${index * 0.03}s`;
         card.classList.add('fade-in');
     });
@@ -354,5 +520,69 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Export functions for Farms table
+function exportFarmsAsExcel() {
+    // Only export visible (filtered) farm cards
+    const farmCards = Array.from(document.querySelectorAll('.farm-card')).filter(card => 
+        card.style.display !== 'none'
+    );
+    
+    if (farmCards.length === 0) {
+        alert('No farm data to export');
+        return;
+    }
+    
+    // Create CSV content
+    let csvContent = "data:text/csv;charset=utf-8,";
+    
+    // Add headers
+    const headers = ['Farm Name', 'Owner', 'Location', 'Variety', 'Field Size', 'Planting Date', 'Created Date'];
+    csvContent += headers.join(',') + '\r\n';
+    
+    // Add data rows
+    farmCards.forEach(card => {
+        const rowData = [];
+        
+        // Farm Name
+        const farmName = card.getAttribute('data-name') || '';
+        rowData.push('"' + farmName.replace(/"/g, '""') + '"');
+        
+        // Owner
+        const owner = card.getAttribute('data-owner') || '';
+        rowData.push('"' + owner.replace(/"/g, '""') + '"');
+        
+        // Location
+        const location = card.getAttribute('data-location') || '';
+        rowData.push('"' + location.replace(/"/g, '""') + '"');
+        
+        // Variety
+        const variety = card.getAttribute('data-variety') || 'N/A';
+        rowData.push('"' + variety.replace(/"/g, '""') + '"');
+        
+        // Field Size
+        const fieldSize = card.getAttribute('data-field-size') || 'N/A';
+        rowData.push('"' + fieldSize.replace(/"/g, '""') + '"');
+        
+        // Planting Date
+        const plantingDate = card.getAttribute('data-planting-date') || 'N/A';
+        rowData.push('"' + plantingDate.replace(/"/g, '""') + '"');
+        
+        // Created Date
+        const createdDate = card.getAttribute('data-created-date') || 'N/A';
+        rowData.push('"' + createdDate.replace(/"/g, '""') + '"');
+        
+        csvContent += rowData.join(',') + '\r\n';
+    });
+    
+    // Create download link
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'farms_management_' + new Date().toISOString().split('T')[0] + '.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 </script>
 @endsection

@@ -182,10 +182,6 @@
                                 <li><a class="dropdown-item" href="#" onclick="exportAsPDF()">
                                     <i class="fas fa-file-pdf me-2"></i>PDF
                                 </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#" onclick="debugPDFLibraries()">
-                                    <i class="fas fa-bug me-2"></i>Debug PDF Libraries
-                                </a></li>
                             </ul>
                         </div>
                     </div>
@@ -1870,14 +1866,6 @@
 
 @push('scripts')
 <script>
-// Debug function for PDF export
-function debugPDFLibraries() {
-    console.log('=== PDF Export Debug Info ===');
-    console.log('Server-side PDF generation is now used');
-    console.log('PDF route:', '{{ route("crop-progress.export-pdf") }}');
-    console.log('DomPDF library installed: Available via Laravel facade');
-    console.log('=============================');
-}
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize countdown timer if waiting for next update
@@ -2600,14 +2588,6 @@ function exportAsPDF() {
     }
 }
 
-// Debug function for PDF export
-function debugPDFLibraries() {
-    console.log('=== PDF Export Debug Info ===');
-    console.log('Server-side PDF generation is now used');
-    console.log('PDF route:', '{{ route("crop-progress.export-pdf") }}');
-    console.log('DomPDF library installed: Available via Laravel facade');
-    console.log('=============================');
-}
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize countdown timer if waiting for next update

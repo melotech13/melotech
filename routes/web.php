@@ -245,10 +245,20 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 	Route::get('/users', [AdminController::class, 'users'])->name('users.index');
 	Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
 	Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
+	
+	// User management exports (must be before parameterized routes)
+	Route::get('/users/export-pdf', [AdminController::class, 'exportUsersPDF'])->name('users.export-pdf');
+	Route::get('/users/print', [AdminController::class, 'printUsers'])->name('users.print');
+	
+	// User parameterized routes (must be after specific routes)
 	Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
 	Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
 	Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
 	Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
+	
+	// Farm management exports (must be before parameterized routes)
+	Route::get('/farms/export-pdf', [AdminController::class, 'exportFarmsPDF'])->name('farms.export-pdf');
+	Route::get('/farms/print', [AdminController::class, 'printFarms'])->name('farms.print');
 	
 	// Farm management
 	Route::get('/farms', [AdminController::class, 'farms'])->name('farms.index');
@@ -259,4 +269,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 	
 	// Admin settings
 	Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+	Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+	Route::put('/settings/password', [AdminController::class, 'updatePassword'])->name('settings.password');
+	
+	// Notifications
+	Route::get('/notifications', [AdminController::class, 'notifications'])->name('notifications');
+	Route::post('/notifications/mark-all-read', [AdminController::class, 'markAllNotificationsRead'])->name('notifications.mark-all-read');
+	Route::get('/notifications/unread-count', [AdminController::class, 'getUnreadCount'])->name('notifications.unread-count');
+	Route::get('/notifications/dropdown', [AdminController::class, 'getDropdownNotifications'])->name('notifications.dropdown');
 });

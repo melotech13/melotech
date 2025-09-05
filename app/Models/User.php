@@ -17,6 +17,7 @@ use App\Models\CropProgressUpdate;
  * @property string $name
  * @property string $email
  * @property string $password
+ * @property string $role
  * @property string|null $phone
  * @property \Carbon\Carbon|null $email_verified_at
  * @property \Carbon\Carbon $created_at
@@ -42,6 +43,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
         'phone',
     ];
 
@@ -66,6 +68,26 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Check if the user is an admin.
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if the user is a regular user.
+     *
+     * @return bool
+     */
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
     }
 
     /**

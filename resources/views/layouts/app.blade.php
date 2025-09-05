@@ -23,6 +23,11 @@
     <!-- Custom Styles -->
     @stack('styles')
     
+    <!-- Admin-specific styles for admin pages -->
+    @if(request()->routeIs('admin.*'))
+        <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    @endif
+    
     <!-- Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
@@ -1305,45 +1310,69 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 @if(Auth::check())
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <!-- Dashboard -->
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                                <i class="fas fa-tachometer-alt"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        
-                        <!-- Crop Growth -->
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('crop-growth.*') ? 'active' : '' }}" href="{{ route('crop-growth.index') }}">
-                                <i class="fas fa-seedling"></i>
-                                Crop Growth
-                            </a>
-                        </li>
-                        
-                        <!-- Weather -->
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('weather.*') ? 'active' : '' }}" href="{{ route('weather.index') }}">
-                                <i class="fas fa-cloud-sun"></i>
-                                Weather
-                            </a>
-                        </li>
-                        
-                        <!-- Crop Progress -->
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('crop-progress.*') ? 'active' : '' }}" href="{{ route('crop-progress.index') }}">
-                                <i class="fas fa-chart-line"></i>
-                                Crop Progress
-                            </a>
-                        </li>
-                        
-                        <!-- Photo Diagnosis -->
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('photo-diagnosis.*') ? 'active' : '' }}" href="{{ route('photo-diagnosis.index') }}">
-                                <i class="fas fa-camera"></i>
-                                Photo Diagnosis
-                            </a>
-                        </li>
+                        @if(Auth::user()->role === 'admin')
+                            <!-- Admin Navigation -->
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                                    <i class="fas fa-shield-alt"></i>
+                                    Admin Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
+                                    <i class="fas fa-users"></i>
+                                    Manage Users
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.farms.*') ? 'active' : '' }}" href="{{ route('admin.farms.index') }}">
+                                    <i class="fas fa-tractor"></i>
+                                    Manage Farms
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('admin.statistics') ? 'active' : '' }}" href="{{ route('admin.statistics') }}">
+                                    <i class="fas fa-chart-bar"></i>
+                                    Statistics
+                                </a>
+                            </li>
+                        @else
+                            <!-- Regular User Navigation -->
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('crop-growth.*') ? 'active' : '' }}" href="{{ route('crop-growth.index') }}">
+                                    <i class="fas fa-seedling"></i>
+                                    Crop Growth
+                                </a>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('weather.*') ? 'active' : '' }}" href="{{ route('weather.index') }}">
+                                    <i class="fas fa-cloud-sun"></i>
+                                    Weather
+                                </a>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('crop-progress.*') ? 'active' : '' }}" href="{{ route('crop-progress.index') }}">
+                                    <i class="fas fa-chart-line"></i>
+                                    Crop Progress
+                                </a>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('photo-diagnosis.*') ? 'active' : '' }}" href="{{ route('photo-diagnosis.index') }}">
+                                    <i class="fas fa-camera"></i>
+                                    Photo Diagnosis
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 @endif
 
@@ -1372,12 +1401,39 @@
                                     </div>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('dashboard') }}">
-                                        <i class="fas fa-tachometer-alt me-2"></i>
-                                        Dashboard
-                                    </a>
-                                </li>
+                                @if(Auth::user()->role === 'admin')
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.dashboard') }}">
+                                            <i class="fas fa-shield-alt me-2"></i>
+                                            Admin Dashboard
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.users.index') }}">
+                                            <i class="fas fa-users me-2"></i>
+                                            Manage Users
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.farms.index') }}">
+                                            <i class="fas fa-tractor me-2"></i>
+                                            Manage Farms
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.statistics') }}">
+                                            <i class="fas fa-chart-bar me-2"></i>
+                                            Statistics
+                                        </a>
+                                    </li>
+                                @else
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('dashboard') }}">
+                                            <i class="fas fa-tachometer-alt me-2"></i>
+                                            Dashboard
+                                        </a>
+                                    </li>
+                                @endif
                                 <li>
                                     <a class="dropdown-item" href="{{ route('profile.settings') }}">
                                         <i class="fas fa-user me-2"></i>
@@ -1453,6 +1509,11 @@
     
     <!-- Custom Scripts -->
     @stack('scripts')
+    
+    <!-- Admin-specific scripts for admin pages -->
+    @if(request()->routeIs('admin.*'))
+        <script src="{{ asset('js/admin.js') }}"></script>
+    @endif
     
 
     

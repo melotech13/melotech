@@ -70,6 +70,16 @@ class Farm extends Model
         return $this->hasOne(CropGrowth::class);
     }
 
+    /**
+     * Get the progress updates for the farm.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function cropProgressUpdates()
+    {
+        return $this->hasMany(CropProgressUpdate::class);
+    }
+
     public function getOrCreateCropGrowth()
     {
         if (!$this->cropGrowth) {

@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AnalysisController;
-use App\Http\Controllers\Api\WeatherController;
+use App\Http\Controllers\WeatherController;
 
 /*
 |--------------------------------------------------------------------------

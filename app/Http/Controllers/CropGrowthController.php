@@ -65,7 +65,7 @@ class CropGrowthController extends Controller
             
             Log::info('Farm questions prepared', ['farm_questions_count' => count($farmQuestions)]);
             
-            return view('crop-growth.index', compact('farms', 'isAuthenticated', 'farmQuestions', 'selectedFarm', 'selectedCropGrowth', 'stages'));
+            return view('user.crop-growth.index', compact('farms', 'isAuthenticated', 'farmQuestions', 'selectedFarm', 'selectedCropGrowth', 'stages'));
         } catch (\Exception $e) {
             Log::error('Error in crop-growth index', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->with('error', 'Failed to load crop growth data. Please try again.');
@@ -130,11 +130,10 @@ class CropGrowthController extends Controller
     {
         $request->validate([
             'stage_progress' => 'required|integer|min:0|max:100',
-            'notes' => 'nullable|string|max:500',
         ]);
 
         $cropGrowth = $farm->getOrCreateCropGrowth();
-        $cropGrowth->updateProgress($request->stage_progress, $request->notes);
+        $cropGrowth->updateProgress($request->stage_progress);
 
         // Check if stage can be advanced
         if ($cropGrowth->canAdvanceStage()) {
@@ -195,7 +194,7 @@ class CropGrowthController extends Controller
         $progressChange = $request->answer ? $question['positive_impact'] : $question['negative_impact'];
         $newProgress = max(0, min(100, $cropGrowth->stage_progress + $progressChange));
         
-        $cropGrowth->updateProgress($newProgress, $request->answer ? $question['positive_note'] : $question['negative_note']);
+        $cropGrowth->updateProgress($newProgress);
 
         // Check if stage can be advanced
         $stageAdvanced = false;

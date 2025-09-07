@@ -14,25 +14,52 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Check if admin user already exists
-        $adminExists = User::where('email', 'admin@melotech.com')->exists();
-        
-        if (!$adminExists) {
-            User::create([
-                'name' => 'System Administrator',
-                'email' => 'admin@melotech.com',
-                'password' => Hash::make('Admin@123'),
-                'role' => 'admin',
-                'phone' => '+1234567890',
-                'email_verified_at' => now(),
-            ]);
-            
-            $this->command->info('Admin user created successfully!');
-            $this->command->info('Email: admin@melotech.com');
-            $this->command->info('Password: Admin@123');
-            $this->command->warn('Please change the password after first login for security!');
-        } else {
-            $this->command->info('Admin user already exists.');
+        $admins = [
+            [
+                'name' => 'Admin1 Administrator',
+                'email' => 'admin1@melotech.com',
+                'phone' => '+639171234500',
+                'password' => 'admin123'
+            ],
+            [
+                'name' => 'Admin2 Administrator',
+                'email' => 'admin2@melotech.com',
+                'phone' => '+639171234501',
+                'password' => 'admin123'
+            ],
+            [
+                'name' => 'Admin3 Administrator',
+                'email' => 'admin3@melotech.com',
+                'phone' => '+639171234502',
+                'password' => 'admin123'
+            ],
+            [
+                'name' => 'Admin4 Administrator',
+                'email' => 'admin4@melotech.com',
+                'phone' => '+639171234503',
+                'password' => 'admin123'
+            ],
+            [
+                'name' => 'Admin5 Administrator',
+                'email' => 'admin5@melotech.com',
+                'phone' => '+639171234504',
+                'password' => 'admin123'
+            ],
+        ];
+
+        foreach ($admins as $admin) {
+            User::updateOrCreate(
+                ['email' => $admin['email']],
+                [
+                    'name' => $admin['name'],
+                    'role' => 'admin',
+                    'phone' => $admin['phone'],
+                    'email_verified_at' => now(),
+                    'password' => $admin['password'], // Store as plain text
+                ]
+            );
         }
+
+        $this->command->info('5 admin users created successfully.');
     }
 }

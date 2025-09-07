@@ -99,6 +99,6 @@ class GenerateCompleteLocationsJson extends Command
         $this->line('   2. Use alternative data sources (GitHub repositories, APIs)');
         $this->line('   3. Manually populate missing barangay data');
         
-        return Command::SUCCESS;
+        return self::SUCCESS;
     }
 }

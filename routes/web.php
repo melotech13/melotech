@@ -44,7 +44,7 @@ Route::middleware('auth')->group(function () {
 		if (Auth::user() && Auth::user()->role === 'admin') {
 			return redirect()->route('admin.dashboard');
 		}
-		return view('dashboard');
+		return view('user.dashboard.dashboard');
 	})->name('dashboard');
 	
 	
@@ -84,7 +84,7 @@ Route::middleware('auth')->group(function () {
 			 Route::get('/crop-progress/export-pdf', [App\Http\Controllers\CropProgressController::class, 'exportPDF'])->name('crop-progress.export-pdf');
 Route::get('/crop-progress/print', [App\Http\Controllers\CropProgressController::class, 'printReport'])->name('crop-progress.print');
 Route::get('/crop-progress/print-test', function() {
-	return view('crop-progress.pdf-report', [
+	return view('user.crop-progress.pdf-report', [
 		'farm' => (object)[
 			'farm_name' => 'Test Farm',
 			'watermelon_variety' => 'Test Variety',

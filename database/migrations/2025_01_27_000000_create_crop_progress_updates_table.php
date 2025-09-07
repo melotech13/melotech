@@ -24,12 +24,8 @@ return new class extends Migration
             // Question-based updates
             $table->json('question_answers')->nullable(); // Store answers to guided questions
             
-            // Image-based updates
-            $table->json('selected_images')->nullable(); // Store selected plant condition images
-            
             // Calculated progress
             $table->integer('calculated_progress')->default(0); // Progress calculated from answers/images
-            $table->text('progress_notes')->nullable(); // Additional notes from farmer
             
             // Next update scheduling
             $table->date('next_update_date'); // When the next set of questions should appear

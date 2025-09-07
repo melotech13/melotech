@@ -20,12 +20,8 @@ return new class extends Migration
             $table->integer('stage_progress')->default(0); // 0-100 percentage within current stage
             $table->integer('overall_progress')->default(0); // 0-100 percentage of total growth cycle
             
-            // Stage-specific data
-            $table->json('stage_data')->nullable(); // Store stage-specific information
-            
             // Growth tracking
             $table->date('last_updated');
-            $table->json('notes')->nullable();
             
             // Timestamps
             $table->timestamps();

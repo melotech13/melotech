@@ -14,13 +14,20 @@ class PhotoAnalysis extends Model
         'identified_type',
         'confidence_score',
         'recommendations',
-        'analysis_date'
+        'analysis_date',
+        'analysis_id',
+        'processing_time',
+        'image_metadata',
+        'analysis_details'
     ];
 
     protected $casts = [
         'analysis_date' => 'datetime',
         'confidence_score' => 'decimal:2',
-        'recommendations' => 'array'
+        'recommendations' => 'array',
+        'image_metadata' => 'array',
+        'analysis_details' => 'array',
+        'processing_time' => 'decimal:2'
     ];
 
     /**

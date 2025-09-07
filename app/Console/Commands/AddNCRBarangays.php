@@ -21,7 +21,7 @@ class AddNCRBarangays extends Command
         
         if (!$ncr) {
             $this->error('NCR province not found!');
-            return Command::FAILURE;
+            return self::FAILURE;
         }
         
         // Sample barangays for major NCR cities
@@ -70,6 +70,6 @@ class AddNCRBarangays extends Command
         
         $this->info("✅ Added {$totalBarangays} barangays for NCR cities!");
         
-        return Command::SUCCESS;
+        return self::SUCCESS;
     }
 }

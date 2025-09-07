@@ -102,6 +102,6 @@ class GenerateLocationsJson extends Command
         $this->line('   - Load once and handle cascading in browser');
         $this->line('   - No AJAX calls needed after initial load');
         
-        return Command::SUCCESS;
+        return self::SUCCESS;
     }
 }

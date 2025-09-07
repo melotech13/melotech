@@ -43,50 +43,70 @@ class AnalysisController extends Controller
     }
 
     /**
-     * Determine the growth stage based on analysis
+     * Determine the growth stage based on analysis using the new analysis service
      */
     private function determineGrowthStage($analysis)
     {
-        // This is a simplified example - you would implement your own logic here
-        $stages = [
-            'seedling' => 'Seedling Stage',
-            'vegetative' => 'Vegetative Stage',
-            'flowering' => 'Flowering Stage',
-            'fruiting' => 'Fruiting Stage',
-            'mature' => 'Mature Stage'
-        ];
-
-        // Simple logic to determine stage (replace with your actual logic)
-        $daysOld = $analysis->created_at->diffInDays(now());
-        
-        if ($daysOld < 7) return $stages['seedling'];
-        if ($daysOld < 21) return $stages['vegetative'];
-        if ($daysOld < 35) return $stages['flowering'];
-        if ($daysOld < 50) return $stages['fruiting'];
-        return $stages['mature'];
+        try {
+            $analysisService = app(\App\Services\Analysis\GrowthAnalysisService::class);
+            return $analysisService->determineGrowthStage($analysis);
+        } catch (\Exception $e) {
+            \Log::error('Growth stage determination failed', [
+                'analysis_id' => $analysis->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            // Fallback to simple time-based logic
+            $daysOld = $analysis->created_at->diffInDays(now());
+            if ($daysOld < 7) return 'Seedling Stage';
+            if ($daysOld < 21) return 'Vegetative Stage';
+            if ($daysOld < 35) return 'Flowering Stage';
+            if ($daysOld < 50) return 'Fruiting Stage';
+            return 'Mature Stage';
+        }
     }
 
     /**
-     * Calculate growth progress percentage
+     * Calculate growth progress percentage using the new analysis service
      */
     private function calculateGrowthProgress($analysis)
     {
-        // Simple progress calculation (replace with your actual logic)
-        $daysOld = $analysis->created_at->diffInDays(now());
-        return min(100, max(5, ($daysOld * 2))); // 2% per day, max 100%
+        try {
+            $analysisService = app(\App\Services\Analysis\GrowthAnalysisService::class);
+            return $analysisService->calculateGrowthProgress($analysis);
+        } catch (\Exception $e) {
+            \Log::error('Growth progress calculation failed', [
+                'analysis_id' => $analysis->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            // Fallback to simple time-based calculation
+            $daysOld = $analysis->created_at->diffInDays(now());
+            return min(100, max(5, ($daysOld * 2)));
+        }
     }
 
     /**
-     * Get recommended next steps
+     * Get recommended next steps using the new analysis service
      */
     private function getNextSteps($analysis)
     {
-        // Simple next steps (customize based on your needs)
-        return [
-            'Monitor soil moisture daily',
-            'Check for pests and diseases',
-            'Apply recommended fertilizer',
-            'Ensure proper sunlight exposure'
-        ];
+        try {
+            $analysisService = app(\App\Services\Analysis\GrowthAnalysisService::class);
+            return $analysisService->getNextSteps($analysis);
+        } catch (\Exception $e) {
+            \Log::error('Next steps generation failed', [
+                'analysis_id' => $analysis->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            // Fallback recommendations
+            return [
+                'Monitor soil moisture daily',
+                'Check for pests and diseases',
+                'Apply recommended fertilizer',
+                'Ensure proper sunlight exposure'
+            ];
+        }
     }
 }

@@ -30,6 +30,10 @@ use App\Models\Notification;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereEmail($value)
+ * @method bool update(array $attributes = [], array $options = [])
+ * @method static \App\Models\User create(array $attributes = [])
+ * @method static \App\Models\User find($id, $columns = ['*'])
+ * @method static \App\Models\User findOrFail($id, $columns = ['*'])
  */
 class User extends Authenticatable
 {
@@ -54,7 +58,6 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
         'remember_token',
     ];
 
@@ -67,7 +70,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            // Removed 'password' => 'hashed' to allow plain text passwords
         ];
     }
 
@@ -108,7 +111,7 @@ class User extends Authenticatable
      */
     public function photoAnalyses(): HasMany
     {
-        return $this->hasMany(\App\Models\PhotoAnalysis::class);
+        return $this->hasMany(PhotoAnalysis::class);
     }
 
     /**
@@ -118,7 +121,7 @@ class User extends Authenticatable
      */
     public function cropProgressUpdates(): HasMany
     {
-        return $this->hasMany(\App\Models\CropProgressUpdate::class);
+        return $this->hasMany(CropProgressUpdate::class);
     }
 
     /**

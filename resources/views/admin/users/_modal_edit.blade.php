@@ -27,6 +27,12 @@
             </div>
             <div class="col-12 col-md-6">
                 <div class="form-floating">
+                    <input type="text" class="form-control" id="editPassword" name="password" value="{{ old('password', $user->password) }}" style="font-family: monospace;">
+                    <label for="editPassword">Password</label>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="form-floating">
                     <select class="form-select" id="editRole" name="role" required>
                         <option value="user" {{ old('role', $user->role) === 'user' ? 'selected' : '' }}>User</option>
                         <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin</option>

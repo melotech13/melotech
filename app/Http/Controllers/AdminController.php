@@ -10,6 +10,8 @@ use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -21,16 +23,137 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
+        // Basic stats
         $stats = [
             'total_users' => User::where('role', 'user')->count(),
             'total_farms' => Farm::count(),
             'total_photo_analyses' => PhotoAnalysis::count(),
             'total_progress_updates' => CropProgressUpdate::count(),
-            'recent_users' => User::where('role', 'user')->latest()->take(5)->get(),
-            'recent_farms' => Farm::with('user')->latest()->take(5)->get(),
         ];
 
-        return view('admin.dashboard', compact('stats'));
+        // Recent Activity Feed data
+        $activityFeed = $this->getActivityFeed();
+
+        return view('admin.dashboard', compact('stats', 'activityFeed'));
+    }
+
+    /**
+     * Get recent activity feed data.
+     */
+    private function getActivityFeed()
+    {
+        try {
+            $activities = [];
+            
+            // Get recent users
+            $recentUsers = User::where('role', 'user')
+                ->orderBy('created_at', 'desc')
+                ->take(3)
+                ->get();
+            
+            foreach ($recentUsers as $user) {
+                $activities[] = [
+                    'type' => 'user_registered',
+                    'icon' => 'fas fa-user-plus',
+                    'title' => 'New User Registered',
+                    'description' => $user->name . ' joined the platform',
+                    'time' => $user->created_at->diffForHumans(),
+                    'color' => 'blue'
+                ];
+            }
+            
+            // Get recent farms
+            $recentFarms = Farm::with('user')
+                ->orderBy('created_at', 'desc')
+                ->take(3)
+                ->get();
+            
+            foreach ($recentFarms as $farm) {
+                $activities[] = [
+                    'type' => 'farm_created',
+                    'icon' => 'fas fa-seedling',
+                    'title' => 'New Farm Created',
+                    'description' => $farm->user->name . ' created "' . $farm->farm_name . '"',
+                    'time' => $farm->created_at->diffForHumans(),
+                    'color' => 'green'
+                ];
+            }
+            
+            // Get recent photo analyses
+            $recentAnalyses = PhotoAnalysis::with('user')
+                ->orderBy('created_at', 'desc')
+                ->take(3)
+                ->get();
+            
+            foreach ($recentAnalyses as $analysis) {
+                $activities[] = [
+                    'type' => 'photo_analyzed',
+                    'icon' => 'fas fa-camera',
+                    'title' => 'Photo Analysis Completed',
+                    'description' => $analysis->user->name . ' analyzed a crop photo',
+                    'time' => $analysis->created_at->diffForHumans(),
+                    'color' => 'purple'
+                ];
+            }
+            
+            // Get recent progress updates
+            $recentUpdates = CropProgressUpdate::with(['user', 'farm'])
+                ->orderBy('created_at', 'desc')
+                ->take(3)
+                ->get();
+            
+            foreach ($recentUpdates as $update) {
+                $activities[] = [
+                    'type' => 'progress_updated',
+                    'icon' => 'fas fa-chart-line',
+                    'title' => 'Progress Update',
+                    'description' => $update->user->name . ' updated progress for ' . $update->farm->farm_name,
+                    'time' => $update->created_at->diffForHumans(),
+                    'color' => 'orange'
+                ];
+            }
+            
+            // Sort all activities by time (most recent first)
+            usort($activities, function($a, $b) {
+                return strtotime($b['time']) - strtotime($a['time']);
+            });
+            
+            // Take only the 4 most recent activities to match Quick Actions height
+            $activities = array_slice($activities, 0, 4);
+            
+            return [
+                'activities' => $activities,
+                'total_activities' => count($activities),
+                'last_updated' => now()->format('M j, Y \a\t g:i A')
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error getting activity feed: ' . $e->getMessage());
+            return [
+                'activities' => [],
+                'total_activities' => 0,
+                'last_updated' => 'Unable to load'
+            ];
+        }
+    }
+
+
+    /**
+     * Count files in a directory recursively.
+     */
+    private function countFilesInDirectory($directory)
+    {
+        $count = 0;
+        if (is_dir($directory)) {
+            $files = glob($directory . '/*');
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    $count++;
+                } elseif (is_dir($file)) {
+                    $count += $this->countFilesInDirectory($file);
+                }
+            }
+        }
+        return $count;
     }
 
     /**
@@ -94,26 +217,58 @@ class AdminController extends Controller
      */
     public function updateUser(Request $request, User $user)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'phone' => 'nullable|string|max:20',
-            'role' => ['required', Rule::in(['user', 'admin'])],
-        ]);
-
-        $user->update($validated);
-
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'User updated successfully.',
-                'user' => $user->fresh(),
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+                'phone' => 'nullable|string|max:20',
+                'password' => 'required|string|min:8',
+                'role' => ['required', Rule::in(['user', 'admin'])],
             ]);
-        }
 
-        return redirect()->route('admin.users.show', $user)
-            ->with('success', 'User updated successfully.');
+            // Store password as provided (system supports plain or hashed)
+            $user->update($validated);
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'User updated successfully.',
+                    'user' => $user->fresh(),
+                ]);
+            }
+
+            return redirect()->route('admin.users.show', $user)
+                ->with('success', 'User updated successfully.');
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Error updating user: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'request_data' => $request->all()
+            ]);
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred while updating the user.',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->back()
+                ->with('error', 'An error occurred while updating the user.')
+                ->withInput();
+        }
     }
+
 
     /**
      * Show the form to create a new user.
@@ -187,7 +342,7 @@ class AdminController extends Controller
         $validated = $request->validate($rules);
 
         $userData = collect($validated)->only(['name','email','password','phone','role'])->toArray();
-        $userData['password'] = Hash::make($userData['password']);
+        // Store password as plain text (no hashing)
 
         $user = User::create($userData);
 
@@ -432,116 +587,12 @@ class AdminController extends Controller
      */
     public function notifications()
     {
-        $user = Auth::user();
-        
-        // Get notifications from database, or create sample data if none exist
-        $notifications = $user->notifications()->orderBy('created_at', 'desc')->get();
-        
-        // If no notifications exist, create some sample data
-        if ($notifications->isEmpty()) {
-            $this->createSampleNotifications($user);
-            $notifications = $user->notifications()->orderBy('created_at', 'desc')->get();
-        }
+        // Get notifications from database
+        $notifications = Notification::with('user')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
 
         return view('admin.notifications', compact('notifications'));
-    }
-
-    /**
-     * Mark all notifications as read.
-     */
-    public function markAllNotificationsRead()
-    {
-        $user = Auth::user();
-        $user->notifications()->unread()->update(['read' => true]);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'All notifications marked as read!',
-            'unread_count' => 0
-        ]);
-    }
-
-    /**
-     * Get unread notification count.
-     */
-    public function getUnreadCount()
-    {
-        $user = Auth::user();
-        $count = $user->notifications()->unread()->count();
-        
-        return response()->json(['unread_count' => $count]);
-    }
-
-    /**
-     * Get notifications for dropdown.
-     */
-    public function getDropdownNotifications()
-    {
-        $user = Auth::user();
-        $notifications = $user->notifications()
-            ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
-        
-        return response()->json([
-            'notifications' => $notifications,
-            'unread_count' => $user->notifications()->unread()->count()
-        ]);
-    }
-
-    /**
-     * Create sample notifications for testing.
-     */
-    private function createSampleNotifications($user)
-    {
-        $sampleNotifications = [
-            [
-                'type' => 'system',
-                'title' => 'System Maintenance Scheduled',
-                'message' => 'Scheduled maintenance will occur on Sunday at 2:00 AM. Expected downtime: 30 minutes.',
-                'read' => false,
-                'action_url' => route('admin.settings')
-            ],
-            [
-                'type' => 'user',
-                'title' => 'New User Registration',
-                'message' => 'John Doe has registered a new account and created their first farm.',
-                'read' => false,
-                'action_url' => route('admin.users.index')
-            ],
-            [
-                'type' => 'farm',
-                'title' => 'Farm Progress Update',
-                'message' => 'Green Valley Farm has updated their crop progress to flowering stage.',
-                'read' => true,
-                'action_url' => route('admin.farms.index')
-            ],
-            [
-                'type' => 'system',
-                'title' => 'Database Backup Completed',
-                'message' => 'Daily database backup has been completed successfully.',
-                'read' => true,
-                'action_url' => null
-            ],
-            [
-                'type' => 'user',
-                'title' => 'User Profile Updated',
-                'message' => 'Jane Smith has updated their profile information.',
-                'read' => true,
-                'action_url' => route('admin.users.index')
-            ],
-            [
-                'type' => 'farm',
-                'title' => 'New Farm Registration',
-                'message' => 'Sunrise Farm has been registered by Mike Johnson.',
-                'read' => true,
-                'action_url' => route('admin.farms.index')
-            ]
-        ];
-
-        foreach ($sampleNotifications as $notification) {
-            $user->notifications()->create($notification);
-        }
     }
 
     /**
@@ -557,7 +608,7 @@ class AdminController extends Controller
             'phone' => 'nullable|string|max:20',
         ]);
 
-        $user->update($validated);
+        User::where('id', $user->id)->update($validated);
 
         return redirect()->route('admin.settings')
             ->with('success', 'Profile updated successfully.');
@@ -571,12 +622,18 @@ class AdminController extends Controller
         $user = Auth::user();
         
         $validated = $request->validate([
-            'current_password' => 'required|current_password',
+            'current_password' => 'required|string',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $user->update([
-            'password' => Hash::make($validated['password'])
+        // Check current password
+        if ($validated['current_password'] !== $user->password) {
+            return redirect()->route('admin.settings')
+                ->with('error', 'Current password is incorrect.');
+        }
+
+        User::where('id', $user->id)->update([
+            'password' => $validated['password'] // Store as plain text
         ]);
 
         return redirect()->route('admin.settings')
@@ -759,6 +816,51 @@ class AdminController extends Controller
             ->header('Pragma', 'no-cache')
             ->header('Expires', '0');
     }
+
+    /**
+     * Get notifications for dropdown display.
+     */
+    public function getDropdownNotifications()
+    {
+        // Get recent notifications from database
+        $notifications = Notification::with('user')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $unreadCount = Notification::where('read', false)->count();
+
+        return response()->json([
+            'notifications' => $notifications,
+            'unread_count' => $unreadCount
+        ]);
+    }
+
+    /**
+     * Mark all notifications as read.
+     */
+    public function markAllNotificationsRead()
+    {
+        Notification::where('read', false)->update(['read' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'All notifications marked as read'
+        ]);
+    }
+
+    /**
+     * Get unread notifications count.
+     */
+    public function getUnreadCount()
+    {
+        $unreadCount = Notification::where('read', false)->count();
+
+        return response()->json([
+            'unread_count' => $unreadCount
+        ]);
+    }
+
 
 }
 

@@ -89,24 +89,24 @@
 		</div>
 		<div class="row g-4">
 			<div class="col-12 col-lg-6">
-				<div class="card shadow-sm" style="border-radius: 12px;">
-					<div class="card-body">
+				<div class="card shadow-sm" style="border-radius: 12px; min-height: 400px;">
+					<div class="card-body" style="padding: 2rem;">
 						<div class="d-flex justify-content-between align-items-center mb-3">
 							<h5 class="mb-0">Users by Role</h5>
 							<i class="fas fa-users text-muted"></i>
 						</div>
-						<canvas id="usersRoleChart" height="140"></canvas>
+						<canvas id="usersRoleChart" height="305"></canvas>
 					</div>
 				</div>
 			</div>
 			<div class="col-12 col-lg-6">
-				<div class="card shadow-sm" style="border-radius: 12px;">
-					<div class="card-body">
+				<div class="card shadow-sm" style="border-radius: 12px; min-height: 400px;">
+					<div class="card-body" style="padding: 2rem;">
 						<div class="d-flex justify-content-between align-items-center mb-3">
 							<h5 class="mb-0">Farm Activity</h5>
 							<i class="fas fa-seedling text-muted"></i>
 						</div>
-						<canvas id="farmActivityChart" height="140"></canvas>
+						<canvas id="farmActivityChart" height="305"></canvas>
 					</div>
 				</div>
 			</div>
@@ -119,28 +119,28 @@
 				<i class="fas fa-chart-bar"></i>
 				Operational Activity
 			</h3>
-			<p class="section-subtitle">Photo analyses and crop progress updates</p>
+			<p class="section-subtitle">System activity and user engagement metrics</p>
 		</div>
 		<div class="row g-4">
 			<div class="col-12 col-lg-6">
-				<div class="card shadow-sm" style="border-radius: 12px;">
-					<div class="card-body">
+				<div class="card shadow-sm" style="border-radius: 12px; min-height: 400px;">
+					<div class="card-body" style="padding: 2rem;">
 						<div class="d-flex justify-content-between align-items-center mb-3">
-							<h5 class="mb-0">Photo Analyses</h5>
-							<i class="fas fa-camera text-muted"></i>
+							<h5 class="mb-0">Activity Distribution</h5>
+							<i class="fas fa-chart-bar text-muted"></i>
 						</div>
-						<canvas id="analysesBarChart" height="140"></canvas>
+						<canvas id="activityDistributionChart" height="305"></canvas>
 					</div>
 				</div>
 			</div>
 			<div class="col-12 col-lg-6">
-				<div class="card shadow-sm" style="border-radius: 12px;">
-					<div class="card-body">
+				<div class="card shadow-sm" style="border-radius: 12px; min-height: 400px;">
+					<div class="card-body" style="padding: 2rem;">
 						<div class="d-flex justify-content-between align-items-center mb-3">
-							<h5 class="mb-0">Progress Updates</h5>
-							<i class="fas fa-chart-line text-muted"></i>
+							<h5 class="mb-0">Monthly Activity</h5>
+							<i class="fas fa-chart-bar text-muted"></i>
 						</div>
-						<canvas id="updatesBarChart" height="140"></canvas>
+						<canvas id="monthlyActivityChart" height="305"></canvas>
 					</div>
 				</div>
 			</div>
@@ -213,18 +213,17 @@
 			});
 		}
 
-		// Analyses (This month vs Total)
-		const analysesCtx = document.getElementById('analysesBarChart');
-		if (analysesCtx) {
-			const remaining = Math.max(stats.analyses.total - stats.analyses.this_month, 0);
-			new Chart(analysesCtx, {
+		// Activity Distribution (Bar)
+		const activityCtx = document.getElementById('activityDistributionChart');
+		if (activityCtx) {
+			new Chart(activityCtx, {
 				type: 'bar',
 				data: {
-					labels: ['This Month', 'All Time'],
+					labels: ['Photo Analyses', 'Progress Updates'],
 					datasets: [{
-						label: 'Photo Analyses',
-						data: [stats.analyses.this_month, stats.analyses.total],
-						backgroundColor: [colors.secondary, colors.primary],
+						label: 'Total Activity',
+						data: [stats.analyses.total, stats.updates.total],
+						backgroundColor: [colors.warning, colors.success],
 						borderRadius: 8,
 						maxBarThickness: 48
 					}]
@@ -238,17 +237,17 @@
 			});
 		}
 
-		// Updates (This month vs Total)
-		const updatesCtx = document.getElementById('updatesBarChart');
-		if (updatesCtx) {
-			new Chart(updatesCtx, {
+		// Monthly Activity (Bar)
+		const monthlyCtx = document.getElementById('monthlyActivityChart');
+		if (monthlyCtx) {
+			new Chart(monthlyCtx, {
 				type: 'bar',
 				data: {
-					labels: ['This Month', 'All Time'],
+					labels: ['This Month Analyses', 'This Month Updates'],
 					datasets: [{
-						label: 'Progress Updates',
-						data: [stats.updates.this_month, stats.updates.total],
-						backgroundColor: [colors.success, colors.primary],
+						label: 'Monthly Activity',
+						data: [stats.analyses.this_month, stats.updates.this_month],
+						backgroundColor: [colors.danger, colors.secondary],
 						borderRadius: 8,
 						maxBarThickness: 48
 					}]

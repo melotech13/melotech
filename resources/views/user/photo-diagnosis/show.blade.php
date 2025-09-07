@@ -140,7 +140,7 @@
                                             </div>
                                             <div class="progress-inline">
                                                 <div class="progress-bar-inline @if($photoAnalysis->confidence_score >= 80) bg-success @elseif($photoAnalysis->confidence_score >= 60) bg-warning @else bg-danger @endif"
-                                                    style="width: {{ $photoAnalysis->confidence_score }}%">
+                                                    style="--progress-width: {{ $photoAnalysis->confidence_score }}%; width: var(--progress-width);" data-width="{{ $photoAnalysis->confidence_score }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -1782,6 +1782,11 @@
 </style>
 @endpush
 
+@php
+    $userFarm = Auth::user()->farms()->first();
+    $farmLocation = $userFarm ? $userFarm->city_municipality_name . ', ' . $userFarm->province_name : 'Manila, Philippines';
+@endphp
+
 @push('scripts')
 <script>
 // Function to load growth progress data
@@ -1809,8 +1814,7 @@ function loadWeatherInfo() {
     const weatherInfoEl = document.getElementById('weather-info-content');
     if (!weatherInfoEl) return;
 
-    // Get farm location from user data or use default
-    const farmLocation = '{{ Auth::user()->farm_location ?? "Manila, Philippines" }}';
+    const farmLocation = '{{ $farmLocation }}';
     
     fetch(`/api/weather?location=${encodeURIComponent(farmLocation)}`)
         .then(response => response.json())

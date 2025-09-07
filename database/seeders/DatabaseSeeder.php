@@ -6,6 +6,7 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Database\Seeders\AdminUserSeeder;
+use Database\Seeders\NotificationSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,5 +20,8 @@ class DatabaseSeeder extends Seeder
 
         // Seed admin and user accounts with farms
         $this->call(UsersSeeder::class);
+
+        // Seed sample notifications
+        $this->call(NotificationSeeder::class);
     }
 }

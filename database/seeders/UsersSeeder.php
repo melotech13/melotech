@@ -18,135 +18,545 @@ class UsersSeeder extends Seeder
 
 		$users = [
 			[
-				'user' => ['name' => 'Maria Lopez', 'email' => 'maria.lopez@example.com', 'phone' => '+63 918 200 1001', 'password' => 'User@12345'],
-				'farm' => [
-					'farm_name' => 'Lopez Family Farm',
-					'province_name' => 'Pampanga',
-					'city_municipality_name' => 'Angeles City',
-					'barangay_name' => 'Barangay Cutcut',
-					'watermelon_variety' => 'Sugar Baby',
-					'planting_date' => Carbon::now()->subDays(28),
-					'field_size' => 1.50,
-					'field_size_unit' => 'hectares',
+				'user' => [
+					'name' => 'Juan Dela Cruz',
+					'email' => 'juan.delacruz@example.com',
+					'phone' => '+639171234567',
+					'password' => 'password123'
 				],
-			],
-			[
-				'user' => ['name' => 'Ramon Perez', 'email' => 'ramon.perez@example.com', 'phone' => '+63 918 200 1002', 'password' => 'User@12345'],
 				'farm' => [
-					'farm_name' => 'Perez Agro Farm',
-					'province_name' => 'Batangas',
-					'city_municipality_name' => 'Batangas City',
-					'barangay_name' => 'Barangay Alangilan',
-					'watermelon_variety' => 'Crimson Sweet',
-					'planting_date' => Carbon::now()->subDays(35),
-					'field_size' => 0.80,
-					'field_size_unit' => 'hectares',
-				],
-			],
-			[
-				'user' => ['name' => 'Lucia Ramos', 'email' => 'lucia.ramos@example.com', 'phone' => '+63 918 200 1003', 'password' => 'User@12345'],
-				'farm' => [
-					'farm_name' => 'Ramos Greenfields',
-					'province_name' => 'Cebu',
-					'city_municipality_name' => 'Cebu City',
-					'barangay_name' => 'Barangay Lahug',
-					'watermelon_variety' => 'Charleston Gray',
-					'planting_date' => Carbon::now()->subDays(18),
-					'field_size' => 1.10,
-					'field_size_unit' => 'hectares',
-				],
-			],
-			[
-				'user' => ['name' => 'Pedro Gomez', 'email' => 'pedro.gomez@example.com', 'phone' => '+63 918 200 1004', 'password' => 'User@12345'],
-				'farm' => [
-					'farm_name' => 'Gomez Orchard',
-					'province_name' => 'Davao',
-					'city_municipality_name' => 'Davao City',
-					'barangay_name' => 'Barangay Matina',
-					'watermelon_variety' => 'Jubilee',
-					'planting_date' => Carbon::now()->subDays(42),
-					'field_size' => 2.20,
-					'field_size_unit' => 'hectares',
-				],
-			],
-			[
-				'user' => ['name' => 'Sofia Cruz', 'email' => 'sofia.cruz@example.com', 'phone' => '+63 918 200 1005', 'password' => 'User@12345'],
-				'farm' => [
-					'farm_name' => 'Cruz Harvest Farm',
-					'province_name' => 'Pangasinan',
-					'city_municipality_name' => 'Dagupan',
-					'barangay_name' => 'Barangay Bonuan',
-					'watermelon_variety' => 'Allsweet',
-					'planting_date' => Carbon::now()->subDays(24),
-					'field_size' => 0.95,
-					'field_size_unit' => 'hectares',
-				],
-			],
-			[
-				'user' => ['name' => 'Miguel Torres', 'email' => 'miguel.torres@example.com', 'phone' => '+63 918 200 1006', 'password' => 'User@12345'],
-				'farm' => [
-					'farm_name' => 'Torres Agri Ventures',
-					'province_name' => 'Bukidnon',
-					'city_municipality_name' => 'Malaybalay',
-					'barangay_name' => 'Barangay Casisang',
-					'watermelon_variety' => 'Crimson Sweet',
-					'planting_date' => Carbon::now()->subDays(31),
-					'field_size' => 1.75,
-					'field_size_unit' => 'hectares',
-				],
-			],
-			[
-				'user' => ['name' => 'Ana Castillo', 'email' => 'ana.castillo@example.com', 'phone' => '+63 918 200 1007', 'password' => 'User@12345'],
-				'farm' => [
-					'farm_name' => 'Castillo Farms',
-					'province_name' => 'Nueva Ecija',
-					'city_municipality_name' => 'Cabanatuan',
-					'barangay_name' => 'Barangay Aduas',
-					'watermelon_variety' => 'Sugar Baby',
-					'planting_date' => Carbon::now()->subDays(14),
-					'field_size' => 0.65,
-					'field_size_unit' => 'hectares',
-				],
-			],
-			[
-				'user' => ['name' => 'Diego Ramos', 'email' => 'diego.ramos@example.com', 'phone' => '+63 918 200 1008', 'password' => 'User@12345'],
-				'farm' => [
-					'farm_name' => 'Ramos Hillside Farm',
+					'farm_name' => 'Dela Cruz Watermelon Farm',
 					'province_name' => 'Laguna',
 					'city_municipality_name' => 'Calamba',
-					'barangay_name' => 'Barangay Canlubang',
+					'barangay_name' => 'Pansol',
+					'watermelon_variety' => 'Sugar Baby',
+					'planting_date' => '2024-01-15',
+					'field_size' => 2.5,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Maria Santos',
+					'email' => 'maria.santos@example.com',
+					'phone' => '+639171234568',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Santos Family Farm',
+					'province_name' => 'Batangas',
+					'city_municipality_name' => 'Tanauan',
+					'barangay_name' => 'Altura Matanda',
+					'watermelon_variety' => 'Crimson Sweet',
+					'planting_date' => '2024-02-01',
+					'field_size' => 1.8,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Pedro Garcia',
+					'email' => 'pedro.garcia@example.com',
+					'phone' => '+639171234569',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Garcia Organic Farm',
+					'province_name' => 'Quezon',
+					'city_municipality_name' => 'Lucena',
+					'barangay_name' => 'Iyam',
 					'watermelon_variety' => 'Charleston Gray',
-					'planting_date' => Carbon::now()->subDays(21),
-					'field_size' => 1.30,
-					'field_size_unit' => 'hectares',
-				],
+					'planting_date' => '2024-01-20',
+					'field_size' => 3.2,
+					'field_size_unit' => 'hectares'
+				]
 			],
 			[
-				'user' => ['name' => 'Elisa Fernandez', 'email' => 'elisa.fernandez@example.com', 'phone' => '+63 918 200 1009', 'password' => 'User@12345'],
-				'farm' => [
-					'farm_name' => 'Fernandez Valley Farm',
-					'province_name' => 'Isabela',
-					'city_municipality_name' => 'Ilagan',
-					'barangay_name' => 'Barangay San Vicente',
-					'watermelon_variety' => 'Jubilee',
-					'planting_date' => Carbon::now()->subDays(39),
-					'field_size' => 2.00,
-					'field_size_unit' => 'hectares',
+				'user' => [
+					'name' => 'Ana Rodriguez',
+					'email' => 'ana.rodriguez@example.com',
+					'phone' => '+639171234570',
+					'password' => 'password123'
 				],
+				'farm' => [
+					'farm_name' => 'Rodriguez Watermelon Fields',
+					'province_name' => 'Cavite',
+					'city_municipality_name' => 'Silang',
+					'barangay_name' => 'Pulong Bunga',
+					'watermelon_variety' => 'Sugar Baby',
+					'planting_date' => '2024-02-10',
+					'field_size' => 2.0,
+					'field_size_unit' => 'hectares'
+				]
 			],
 			[
-				'user' => ['name' => 'Oscar Delgado', 'email' => 'oscar.delgado@example.com', 'phone' => '+63 918 200 1010', 'password' => 'User@12345'],
-				'farm' => [
-					'farm_name' => 'Delgado Family Estate',
-					'province_name' => 'Tarlac',
-					'city_municipality_name' => 'Tarlac City',
-					'barangay_name' => 'Barangay San Isidro',
-					'watermelon_variety' => 'Allsweet',
-					'planting_date' => Carbon::now()->subDays(27),
-					'field_size' => 1.20,
-					'field_size_unit' => 'hectares',
+				'user' => [
+					'name' => 'Carlos Mendoza',
+					'email' => 'carlos.mendoza@example.com',
+					'phone' => '+639171234571',
+					'password' => 'password123'
 				],
+				'farm' => [
+					'farm_name' => 'Mendoza Farmstead',
+					'province_name' => 'Rizal',
+					'city_municipality_name' => 'Antipolo',
+					'barangay_name' => 'Cupang',
+					'watermelon_variety' => 'Crimson Sweet',
+					'planting_date' => '2024-01-25',
+					'field_size' => 1.5,
+					'field_size_unit' => 'hectares'
+				]
 			],
+			[
+				'user' => [
+					'name' => 'Elena Torres',
+					'email' => 'elena.torres@example.com',
+					'phone' => '+639171234572',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Torres Watermelon Garden',
+					'province_name' => 'Laguna',
+					'city_municipality_name' => 'San Pablo',
+					'barangay_name' => 'San Rafael',
+					'watermelon_variety' => 'Charleston Gray',
+					'planting_date' => '2024-02-05',
+					'field_size' => 2.8,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Roberto Cruz',
+					'email' => 'roberto.cruz@example.com',
+					'phone' => '+639171234573',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Cruz Family Farm',
+					'province_name' => 'Batangas',
+					'city_municipality_name' => 'Lipa',
+					'barangay_name' => 'Mataas na Lupa',
+					'watermelon_variety' => 'Sugar Baby',
+					'planting_date' => '2024-01-30',
+					'field_size' => 1.2,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Isabel Ramos',
+					'email' => 'isabel.ramos@example.com',
+					'phone' => '+639171234574',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Ramos Watermelon Plantation',
+					'province_name' => 'Quezon',
+					'city_municipality_name' => 'Tayabas',
+					'barangay_name' => 'Ibas',
+					'watermelon_variety' => 'Crimson Sweet',
+					'planting_date' => '2024-02-15',
+					'field_size' => 3.5,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Miguel Lopez',
+					'email' => 'miguel.lopez@example.com',
+					'phone' => '+639171234575',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Lopez Organic Watermelons',
+					'province_name' => 'Cavite',
+					'city_municipality_name' => 'Trece Martires',
+					'barangay_name' => 'Osorio',
+					'watermelon_variety' => 'Charleston Gray',
+					'planting_date' => '2024-01-18',
+					'field_size' => 2.3,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Carmen Villanueva',
+					'email' => 'carmen.villanueva@example.com',
+					'phone' => '+639171234576',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Villanueva Farm',
+					'province_name' => 'Rizal',
+					'city_municipality_name' => 'Taytay',
+					'barangay_name' => 'San Juan',
+					'watermelon_variety' => 'Sugar Baby',
+					'planting_date' => '2024-02-20',
+					'field_size' => 1.8,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Fernando Reyes',
+					'email' => 'fernando.reyes@example.com',
+					'phone' => '+639171234577',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Reyes Watermelon Fields',
+					'province_name' => 'Laguna',
+					'city_municipality_name' => 'Los Baños',
+					'barangay_name' => 'Putho',
+					'watermelon_variety' => 'Crimson Sweet',
+					'planting_date' => '2024-01-12',
+					'field_size' => 2.7,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Patricia Morales',
+					'email' => 'patricia.morales@example.com',
+					'phone' => '+639171234578',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Morales Family Farm',
+					'province_name' => 'Batangas',
+					'city_municipality_name' => 'Bauan',
+					'barangay_name' => 'San Andres',
+					'watermelon_variety' => 'Charleston Gray',
+					'planting_date' => '2024-02-08',
+					'field_size' => 1.9,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Antonio Gutierrez',
+					'email' => 'antonio.gutierrez@example.com',
+					'phone' => '+639171234579',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Gutierrez Watermelon Garden',
+					'province_name' => 'Quezon',
+					'city_municipality_name' => 'Lucban',
+					'barangay_name' => 'Ibabang Dupay',
+					'watermelon_variety' => 'Sugar Baby',
+					'planting_date' => '2024-01-22',
+					'field_size' => 2.1,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Rosa Herrera',
+					'email' => 'rosa.herrera@example.com',
+					'phone' => '+639171234580',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Herrera Organic Farm',
+					'province_name' => 'Cavite',
+					'city_municipality_name' => 'General Trias',
+					'barangay_name' => 'San Francisco',
+					'watermelon_variety' => 'Crimson Sweet',
+					'planting_date' => '2024-02-12',
+					'field_size' => 3.0,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Jose Jimenez',
+					'email' => 'jose.jimenez@example.com',
+					'phone' => '+639171234581',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Jimenez Watermelon Plantation',
+					'province_name' => 'Rizal',
+					'city_municipality_name' => 'Cainta',
+					'barangay_name' => 'San Juan',
+					'watermelon_variety' => 'Charleston Gray',
+					'planting_date' => '2024-01-28',
+					'field_size' => 1.6,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Sofia Castillo',
+					'email' => 'sofia.castillo@example.com',
+					'phone' => '+639171234582',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Castillo Farmstead',
+					'province_name' => 'Laguna',
+					'city_municipality_name' => 'Santa Cruz',
+					'barangay_name' => 'Pagsawitan',
+					'watermelon_variety' => 'Sugar Baby',
+					'planting_date' => '2024-02-18',
+					'field_size' => 2.4,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Ramon Aguilar',
+					'email' => 'ramon.aguilar@example.com',
+					'phone' => '+639171234583',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Aguilar Watermelon Fields',
+					'province_name' => 'Batangas',
+					'city_municipality_name' => 'Santo Tomas',
+					'barangay_name' => 'San Agustin',
+					'watermelon_variety' => 'Crimson Sweet',
+					'planting_date' => '2024-01-14',
+					'field_size' => 1.7,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Teresa Moreno',
+					'email' => 'teresa.moreno@example.com',
+					'phone' => '+639171234584',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Moreno Family Farm',
+					'province_name' => 'Quezon',
+					'city_municipality_name' => 'Sariaya',
+					'barangay_name' => 'Castañas',
+					'watermelon_variety' => 'Charleston Gray',
+					'planting_date' => '2024-02-03',
+					'field_size' => 2.9,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Luis Vargas',
+					'email' => 'luis.vargas@example.com',
+					'phone' => '+639171234585',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Vargas Watermelon Garden',
+					'province_name' => 'Cavite',
+					'city_municipality_name' => 'Imus',
+					'barangay_name' => 'Bucandala',
+					'watermelon_variety' => 'Sugar Baby',
+					'planting_date' => '2024-01-26',
+					'field_size' => 2.2,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Elena Flores',
+					'email' => 'elena.flores@example.com',
+					'phone' => '+639171234586',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Flores Organic Watermelons',
+					'province_name' => 'Rizal',
+					'city_municipality_name' => 'Rodriguez',
+					'barangay_name' => 'San Jose',
+					'watermelon_variety' => 'Crimson Sweet',
+					'planting_date' => '2024-02-14',
+					'field_size' => 1.4,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Francisco Ruiz',
+					'email' => 'francisco.ruiz@example.com',
+					'phone' => '+639171234587',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Ruiz Watermelon Plantation',
+					'province_name' => 'Laguna',
+					'city_municipality_name' => 'Biñan',
+					'barangay_name' => 'Malamig',
+					'watermelon_variety' => 'Charleston Gray',
+					'planting_date' => '2024-01-19',
+					'field_size' => 3.1,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Monica Silva',
+					'email' => 'monica.silva@example.com',
+					'phone' => '+639171234588',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Silva Farm',
+					'province_name' => 'Batangas',
+					'city_municipality_name' => 'Calaca',
+					'barangay_name' => 'Lalayat',
+					'watermelon_variety' => 'Sugar Baby',
+					'planting_date' => '2024-02-07',
+					'field_size' => 2.6,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Alberto Medina',
+					'email' => 'alberto.medina@example.com',
+					'phone' => '+639171234589',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Medina Watermelon Fields',
+					'province_name' => 'Quezon',
+					'city_municipality_name' => 'Candelaria',
+					'barangay_name' => 'Malabanban Norte',
+					'watermelon_variety' => 'Crimson Sweet',
+					'planting_date' => '2024-01-24',
+					'field_size' => 1.9,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Beatriz Ortega',
+					'email' => 'beatriz.ortega@example.com',
+					'phone' => '+639171234590',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Ortega Family Farm',
+					'province_name' => 'Cavite',
+					'city_municipality_name' => 'Kawit',
+					'barangay_name' => 'Magdalo',
+					'watermelon_variety' => 'Charleston Gray',
+					'planting_date' => '2024-02-11',
+					'field_size' => 2.8,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Ricardo Navarro',
+					'email' => 'ricardo.navarro@example.com',
+					'phone' => '+639171234591',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Navarro Watermelon Garden',
+					'province_name' => 'Rizal',
+					'city_municipality_name' => 'San Mateo',
+					'barangay_name' => 'Ampid',
+					'watermelon_variety' => 'Sugar Baby',
+					'planting_date' => '2024-01-17',
+					'field_size' => 1.3,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Adriana Pena',
+					'email' => 'adriana.pena@example.com',
+					'phone' => '+639171234592',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Pena Organic Farm',
+					'province_name' => 'Laguna',
+					'city_municipality_name' => 'Alaminos',
+					'barangay_name' => 'San Gregorio',
+					'watermelon_variety' => 'Crimson Sweet',
+					'planting_date' => '2024-02-16',
+					'field_size' => 3.3,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Hector Delgado',
+					'email' => 'hector.delgado@example.com',
+					'phone' => '+639171234593',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Delgado Watermelon Plantation',
+					'province_name' => 'Batangas',
+					'city_municipality_name' => 'Nasugbu',
+					'barangay_name' => 'Aguado',
+					'watermelon_variety' => 'Charleston Gray',
+					'planting_date' => '2024-01-21',
+					'field_size' => 2.5,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Gloria Rios',
+					'email' => 'gloria.rios@example.com',
+					'phone' => '+639171234594',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Rios Farmstead',
+					'province_name' => 'Quezon',
+					'city_municipality_name' => 'Tiaong',
+					'barangay_name' => 'Lalig',
+					'watermelon_variety' => 'Sugar Baby',
+					'planting_date' => '2024-02-09',
+					'field_size' => 1.8,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Vicente Mendez',
+					'email' => 'vicente.mendez@example.com',
+					'phone' => '+639171234595',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Mendez Watermelon Fields',
+					'province_name' => 'Cavite',
+					'city_municipality_name' => 'Bacoor',
+					'barangay_name' => 'Molino',
+					'watermelon_variety' => 'Crimson Sweet',
+					'planting_date' => '2024-01-23',
+					'field_size' => 2.7,
+					'field_size_unit' => 'hectares'
+				]
+			],
+			[
+				'user' => [
+					'name' => 'Leticia Vega',
+					'email' => 'leticia.vega@example.com',
+					'phone' => '+639171234596',
+					'password' => 'password123'
+				],
+				'farm' => [
+					'farm_name' => 'Vega Family Farm',
+					'province_name' => 'Rizal',
+					'city_municipality_name' => 'Angono',
+					'barangay_name' => 'Bagong Barrio',
+					'watermelon_variety' => 'Charleston Gray',
+					'planting_date' => '2024-02-13',
+					'field_size' => 1.6,
+					'field_size_unit' => 'hectares'
+				]
+			]
 		];
 
 		foreach ($users as $entry) {
@@ -160,7 +570,7 @@ class UsersSeeder extends Seeder
 					'role' => 'user',
 					'phone' => $u['phone'],
 					'email_verified_at' => now(),
-					'password' => Hash::make($u['password']),
+					'password' => $u['password'], // Store as plain text like admin accounts
 				]
 			);
 
@@ -182,5 +592,4 @@ class UsersSeeder extends Seeder
 		}
 	}
 }
-
 

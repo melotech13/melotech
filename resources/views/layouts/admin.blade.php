@@ -471,6 +471,7 @@
             line-height: 1.4;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -747,7 +748,7 @@
                         <div class="dropdown">
                             <button class="notification-link dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-bell"></i>
-                                <span class="notification-badge">3</span>
+                                <span class="notification-badge" id="notificationBadge">0</span>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown">
                                 <div class="notification-header">
@@ -1169,9 +1170,23 @@
                     });
                 });
 
-                // Add number counting animation to metrics
-                animateNumbers();
-            }
+                            // Add number counting animation to metrics
+            animateNumbers();
+            
+            // Initialize progress bars
+            initializeProgressBars();
+        }
+        
+        // Function to initialize progress bars
+        function initializeProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-fill[data-width]');
+            progressBars.forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                bar.style.width = width + '%';
+            });
+        }
+
+
 
             // Clock update function
             function updateClock() {

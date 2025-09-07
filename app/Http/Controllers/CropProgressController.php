@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\CropRecommendationService;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CropProgressController extends Controller
 {
@@ -28,7 +29,7 @@ class CropProgressController extends Controller
         $selectedFarm = $farms->first();
         
         if (!$selectedFarm) {
-            return view('crop-progress.index', [
+            return view('user.crop-progress.index', [
                 'farms' => collect(),
                 'selectedFarm' => null,
                 'canUpdate' => false,
@@ -50,7 +51,7 @@ class CropProgressController extends Controller
             ->orderBy('update_date', 'desc')
             ->get();
 
-        return view('crop-progress.index', [
+        return view('user.crop-progress.index', [
             'farms' => $farms,
             'selectedFarm' => $selectedFarm,
             'canUpdate' => $canUpdate,
@@ -83,7 +84,7 @@ class CropProgressController extends Controller
         
         if (!$canAccess) {
             $nextWeekNumber = CropProgressUpdate::getNextWeekNumber($user, $farm);
-            return view('crop-progress.waiting', [
+            return view('user.crop-progress.waiting', [
                 'farm' => $farm,
                 'nextUpdateDate' => $nextUpdateDate,
                 'nextWeekNumber' => $nextWeekNumber
@@ -92,14 +93,9 @@ class CropProgressController extends Controller
 
         $questions = $this->getGuidedQuestions($farm);
         
-        return view('crop-progress.questions', [
+        return view('user.crop-progress.questions', [
             'farm' => $farm,
             'questions' => $questions
-        ]);
-
-        return view('crop-progress.waiting', [
-            'farm' => $farm,
-            'nextUpdateDate' => $nextUpdateDate
         ]);
     }
 
@@ -139,7 +135,6 @@ class CropProgressController extends Controller
             'update_date' => Carbon::now(),
             'update_method' => 'questions',
             'question_answers' => $answers,
-            'selected_images' => null,
             'calculated_progress' => $calculatedProgress,
             'next_update_date' => Carbon::now()->addDays(6),
             'status' => 'completed'
@@ -194,7 +189,6 @@ class CropProgressController extends Controller
                     'update_method' => $update->update_method,
                     'calculated_progress' => $update->calculated_progress . '%',
                     'question_answers' => $update->question_answers,
-                    'selected_images' => $update->selected_images
                 ];
             }),
             'export_date' => Carbon::now()->format('M d, Y H:i:s')
@@ -235,7 +229,7 @@ class CropProgressController extends Controller
         ];
 
         // Return a printable HTML view for single update
-        return view('crop-progress.single-update-report', $data);
+        return view('user.crop-progress.single-update-report', $data);
     }
 
     /**
@@ -882,7 +876,7 @@ class CropProgressController extends Controller
         ];
 
         // Generate PDF using DomPDF
-        $pdf = \PDF::loadView('crop-progress.pdf-report', $data);
+        $pdf = Pdf::loadView('crop-progress.pdf-report', $data);
         
         $fileName = 'progress_history_' . Carbon::now()->format('Y-m-d') . '.pdf';
         
@@ -911,7 +905,7 @@ class CropProgressController extends Controller
         ];
 
         // Add cache control headers to prevent caching issues
-        return response()->view('crop-progress.pdf-report', $data)
+        return response()->view('user.crop-progress.pdf-report', $data)
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
             ->header('Pragma', 'no-cache')
             ->header('Expires', '0');

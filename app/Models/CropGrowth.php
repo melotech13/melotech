@@ -13,9 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $current_stage
  * @property int $stage_progress
  * @property int $overall_progress
- * @property array|null $stage_data
  * @property \Carbon\Carbon $last_updated
- * @property string|null $notes
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * 
@@ -36,14 +34,10 @@ class CropGrowth extends Model
         'current_stage',
         'stage_progress',
         'overall_progress',
-        'stage_data',
         'last_updated',
-        'notes',
     ];
 
     protected $casts = [
-        'stage_data' => 'array',
-        'notes' => 'array',
         'last_updated' => 'date',
         'stage_progress' => 'integer',
         'overall_progress' => 'integer',
@@ -155,7 +149,7 @@ class CropGrowth extends Model
         return false;
     }
 
-    public function updateProgress($stageProgress, $notes = null)
+    public function updateProgress($stageProgress)
     {
         $this->stage_progress = max(0, min(100, $stageProgress));
         
@@ -170,10 +164,6 @@ class CropGrowth extends Model
         }
         
         $this->last_updated = now();
-        if ($notes) {
-            $this->notes = $notes;
-        }
-        
         $this->save();
         
         return $this;

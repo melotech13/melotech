@@ -20,7 +20,7 @@ class FixNCRData extends Command
         
         if (!$ncr) {
             $this->error('NCR province not found!');
-            return Command::FAILURE;
+            return self::FAILURE;
         }
         
         $this->info("Found NCR: {$ncr->name}");
@@ -64,6 +64,6 @@ class FixNCRData extends Command
         $this->info("✅ NCR data fixed! Created {$created} new locations.");
         $this->info("Total NCR locations: " . $ncr->municipalities()->count());
         
-        return Command::SUCCESS;
+        return self::SUCCESS;
     }
 }

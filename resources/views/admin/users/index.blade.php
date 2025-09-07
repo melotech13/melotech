@@ -123,6 +123,7 @@
             <div class="users-grid-header-left">Full name</div>
             <div class="users-grid-header-mid">
                 <div>Email</div>
+                <div>Password</div>
                 <div>Farm</div>
                 <div>Phone</div>
             </div>
@@ -152,6 +153,12 @@
                         <div class="field-label">Email</div>
                         <div class="cell-with-action">
                             <span class="email-value text-truncate" title="{{ $user->email }}">{{ $user->email }}</span>
+                        </div>
+                    </div>
+                    <div class="user-field">
+                        <div class="field-label">Password</div>
+                        <div class="cell-with-action">
+                            <span class="password-value text-truncate" title="Click to reveal password" style="font-family: monospace; font-size: 0.85em; cursor: pointer;" onclick="togglePassword(this, '{{ $user->password }}')">{{ str_repeat('•', strlen($user->password)) }}</span>
                         </div>
                     </div>
                     <div class="user-field">
@@ -320,8 +327,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         })
                         .then(({ user }) => {
                             if (!user) { userModal.hide(); return; }
-                            const card = document.querySelector(`.user-card[data-email="${CSS.escape((user.email || '').toLowerCase())}"]`) ||
-                                         document.querySelector(`.user-card .user-name:contains('${user.name}')`);
+                            // Find user card by email first
+                            let card = document.querySelector(`.user-card[data-email="${CSS.escape((user.email || '').toLowerCase())}"]`);
+                            
+                            // If not found by email, find by name
+                            if (!card) {
+                                const allCards = Array.from(document.querySelectorAll('.user-card'));
+                                card = allCards.find(c => {
+                                    const nameElement = c.querySelector('.user-name');
+                                    return nameElement && nameElement.textContent.trim() === user.name;
+                                });
+                            }
+                            
                             // Fallback find by ID in the displayed label
                             const allCards = Array.from(document.querySelectorAll('.user-card'));
                             const found = card || allCards.find(c => c.querySelector('.user-ident .text-muted')?.textContent?.includes(`ID: ${user.id}`));
@@ -335,6 +352,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 if (nameEl) nameEl.textContent = user.name || '';
                                 const emailEl = found.querySelector('.email-value');
                                 if (emailEl) { emailEl.textContent = user.email || ''; emailEl.title = user.email || ''; }
+                                const passwordEl = found.querySelector('.password-value');
+                                if (passwordEl) { passwordEl.textContent = user.password || ''; passwordEl.title = user.password || ''; }
                                 const phoneEl = found.querySelector('.phone-value');
                                 const phoneMissing = found.querySelector('.phone-missing');
                                 if (user.phone) {
@@ -358,14 +377,33 @@ document.addEventListener('DOMContentLoaded', function() {
                                     }
                                 }
                             }
+                            
+                            // Show success message
+                            const alert = document.createElement('div');
+                            alert.className = 'alert alert-success d-flex align-items-center mt-2';
+                            alert.innerHTML = `<i class="fas fa-check-circle me-2"></i><div>User updated successfully.</div>`;
+                            const container = document.querySelector('.admin-content');
+                            container?.insertBefore(alert, container.firstChild);
+                            
+                            // Auto-hide success message after 5 seconds
+                            setTimeout(() => {
+                                alert.style.transition = 'opacity 0.5s ease';
+                                alert.style.opacity = '0';
+                                setTimeout(() => alert.remove(), 500);
+                            }, 5000);
+                            
                             userModal.hide();
                         })
                         .catch(async (err) => {
+                            console.error('Error updating user:', err);
                             // Try to surface validation errors inline if HTML returned
                             if (err && err.errors) {
-                                alert(Object.values(err.errors).flat().join('\n'));
+                                const errorMessages = Object.values(err.errors).flat();
+                                alert('Validation Error:\n' + errorMessages.join('\n'));
+                            } else if (err && err.message) {
+                                alert('Error: ' + err.message);
                             } else {
-                                alert('Failed to save changes.');
+                                alert('Failed to save changes. Please try again.');
                             }
                         });
                     });
@@ -500,8 +538,36 @@ document.addEventListener('DOMContentLoaded', function() {
             pendingDelete = null;
         });
     });
+
+    // (Removed) Temporary password reset functionality
     
 });
+
+// Function to toggle password visibility in the main list
+function togglePassword(element, actualPassword) {
+    if (element.textContent === actualPassword) {
+        // Currently showing actual password, hide it
+        element.textContent = '•'.repeat(actualPassword.length);
+        element.title = 'Click to reveal password';
+    } else {
+        // Currently showing dots, reveal actual password
+        element.textContent = actualPassword;
+        element.title = 'Click to hide password';
+    }
+}
+
+// Function to toggle password visibility in the modal
+function toggleModalPassword(element, actualPassword) {
+    if (element.value === actualPassword) {
+        // Currently showing actual password, hide it
+        element.value = '•'.repeat(actualPassword.length);
+        element.title = 'Click to reveal password';
+    } else {
+        // Currently showing dots, reveal actual password
+        element.value = actualPassword;
+        element.title = 'Click to hide password';
+    }
+}
 
 // Export functions for User Management table
 function exportUsersAsExcel() {

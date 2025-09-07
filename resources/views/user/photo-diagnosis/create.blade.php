@@ -1136,11 +1136,14 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Show loading overlay
+        // Enforce a visible loading period of 7–10 seconds before submission
+        e.preventDefault();
         showLoadingOverlay();
-        
-        // Simulate analysis progress (7-10 seconds)
-        simulateAnalysisProgress();
+        const delayMs = Math.floor(7000 + Math.random() * 3000); // 7000–10000ms
+        simulateAnalysisProgress(delayMs);
+        setTimeout(() => {
+            form.submit();
+        }, delayMs);
     });
 
     function showLoadingOverlay() {
@@ -1150,23 +1153,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 10);
     }
 
-    function simulateAnalysisProgress() {
+    function simulateAnalysisProgress(totalTime) {
         let progress = 0;
-        const totalTime = 8000; // 8 seconds total
         const interval = 100; // Update every 100ms
-        
         const progressInterval = setInterval(() => {
             progress += (interval / totalTime) * 100;
-            
             if (progress >= 100) {
                 progress = 100;
                 clearInterval(progressInterval);
             }
-            
             // Update progress bar
             progressFill.style.width = progress + '%';
             progressText.textContent = Math.round(progress) + '%';
-            
             // Update steps
             if (progress < 30) {
                 updateStep(1);

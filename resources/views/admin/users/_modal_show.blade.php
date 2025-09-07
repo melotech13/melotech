@@ -36,6 +36,12 @@
         </div>
         <div class="col-12 col-md-6">
             <div class="form-floating">
+                <input type="text" readonly class="form-control" id="viewPassword" value="{{ str_repeat('•', strlen($user->password)) }}" style="font-family: monospace;" onclick="toggleModalPassword(this, '{{ $user->password }}')" title="Click to reveal password">
+                <label for="viewPassword">Password</label>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="form-floating">
                 <input type="text" readonly class="form-control" id="viewCreated" value="{{ $user->created_at?->format('M d, Y H:i') }}">
                 <label for="viewCreated">Created</label>
             </div>

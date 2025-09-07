@@ -213,7 +213,7 @@
                                             <td>
                                                 <div class="ph-progress-wrap">
                                                     <div class="ph-progress">
-                                                        <div class="ph-progress-bar" style="width: {{ $update->calculated_progress }}%"></div>
+                                                        <div class="ph-progress-bar" style="--progress-width: {{ $update->calculated_progress }}%; width: var(--progress-width);"></div>
                                                     </div>
                                                     <span class="ph-progress-label">{{ $update->calculated_progress }}%</span>
                                                 </div>

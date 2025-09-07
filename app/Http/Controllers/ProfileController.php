@@ -17,7 +17,7 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
-        return view('profile.settings', compact('user'));
+        return view('user.profile.settings', compact('user'));
     }
 
     /**
@@ -60,12 +60,12 @@ class ProfileController extends Controller
 
         $user = Auth::user();
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if ($request->current_password !== $user->password) {
             return back()->withErrors(['current_password' => 'The current password is incorrect.']);
         }
 
         $user->update([
-            'password' => Hash::make($request->password),
+            'password' => $request->password, // Store as plain text
         ]);
 
         return redirect()->route('profile.settings')->with('success', 'Password updated successfully!');

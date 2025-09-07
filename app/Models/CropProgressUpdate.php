@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Log;
  * @property \Carbon\Carbon $update_date
  * @property string $update_method
  * @property array $question_answers
- * @property array|null $selected_images
  * @property int $calculated_progress
  * @property \Carbon\Carbon $next_update_date
  * @property string $status
@@ -39,7 +38,6 @@ class CropProgressUpdate extends Model
         'update_date',
         'update_method',
         'question_answers',
-        'selected_images',
         'calculated_progress',
         'next_update_date',
         'status'
@@ -49,7 +47,6 @@ class CropProgressUpdate extends Model
         'update_date' => 'datetime',
         'next_update_date' => 'datetime',
         'question_answers' => 'array',
-        'selected_images' => 'array',
         'calculated_progress' => 'integer'
     ];
 
@@ -194,40 +191,6 @@ class CropProgressUpdate extends Model
         return $maxScore > 0 ? round(($totalScore / $maxScore) * 100) : 0;
     }
 
-    /**
-     * Calculate progress based on selected images
-     */
-    public static function calculateProgressFromImages(array $selectedImages): int
-    {
-        $totalScore = 0;
-        $maxScore = count($selectedImages) * 10; // Each image worth 10 points
-
-        foreach ($selectedImages as $imageId => $imageData) {
-            // Assign points based on image condition
-            if (isset($imageData['condition'])) {
-                switch (strtolower($imageData['condition'])) {
-                    case 'excellent':
-                        $totalScore += 10;
-                        break;
-                    case 'good':
-                        $totalScore += 8;
-                        break;
-                    case 'fair':
-                        $totalScore += 6;
-                        break;
-                    case 'poor':
-                        $totalScore += 3;
-                        break;
-                    default:
-                        $totalScore += 5;
-                }
-            } else {
-                $totalScore += 5; // Default score
-            }
-        }
-
-        return $maxScore > 0 ? round(($totalScore / $maxScore) * 100) : 0;
-    }
 
     /**
      * Get the week number for this progress update

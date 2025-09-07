@@ -397,6 +397,21 @@ document.addEventListener('DOMContentLoaded', function() {
                                 const locEl = card.querySelector('.user-field:nth-child(2) .text-truncate');
                                 if (locEl) locEl.textContent = `${farm.city_municipality_name || ''}, ${farm.province_name || ''}`;
                             }
+                            
+                            // Show success message
+                            const alert = document.createElement('div');
+                            alert.className = 'alert alert-success d-flex align-items-center mt-2';
+                            alert.innerHTML = `<i class="fas fa-check-circle me-2"></i><div>Farm updated successfully.</div>`;
+                            const container = document.querySelector('.admin-content');
+                            container?.insertBefore(alert, container.firstChild);
+                            
+                            // Auto-hide success message after 5 seconds
+                            setTimeout(() => {
+                                alert.style.transition = 'opacity 0.5s ease';
+                                alert.style.opacity = '0';
+                                setTimeout(() => alert.remove(), 500);
+                            }, 5000);
+                            
                             userModal.hide();
                         })
                         .catch((err) => {

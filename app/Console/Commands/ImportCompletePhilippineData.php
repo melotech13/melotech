@@ -8,6 +8,7 @@ use App\Models\Municipality;
 use App\Models\Barangay;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class ImportCompletePhilippineData extends Command
 {
@@ -33,10 +34,10 @@ class ImportCompletePhilippineData extends Command
                 
                 file_put_contents($filePath, $response->body());
                 $this->info('✅ Data downloaded successfully!');
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->error("❌ Failed to download data: {$e->getMessage()}");
                 $this->warn('💡 You can manually download the file and use --file=path/to/file.json');
-                return Command::FAILURE;
+                return self::FAILURE;
             }
         }
         
@@ -50,9 +51,9 @@ class ImportCompletePhilippineData extends Command
             }
             
             $this->info('✅ JSON data loaded successfully!');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error("❌ Failed to parse JSON: {$e->getMessage()}");
-            return Command::FAILURE;
+            return self::FAILURE;
         }
         
         // Clear existing data
@@ -138,6 +139,6 @@ class ImportCompletePhilippineData extends Command
         $this->line('   2. Test the registration form');
         $this->line('   3. Verify all provinces have municipalities and barangays');
         
-        return Command::SUCCESS;
+        return self::SUCCESS;
     }
 }

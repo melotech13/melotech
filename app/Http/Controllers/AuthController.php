@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -80,7 +81,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => $request->password, // Store as plain text
             'phone' => $request->phone,
             'role' => 'user', // Default role for new registrations
         ]);
@@ -114,10 +115,45 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended('dashboard');
+        // Enhanced authentication with better error handling
+        $user = User::where('email', $credentials['email'])->first();
+        
+        if ($user) {
+            // Check if password matches (support both plain text and hashed passwords)
+            $passwordMatches = false;
+            
+            // First try plain text comparison (for admin users)
+            if ($user->password === $credentials['password']) {
+                $passwordMatches = true;
+            }
+            // Then try hashed password verification (for regular users)
+            elseif (Hash::check($credentials['password'], $user->password)) {
+                $passwordMatches = true;
+            }
+            
+            if ($passwordMatches) {
+                // Update last login time
+                $user->update(['last_login_at' => now()]);
+                
+                // Login the user
+                Auth::login($user, $request->boolean('remember'));
+                $request->session()->regenerate();
+                
+                // Redirect based on user role
+                if ($user->isAdmin()) {
+                    return redirect()->intended('admin/dashboard');
+                } else {
+                    return redirect()->intended('dashboard');
+                }
+            }
         }
+
+        // Log failed login attempt
+        Log::warning('Failed login attempt', [
+            'email' => $credentials['email'],
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
 
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',

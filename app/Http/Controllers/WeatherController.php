@@ -476,6 +476,41 @@ class WeatherController extends Controller
         $user = auth()->user();
         $farms = $user->farms;
         
-        return view('weather.index', compact('farms'));
+        return view('user.weather.index', compact('farms'));
+    }
+
+    /**
+     * Get weather information for API requests
+     */
+    public function getWeatherInfo(Request $request): JsonResponse
+    {
+        try {
+            $location = $request->get('location');
+            
+            if (!$location) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Location parameter is required'
+                ], 400);
+            }
+
+            // For now, return a simple response since the location parsing is complex
+            // This can be enhanced later with proper location parsing
+            $html = '<div class="weather-info"><p>Weather information for: ' . htmlspecialchars($location) . '</p><p class="text-muted">Weather data will be available soon.</p></div>';
+
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'location' => $location
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Weather API error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch weather information'
+            ], 500);
+        }
     }
 }

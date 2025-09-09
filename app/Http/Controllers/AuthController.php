@@ -99,8 +99,8 @@ class AuthController extends Controller
             'barangay_name' => $request->barangay_name,
         ]);
 
-        // Redirect to login page with success message
-        return redirect()->route('login')->with('success', 'Account created successfully! Please login with your email and password.');
+        // Redirect to login page
+        return redirect()->route('login');
     }
 
     public function showLogin()

@@ -7,6 +7,7 @@ use App\Models\Farm;
 use App\Models\PhotoAnalysis;
 use App\Models\CropProgressUpdate;
 use App\Models\Notification;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -34,7 +35,54 @@ class AdminController extends Controller
         // Recent Activity Feed data
         $activityFeed = $this->getActivityFeed();
 
-        return view('admin.dashboard', compact('stats', 'activityFeed'));
+        // Daily activity data for the last 7 days
+        $dailyActivity = $this->getDailyActivityData();
+
+        return view('admin.dashboard', compact('stats', 'activityFeed', 'dailyActivity'));
+    }
+
+    /**
+     * Get daily activity data for the last 7 days.
+     */
+    private function getDailyActivityData()
+    {
+        try {
+            $dailyActivity = [];
+            
+            // Get data for the last 7 days
+            for ($i = 6; $i >= 0; $i--) {
+                $date = Carbon::now()->subDays($i);
+                $startOfDay = $date->copy()->startOfDay();
+                $endOfDay = $date->copy()->endOfDay();
+                
+                // Count new users registered on this day
+                $newUsers = User::where('role', 'user')
+                    ->whereBetween('created_at', [$startOfDay, $endOfDay])
+                    ->count();
+                
+                // Count new farms created on this day
+                $newFarms = Farm::whereBetween('created_at', [$startOfDay, $endOfDay])
+                    ->count();
+                
+                // Count photo analyses created on this day
+                $newAnalyses = PhotoAnalysis::whereBetween('created_at', [$startOfDay, $endOfDay])
+                    ->count();
+                
+                $dailyActivity[] = [
+                    'date' => $date->format('M d'),
+                    'date_full' => $date->format('Y-m-d'),
+                    'new_users' => $newUsers,
+                    'new_farms' => $newFarms,
+                    'new_analyses' => $newAnalyses,
+                    'total_activity' => $newUsers + $newFarms + $newAnalyses,
+                ];
+            }
+            
+            return $dailyActivity;
+        } catch (\Exception $e) {
+            Log::error('Error getting daily activity data: ' . $e->getMessage());
+            return [];
+        }
     }
 
     /**
@@ -229,6 +277,9 @@ class AdminController extends Controller
             // Store password as provided (system supports plain or hashed)
             $user->update($validated);
 
+            // Notify about admin-updated user
+            NotificationService::notifyAdminUpdatedUser(Auth::user(), $user);
+
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -237,8 +288,7 @@ class AdminController extends Controller
                 ]);
             }
 
-            return redirect()->route('admin.users.show', $user)
-                ->with('success', 'User updated successfully.');
+            return redirect()->route('admin.users.show', $user);
                 
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {
@@ -346,11 +396,14 @@ class AdminController extends Controller
 
         $user = User::create($userData);
 
+        // Notify about admin-created user
+        NotificationService::notifyAdminCreatedUser(Auth::user(), $user);
+
         // Removed email verified flag handling as per requirements
 
         // Create farm only for non-admin users
         if (strtolower($user->role) === 'user') {
-            Farm::create([
+            $farm = Farm::create([
                 'user_id' => $user->id,
                 'farm_name' => $validated['farm_name'] ?? '',
                 'province_name' => $validated['province_name'] ?? '',
@@ -361,10 +414,12 @@ class AdminController extends Controller
                 'field_size' => $validated['field_size'] ?? null,
                 'field_size_unit' => $validated['field_size_unit'] ?? null,
             ]);
+            
+            // Notify about admin-created farm
+            NotificationService::notifyAdminCreatedFarm(Auth::user(), $farm);
         }
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'User created successfully.');
+        return redirect()->route('admin.users.index');
     }
 
     /**
@@ -383,7 +438,14 @@ class AdminController extends Controller
             return back()->with('error', 'You cannot delete your own account.');
         }
 
+        // Store user info before deletion for notification
+        $userName = $user->name;
+        $userEmail = $user->email;
+        
         $user->delete();
+
+        // Notify about admin-deleted user
+        NotificationService::notifyAdminDeletedUser(Auth::user(), $userName, $userEmail);
 
         if (request()->ajax() || request()->wantsJson()) {
             return response()->json([
@@ -392,7 +454,7 @@ class AdminController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
+        return redirect()->route('admin.users.index');
     }
 
     /**
@@ -459,10 +521,7 @@ class AdminController extends Controller
     public function showFarm(Farm $farm)
     {
         $farm->load(['user', 'cropGrowth', 'cropProgressUpdates']);
-        if (request()->ajax() || request()->boolean('modal')) {
-            return view('admin.farms._modal_show', compact('farm'));
-        }
-        return view('admin.farms.show', compact('farm'));
+        return view('admin.farms._modal_show', compact('farm'));
     }
 
     /**
@@ -501,7 +560,7 @@ class AdminController extends Controller
     public function editFarm(Farm $farm)
     {
         if (request()->ajax() || request()->boolean('modal')) {
-            return view('admin.farms._modal_edit', compact('farm'));
+            return view('admin.farms.modal_edit', compact('farm'));
         }
         return view('admin.farms.edit', compact('farm'));
     }
@@ -524,6 +583,9 @@ class AdminController extends Controller
 
         $farm->update($validated);
 
+        // Notify about admin-updated farm
+        NotificationService::notifyAdminUpdatedFarm(Auth::user(), $farm);
+
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
@@ -532,8 +594,7 @@ class AdminController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.farms.show', $farm)
-            ->with('success', 'Farm updated successfully.');
+        return redirect()->route('admin.farms.show', $farm);
     }
 
     /**
@@ -545,6 +606,10 @@ class AdminController extends Controller
         $userDeleted = false;
         $shouldDeleteUser = false;
 
+        // Store farm info before deletion for notification
+        $farmName = $farm->farm_name;
+        $ownerName = $user ? $user->name : 'Unknown';
+
         if ($user) {
             // If this is the owner's only farm, mark the owner for deletion (avoid deleting admins)
             $shouldDeleteUser = ($user->farms()->count() === 1) && (strtolower($user->role) !== 'admin');
@@ -552,6 +617,9 @@ class AdminController extends Controller
 
         // Delete the farm first
         $farm->delete();
+
+        // Notify about admin-deleted farm
+        NotificationService::notifyAdminDeletedFarm(Auth::user(), $farmName, $ownerName);
 
         // Optionally delete the owning user account
         if ($shouldDeleteUser) {
@@ -571,7 +639,7 @@ class AdminController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.farms.index')->with('success', $message);
+        return redirect()->route('admin.farms.index');
     }
 
     /**
@@ -587,8 +655,11 @@ class AdminController extends Controller
      */
     public function notifications()
     {
-        // Get notifications from database
-        $notifications = Notification::with('user')
+        $currentUser = Auth::user();
+        
+        // Get notifications for the current user only
+        $notifications = Notification::where('user_id', $currentUser->id)
+            ->with('user')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
@@ -822,13 +893,19 @@ class AdminController extends Controller
      */
     public function getDropdownNotifications()
     {
-        // Get recent notifications from database
-        $notifications = Notification::with('user')
+        $currentUser = Auth::user();
+        
+        // Get recent notifications for the current user only
+        $notifications = Notification::where('user_id', $currentUser->id)
+            ->with('user')
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
 
-        $unreadCount = Notification::where('read', false)->count();
+        // Get unread count for the current user only
+        $unreadCount = Notification::where('user_id', $currentUser->id)
+            ->where('read', false)
+            ->count();
 
         return response()->json([
             'notifications' => $notifications,
@@ -841,7 +918,12 @@ class AdminController extends Controller
      */
     public function markAllNotificationsRead()
     {
-        Notification::where('read', false)->update(['read' => true]);
+        $currentUser = Auth::user();
+        
+        // Mark all notifications as read for the current user only
+        Notification::where('user_id', $currentUser->id)
+            ->where('read', false)
+            ->update(['read' => true]);
 
         return response()->json([
             'success' => true,
@@ -854,7 +936,12 @@ class AdminController extends Controller
      */
     public function getUnreadCount()
     {
-        $unreadCount = Notification::where('read', false)->count();
+        $currentUser = Auth::user();
+        
+        // Get unread count for the current user only
+        $unreadCount = Notification::where('user_id', $currentUser->id)
+            ->where('read', false)
+            ->count();
 
         return response()->json([
             'unread_count' => $unreadCount

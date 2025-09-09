@@ -53,12 +53,6 @@
     </div>
     @endif
 
-    @if(session('success'))
-        <div class="alert alert-success d-flex align-items-center mt-2" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            <div>{{ session('success') }}</div>
-        </div>
-    @endif
     @if(session('error'))
         <div class="alert alert-danger d-flex align-items-center mt-2" role="alert">
             <i class="fas fa-triangle-exclamation me-2"></i>
@@ -309,6 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // After content loads, if it's the edit form, wire up AJAX submit
                 const editForm = userModalEl.querySelector('#editUserForm');
                 if (editForm) {
+                    console.log('User edit form found, setting up AJAX submit...');
                     editForm.addEventListener('submit', function(e) {
                         e.preventDefault();
                         const form = e.currentTarget;
@@ -378,19 +373,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 }
                             }
                             
-                            // Show success message
-                            const alert = document.createElement('div');
-                            alert.className = 'alert alert-success d-flex align-items-center mt-2';
-                            alert.innerHTML = `<i class="fas fa-check-circle me-2"></i><div>User updated successfully.</div>`;
-                            const container = document.querySelector('.admin-content');
-                            container?.insertBefore(alert, container.firstChild);
+                            // Show success modal
+                            const userName = found?.querySelector('.user-name')?.textContent?.trim() || '';
+                            showOperationSuccess('update', 'user', userName);
                             
-                            // Auto-hide success message after 5 seconds
-                            setTimeout(() => {
-                                alert.style.transition = 'opacity 0.5s ease';
-                                alert.style.opacity = '0';
-                                setTimeout(() => alert.remove(), 500);
-                            }, 5000);
+                            // Refresh notifications after successful update
+                            if (typeof window.refreshNotifications === 'function') {
+                                window.refreshNotifications();
+                            }
                             
                             userModal.hide();
                         })
@@ -510,11 +500,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => { card.remove(); }, 260);
             }
 
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-success d-flex align-items-center mt-2';
-            alert.innerHTML = `<i class="fas fa-check-circle me-2"></i><div>${data.message || 'User deleted successfully.'}</div>`;
-            const container = document.querySelector('.admin-content');
-            container?.insertBefore(alert, container.firstChild);
+            // Show success modal
+            const userName = card?.querySelector('.user-name')?.textContent?.trim() || '';
+            showOperationSuccess('delete', 'user', userName);
+
+            // Refresh notifications after successful deletion
+            if (typeof window.refreshNotifications === 'function') {
+                window.refreshNotifications();
+            }
 
             if (button) {
                 button.disabled = false;

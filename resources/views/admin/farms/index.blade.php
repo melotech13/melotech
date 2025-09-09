@@ -54,12 +54,6 @@
     </div>
 </div>
 
-@if(session('success'))
-    <div class="alert alert-success d-flex align-items-center mt-2" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
-        <div>{{ session('success') }}</div>
-    </div>
-@endif
 @if(session('error'))
     <div class="alert alert-danger d-flex align-items-center mt-2" role="alert">
         <i class="fas fa-triangle-exclamation me-2"></i>
@@ -134,7 +128,7 @@
             data-id="{{ $farm->id }}"
             data-name="{{ strtolower($farm->farm_name) }}"
             data-owner="{{ strtolower($farm->user->name) }}"
-            data-location="{{ strtolower($farm->city_municipality_name . ', ' . $farm->province_name) }}"
+            data-location="{{ strtolower(($farm->barangay_name ? $farm->barangay_name . ', ' : '') . $farm->city_municipality_name . ', ' . $farm->province_name) }}"
             data-variety="{{ $farm->watermelon_variety ?: 'N/A' }}"
             data-field-size="{{ $farm->field_size ? $farm->field_size . ' ' . $farm->field_size_unit : 'N/A' }}"
             data-planting-date="{{ $farm->planting_date ? $farm->planting_date->format('M d, Y') : 'N/A' }}"
@@ -160,7 +154,12 @@
                 <div class="user-field">
                     <div class="field-label">Location</div>
                     <div class="cell-with-action">
-                        <span class="text-truncate" title="{{ $farm->province_name }}">{{ $farm->city_municipality_name }}, {{ $farm->province_name }}</span>
+                        <span class="text-truncate" title="{{ $farm->barangay_name ? $farm->barangay_name . ', ' : '' }}{{ $farm->city_municipality_name }}, {{ $farm->province_name }}">
+                            @if($farm->barangay_name)
+                                {{ $farm->barangay_name }}, 
+                            @endif
+                            {{ $farm->city_municipality_name }}, {{ $farm->province_name }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -364,10 +363,66 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             e.stopPropagation();
             const href = editLink.getAttribute('href');
-            loadIntoModal(href, () => {
+            
+            // Set up modal event listener for when it's fully shown
+            const handleModalShown = () => {
+                console.log('Modal shown event triggered');
                 const editForm = userModalEl.querySelector('#editFarmForm');
-                if (!editForm) return;
-                editForm.addEventListener('submit', function(ev) {
+                if (!editForm) {
+                    console.error('Edit form not found in modal');
+                    console.log('Available elements in modal:', userModalEl.querySelectorAll('*'));
+                    return;
+                }
+                
+                console.log('Edit form found, checking dropdowns...');
+                const provinceSelect = userModalEl.querySelector('#edit_province');
+                const varietySelect = userModalEl.querySelector('#edit_watermelon_variety');
+                const sizeUnitSelect = userModalEl.querySelector('#edit_field_size_unit');
+                
+                console.log('Dropdown elements in modal:', {
+                    province: !!provinceSelect,
+                    variety: !!varietySelect,
+                    sizeUnit: !!sizeUnitSelect
+                });
+                
+                console.log('Current dropdown values:', {
+                    variety: varietySelect?.value || 'not set',
+                    sizeUnit: sizeUnitSelect?.value || 'not set',
+                    province: provinceSelect?.value || 'not set'
+                });
+                
+                console.log('Modal fully shown, initializing farm edit dropdowns...');
+                // Add a longer delay to ensure DOM is fully ready and locations data is loaded
+                setTimeout(() => {
+                    console.log('🚀 Starting farm edit dropdown initialization...');
+                    initializeFarmEditDropdowns();
+                }, 500);
+                
+                // Add a fallback initialization attempt
+                setTimeout(() => {
+                    console.log('Fallback initialization attempt...');
+                    const provinceSelect = userModalEl.querySelector('#edit_province');
+                    if (provinceSelect && provinceSelect.value === '') {
+                        console.log('Province not set, attempting fallback initialization...');
+                        initializeFarmEditDropdowns();
+                    }
+                }, 1000);
+                
+                // Remove the event listener after first use
+                userModalEl.removeEventListener('shown.bs.modal', handleModalShown);
+            };
+            
+            // Add event listener for when modal is fully shown
+            userModalEl.addEventListener('shown.bs.modal', handleModalShown);
+            
+            loadIntoModal(href, () => {
+                // This callback runs when content is loaded, but modal might not be fully shown yet
+                console.log('Modal content loaded, waiting for modal to be fully shown...');
+                
+                // Set up form submission handler
+                const editForm = userModalEl.querySelector('#editFarmForm');
+                if (editForm) {
+                    editForm.addEventListener('submit', function(ev) {
                     ev.preventDefault();
                     const form = ev.currentTarget;
                     const action = form.getAttribute('action');
@@ -385,7 +440,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (card) {
                                 card.setAttribute('data-name', (farm.farm_name || '').toLowerCase());
                                 card.setAttribute('data-owner', (farm.user?.name || '').toLowerCase());
-                                card.setAttribute('data-location', ((farm.city_municipality_name || '') + ', ' + (farm.province_name || '')).toLowerCase());
+                                card.setAttribute('data-location', ((farm.barangay_name ? farm.barangay_name + ', ' : '') + (farm.city_municipality_name || '') + ', ' + (farm.province_name || '')).toLowerCase());
                                 const nameEl = card.querySelector('.user-name');
                                 if (nameEl) nameEl.textContent = farm.farm_name || '';
                                 const badges = card.querySelector('.badges');
@@ -395,22 +450,21 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <span class=\"badge bg-primary\"><i class=\"fas fa-ruler-combined me-1\"></i>${farm.field_size ?? ''} ${farm.field_size_unit ?? ''}</span>`;
                                 }
                                 const locEl = card.querySelector('.user-field:nth-child(2) .text-truncate');
-                                if (locEl) locEl.textContent = `${farm.city_municipality_name || ''}, ${farm.province_name || ''}`;
+                                if (locEl) {
+                                    const locationText = `${farm.barangay_name ? farm.barangay_name + ', ' : ''}${farm.city_municipality_name || ''}, ${farm.province_name || ''}`;
+                                    locEl.textContent = locationText;
+                                    locEl.setAttribute('title', locationText);
+                                }
                             }
                             
-                            // Show success message
-                            const alert = document.createElement('div');
-                            alert.className = 'alert alert-success d-flex align-items-center mt-2';
-                            alert.innerHTML = `<i class="fas fa-check-circle me-2"></i><div>Farm updated successfully.</div>`;
-                            const container = document.querySelector('.admin-content');
-                            container?.insertBefore(alert, container.firstChild);
+                            // Show success modal
+                            const farmName = found?.querySelector('.farm-name')?.textContent?.trim() || '';
+                            showOperationSuccess('update', 'farm', farmName);
                             
-                            // Auto-hide success message after 5 seconds
-                            setTimeout(() => {
-                                alert.style.transition = 'opacity 0.5s ease';
-                                alert.style.opacity = '0';
-                                setTimeout(() => alert.remove(), 500);
-                            }, 5000);
+                            // Refresh notifications after successful update
+                            if (typeof window.refreshNotifications === 'function') {
+                                window.refreshNotifications();
+                            }
                             
                             userModal.hide();
                         })
@@ -421,7 +475,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 alert('Failed to save changes.');
                             }
                         });
-                });
+                    });
+                }
             });
         }
     });
@@ -506,11 +561,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => { card.remove(); }, 260);
             }
 
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-success d-flex align-items-center mt-2';
-            alert.innerHTML = `<i class="fas fa-check-circle me-2"></i><div>${data.message || 'Farm deleted successfully.'}</div>`;
-            const container = document.querySelector('.admin-content');
-            container?.insertBefore(alert, container.firstChild);
+            // Show success modal
+            const farmName = card?.querySelector('.farm-name')?.textContent?.trim() || '';
+            showOperationSuccess('delete', 'farm', farmName);
+
+            // Refresh notifications after successful deletion
+            if (typeof window.refreshNotifications === 'function') {
+                window.refreshNotifications();
+            }
 
             if (button) {
                 button.disabled = false;
@@ -567,7 +625,7 @@ function exportFarmsAsExcel() {
         const owner = card.getAttribute('data-owner') || '';
         rowData.push('"' + owner.replace(/"/g, '""') + '"');
         
-        // Location
+        // Location (now includes barangay, municipality, province)
         const location = card.getAttribute('data-location') || '';
         rowData.push('"' + location.replace(/"/g, '""') + '"');
         
@@ -598,6 +656,237 @@ function exportFarmsAsExcel() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+/**
+ * Populate select dropdown with options (without setting a specific value)
+ */
+function populateSelect(selectElement, options, placeholder = 'Select...') {
+    selectElement.innerHTML = '';
+    
+    // Add placeholder
+    const placeholderOption = document.createElement('option');
+    placeholderOption.value = '';
+    placeholderOption.textContent = placeholder;
+    selectElement.appendChild(placeholderOption);
+    
+    // Add options
+    options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option;
+        optionElement.textContent = option;
+        selectElement.appendChild(optionElement);
+    });
+    
+    selectElement.disabled = false;
+}
+
+/**
+ * Populate select dropdown with options and set a specific value
+ */
+function populateSelectWithValue(selectElement, options, placeholder = 'Select...', currentValue = '') {
+    console.log(`🔄 Populating ${selectElement.id} with ${options.length} options, current value: ${currentValue}`);
+    selectElement.innerHTML = '';
+    
+    // Add placeholder
+    const placeholderOption = document.createElement('option');
+    placeholderOption.value = '';
+    placeholderOption.textContent = placeholder;
+    selectElement.appendChild(placeholderOption);
+    
+    // Add options
+    options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option;
+        optionElement.textContent = option;
+        selectElement.appendChild(optionElement);
+    });
+    
+    selectElement.disabled = false;
+    
+    // Set the current value if it exists
+    if (currentValue) {
+        if (options.includes(currentValue)) {
+        selectElement.value = currentValue;
+            console.log(`✅ Set ${selectElement.id} to existing value:`, currentValue);
+        } else {
+            // If current value is not in options, add it and select it
+            const currentOption = document.createElement('option');
+            currentOption.value = currentValue;
+            currentOption.textContent = currentValue;
+            currentOption.selected = true;
+            selectElement.appendChild(currentOption);
+            selectElement.value = currentValue;
+            console.log(`✅ Added and selected current value:`, currentValue);
+        }
+    }
+    
+    console.log(`✅ ${selectElement.id} populated with ${selectElement.options.length} options, selected: ${selectElement.value}`);
+}
+
+/**
+ * Initialize location dropdowns for farm edit modal - using same system as registration
+ */
+async function initializeFarmEditDropdowns() {
+    console.log('🔧 Initializing farm edit dropdowns using registration system...');
+    
+    const provinceSelect = document.getElementById('edit_province');
+    const municipalitySelect = document.getElementById('edit_city_municipality');
+    const barangaySelect = document.getElementById('edit_barangay');
+    
+    if (!provinceSelect || !municipalitySelect || !barangaySelect) {
+        console.error('❌ Required select elements not found for farm edit');
+        return;
+    }
+
+    try {
+        // Get current values
+        const currentProvince = document.getElementById('current_province')?.value || '';
+        const currentMunicipality = document.getElementById('current_city_municipality')?.value || '';
+        const currentBarangay = document.getElementById('current_barangay')?.value || '';
+        
+        console.log('Current values:', { currentProvince, currentMunicipality, currentBarangay });
+        
+        // Load locations data using the same system as registration
+        const data = await loadLocationsData();
+        console.log('✅ Locations data loaded for farm edit');
+        
+        // Populate provinces - keep current value and add all others
+        const provinces = Object.keys(data).sort();
+        provinceSelect.innerHTML = '';
+        
+        // Add current province first if it exists
+        if (currentProvince) {
+            const currentOption = document.createElement('option');
+            currentOption.value = currentProvince;
+            currentOption.textContent = currentProvince;
+            currentOption.selected = true;
+            provinceSelect.appendChild(currentOption);
+        }
+        
+        // Add all other provinces
+        provinces.forEach(province => {
+            if (province !== currentProvince) {
+                const option = document.createElement('option');
+                option.value = province;
+                option.textContent = province;
+                provinceSelect.appendChild(option);
+            }
+        });
+        
+        // If current province exists, populate municipalities
+        if (currentProvince && data[currentProvince]) {
+            const municipalities = Object.keys(data[currentProvince]).sort();
+            municipalitySelect.innerHTML = '';
+            
+            // Add current municipality first if it exists
+            if (currentMunicipality) {
+                const currentOption = document.createElement('option');
+                currentOption.value = currentMunicipality;
+                currentOption.textContent = currentMunicipality;
+                currentOption.selected = true;
+                municipalitySelect.appendChild(currentOption);
+            }
+            
+            // Add all other municipalities
+            municipalities.forEach(municipality => {
+                if (municipality !== currentMunicipality) {
+                    const option = document.createElement('option');
+                    option.value = municipality;
+                    option.textContent = municipality;
+                    municipalitySelect.appendChild(option);
+                }
+            });
+            
+            // If current municipality exists, populate barangays
+            if (currentMunicipality && data[currentProvince][currentMunicipality]) {
+                const barangays = data[currentProvince][currentMunicipality].sort();
+                barangaySelect.innerHTML = '';
+                
+                // Add current barangay first if it exists
+                if (currentBarangay) {
+                    const currentOption = document.createElement('option');
+                    currentOption.value = currentBarangay;
+                    currentOption.textContent = currentBarangay;
+                    currentOption.selected = true;
+                    barangaySelect.appendChild(currentOption);
+                }
+                
+                // Add all other barangays
+                barangays.forEach(barangay => {
+                    if (barangay !== currentBarangay) {
+                        const option = document.createElement('option');
+                        option.value = barangay;
+                        option.textContent = barangay;
+                        barangaySelect.appendChild(option);
+                    }
+                });
+            }
+        }
+        
+        // Add event listeners for cascading dropdowns
+        provinceSelect.addEventListener('change', function() {
+            const selectedProvince = this.value;
+            
+            // Reset dependent dropdowns
+            municipalitySelect.innerHTML = '<option value="">Select Municipality/City</option>';
+            municipalitySelect.disabled = !selectedProvince;
+            barangaySelect.innerHTML = '<option value="">Select Municipality first</option>';
+            barangaySelect.disabled = true;
+            
+            if (selectedProvince && data[selectedProvince]) {
+                const municipalities = Object.keys(data[selectedProvince]).sort();
+                municipalities.forEach(municipality => {
+                    const option = document.createElement('option');
+                    option.value = municipality;
+                    option.textContent = municipality;
+                    municipalitySelect.appendChild(option);
+                });
+                municipalitySelect.disabled = false;
+            }
+        });
+        
+        municipalitySelect.addEventListener('change', function() {
+            const selectedProvince = provinceSelect.value;
+            const selectedMunicipality = this.value;
+            
+            // Reset barangay dropdown
+            barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+            barangaySelect.disabled = !selectedMunicipality;
+            
+            if (selectedProvince && selectedMunicipality && 
+                data[selectedProvince] && data[selectedProvince][selectedMunicipality]) {
+                const barangays = data[selectedProvince][selectedMunicipality].sort();
+                barangays.forEach(barangay => {
+                    const option = document.createElement('option');
+                    option.value = barangay;
+                    option.textContent = barangay;
+                    barangaySelect.appendChild(option);
+                });
+                barangaySelect.disabled = false;
+            }
+        });
+        
+        console.log('✅ Farm edit dropdowns initialized successfully with full data!');
+        
+    } catch (error) {
+        console.error('❌ Failed to initialize farm edit dropdowns:', error);
+        
+        // Show current values as fallback
+        const currentProvince = document.getElementById('current_province')?.value;
+        const currentMunicipality = document.getElementById('current_city_municipality')?.value;
+        const currentBarangay = document.getElementById('current_barangay')?.value;
+        
+        if (currentProvince) {
+            provinceSelect.innerHTML = `<option value="${currentProvince}" selected>${currentProvince}</option>`;
+        }
+        if (currentMunicipality) {
+            municipalitySelect.innerHTML = `<option value="${currentMunicipality}" selected>${currentMunicipality}</option>`;
+        }
+        if (currentBarangay) {
+            barangaySelect.innerHTML = `<option value="${currentBarangay}" selected>${currentBarangay}</option>`;
+        }
+    }
 }
 </script>
 @endsection

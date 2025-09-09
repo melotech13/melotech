@@ -1554,5 +1554,8 @@
         }
     });
     </script>
+
+    <!-- Success Modal Component -->
+    @include('components.success-modal')
 </body>
 </html>

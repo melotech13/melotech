@@ -42,7 +42,7 @@ class ProfileController extends Controller
             'phone' => $request->phone,
         ]);
 
-        return redirect()->route('profile.settings')->with('success', 'Profile updated successfully!');
+        return redirect()->route('profile.settings', ['updated' => 'true']);
     }
 
     /**
@@ -68,6 +68,6 @@ class ProfileController extends Controller
             'password' => $request->password, // Store as plain text
         ]);
 
-        return redirect()->route('profile.settings')->with('success', 'Password updated successfully!');
+        return redirect()->route('profile.settings', ['updated' => 'true']);
     }
 }

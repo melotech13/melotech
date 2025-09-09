@@ -4,13 +4,6 @@
 
 @section('content')
 <div class="crop-growth-container">
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -1276,7 +1269,9 @@ function forceUpdateProgress(farmId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Progress updated successfully!');
+            // Show success modal
+            const farmName = document.querySelector('.farm-name')?.textContent?.trim() || '';
+            showOperationSuccess('update', 'farm', farmName);
             window.location.reload();
         } else {
             alert('Failed to update progress: ' + data.message);
@@ -1297,5 +1292,26 @@ function setupActivityButtons() {
 }
 
 // Help and Quick Actions functions removed - single farm per account
+
+// Show success modal if farm was just created
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we have a selected_farm parameter in the URL, indicating a farm was just created
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedFarm = urlParams.get('selected_farm');
+    
+    if (selectedFarm) {
+        // Get the farm name from the page
+        const farmNameElement = document.querySelector('.farm-name, .farm-title, h2, h3');
+        const farmName = farmNameElement ? farmNameElement.textContent.trim() : '';
+        
+        // Show success modal
+        showOperationSuccess('create', 'farm', farmName);
+        
+        // Clean up the URL by removing the parameter
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.delete('selected_farm');
+        window.history.replaceState({}, '', newUrl);
+    }
+});
 </script>
 @endpush

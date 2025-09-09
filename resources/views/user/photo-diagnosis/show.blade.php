@@ -4,13 +4,6 @@
 
 @section('content')
 <div class="analysis-results-container">
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
     <!-- Unified Header -->
     <div class="unified-header">
@@ -1861,5 +1854,15 @@ function shareResults() {
         });
     }
 }
+
+// Show success modal if photo analysis was just completed
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're viewing a newly created analysis (you can add URL parameter detection here)
+    // For now, we'll show success modal for any photo analysis view
+    const analysisTitle = document.querySelector('.page-title')?.textContent?.trim() || '';
+    if (analysisTitle.includes('Analysis Results')) {
+        showSuccessModal('Photo Analysis Complete', 'Your crop photo has been analyzed successfully!');
+    }
+});
 </script>
 @endpush

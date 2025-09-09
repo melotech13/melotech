@@ -214,7 +214,12 @@
                     <tr>
                         <td>{{ $farm->farm_name }}</td>
                         <td>{{ $farm->user->name }}</td>
-                        <td>{{ $farm->city_municipality_name }}, {{ $farm->province_name }}</td>
+                        <td>
+                            @if($farm->barangay_name)
+                                {{ $farm->barangay_name }}, 
+                            @endif
+                            {{ $farm->city_municipality_name }}, {{ $farm->province_name }}
+                        </td>
                         <td>
                             @if($farm->watermelon_variety)
                                 <span class="badge badge-variety">{{ $farm->watermelon_variety }}</span>

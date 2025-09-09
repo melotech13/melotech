@@ -335,7 +335,7 @@
             background: var(--danger-color);
             color: white;
             border-radius: 50%;
-            width: 18px;
+            min-width: 18px;
             height: 18px;
             font-size: 0.7rem;
             font-weight: 600;
@@ -344,6 +344,12 @@
             justify-content: center;
             border: 2px solid var(--bg-primary);
             animation: pulse 2s infinite;
+            padding: 0 4px;
+            box-sizing: border-box;
+        }
+
+        .notification-badge:empty {
+            display: none;
         }
 
         @keyframes pulse {
@@ -748,7 +754,11 @@
                         <div class="dropdown">
                             <button class="notification-link dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-bell"></i>
-                                <span class="notification-badge" id="notificationBadge">0</span>
+                                <span class="notification-badge" id="notificationBadge" data-initial-count="{{ $unreadNotificationCount ?? 0 }}">
+                                    @if(($unreadNotificationCount ?? 0) > 0)
+                                        {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
+                                    @endif
+                                </span>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown">
                                 <div class="notification-header">
@@ -774,14 +784,6 @@
 
             <!-- Content Area -->
             <div class="admin-content">
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle me-2"></i>
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
                 @if(session('error'))
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="fas fa-exclamation-circle me-2"></i>
@@ -857,11 +859,29 @@
                 content.classList.add('fade-in');
             }
 
-            // Load notifications on page load
-            loadNotifications();
+            // Initialize notification badge with server-side count
+            const initialCount = parseInt(document.getElementById('notificationBadge').getAttribute('data-initial-count')) || 0;
+            updateNotificationBadge(initialCount);
             
-            // Load notifications every 30 seconds for real-time updates
-            setInterval(loadNotifications, 30000);
+            // Load notifications on page load (but don't override the initial count immediately)
+            loadNotifications(false);
+            
+            // Load notifications every 10 seconds for real-time updates
+            setInterval(loadNotifications, 10000);
+            
+            // Also load notifications when the dropdown is opened
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            if (notificationDropdown) {
+                notificationDropdown.addEventListener('shown.bs.dropdown', function() {
+                    loadNotifications(true); // Update count when dropdown is opened
+                });
+            }
+
+            // Global function to refresh notifications after admin actions
+            window.refreshNotifications = function() {
+                refreshNotificationCount();
+                loadNotifications();
+            };
 
             // Notification dropdown functionality
             const markAllReadDropdown = document.getElementById('markAllReadDropdown');
@@ -882,7 +902,8 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Reload notifications to reflect changes
+                            // Refresh notification count and list
+                            refreshNotificationCount();
                             loadNotifications();
                             
                             // Show success message
@@ -919,15 +940,44 @@
             }
 
             // Function to load notifications from backend
-            function loadNotifications() {
-                fetch('{{ route("admin.notifications.dropdown") }}')
-                .then(response => response.json())
+            function loadNotifications(updateCount = true) {
+                fetch('{{ route("admin.notifications.dropdown") }}', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    cache: 'no-cache'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    updateNotificationDropdown(data.notifications);
-                    updateNotificationBadge(data.unread_count);
+                    if (data && typeof data === 'object') {
+                        updateNotificationDropdown(data.notifications || []);
+                        // Only update count if explicitly requested or if it's different from current
+                        if (updateCount) {
+                            const currentCount = parseInt(document.getElementById('notificationBadge').textContent) || 0;
+                            const newCount = data.unread_count || 0;
+                            if (currentCount !== newCount) {
+                                updateNotificationBadge(newCount);
+                            }
+                        }
+                    } else {
+                        console.warn('Invalid notification data received:', data);
+                    }
                 })
                 .catch(error => {
                     console.error('Error loading notifications:', error);
+                    // Show error state in dropdown
+                    const notificationList = document.getElementById('notificationList');
+                    if (notificationList) {
+                        notificationList.innerHTML = '<div class="text-center p-3 text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Failed to load notifications</div>';
+                    }
                 });
             }
 
@@ -965,15 +1015,47 @@
 
             // Function to update notification badge
             function updateNotificationBadge(count) {
-                const badge = document.querySelector('.notification-badge');
+                const badge = document.getElementById('notificationBadge');
                 if (badge) {
-                    if (count > 0) {
-                        badge.textContent = count;
-                        badge.style.display = 'inline-block';
+                    // Ensure count is a valid number
+                    const validCount = parseInt(count) || 0;
+                    
+                    if (validCount > 0) {
+                        badge.textContent = validCount > 99 ? '99+' : validCount.toString();
+                        badge.style.display = 'flex';
+                        badge.style.visibility = 'visible';
                     } else {
                         badge.style.display = 'none';
+                        badge.style.visibility = 'hidden';
                     }
                 }
+            }
+
+            // Function to refresh notification count only
+            function refreshNotificationCount() {
+                fetch('{{ route("admin.notifications.unread-count") }}', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    cache: 'no-cache'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && typeof data === 'object') {
+                        updateNotificationBadge(data.unread_count || 0);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error refreshing notification count:', error);
+                });
             }
 
             // Function to get notification icon based on type
@@ -982,6 +1064,8 @@
                     'system': 'fas fa-cog text-info',
                     'user': 'fas fa-user text-success',
                     'farm': 'fas fa-seedling text-warning',
+                    'analysis': 'fas fa-camera text-primary',
+                    'progress': 'fas fa-chart-line text-info',
                     'default': 'fas fa-bell text-primary'
                 };
                 return icons[type] || icons.default;
@@ -1224,6 +1308,12 @@
             }
         });
     </script>
+
+    <!-- Success Modal Component -->
+    @include('components.success-modal')
+
+    <!-- Locations JavaScript for dropdowns -->
+    <script src="{{ asset('js/locations-simple.js') }}?v={{ time() }}"></script>
 </body>
 </html>
 

@@ -252,7 +252,7 @@
     <div class="chart-card">
         <div class="chart-header">
             <div class="chart-title">
-                <i class="fas fa-chart-line"></i>
+                <i class="fas fa-chart-bar"></i>
                 Activity Trends
             </div>
             <div class="chart-subtitle">Last 7 days activity overview</div>
@@ -317,7 +317,7 @@
     </div>
 </div>
 
-<script id="dashboard-data" type="application/json">{!! json_encode(['stats' => $stats, 'activityFeed' => $activityFeed]) !!}</script>
+<script id="dashboard-data" type="application/json">{!! json_encode(['stats' => $stats, 'activityFeed' => $activityFeed, 'dailyActivity' => $dailyActivity]) !!}</script>
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -339,70 +339,72 @@ document.addEventListener('DOMContentLoaded', function() {
     // Activity Overview Chart
     const activityCtx = document.getElementById('activityOverviewChart');
     if (activityCtx) {
-        // Generate sample data for the last 7 days
-        const last7Days = [];
-        const userRegistrations = [];
-        const farmCreations = [];
-        const photoAnalyses = [];
+        // Use real data from backend
+        const dailyActivity = data.dailyActivity || [];
         
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            last7Days.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-            
-            // Generate realistic sample data based on current stats
-            const baseUsers = Math.floor((data.stats.total_users || 0) / 30);
-            const baseFarms = Math.floor((data.stats.total_farms || 0) / 30);
-            const baseAnalyses = Math.floor((data.stats.total_photo_analyses || 0) / 30);
-            
-            userRegistrations.push(Math.floor(Math.random() * (baseUsers + 2)) + 1);
-            farmCreations.push(Math.floor(Math.random() * (baseFarms + 1)) + 1);
-            photoAnalyses.push(Math.floor(Math.random() * (baseAnalyses + 3)) + 1);
+        // Extract data for chart
+        const last7Days = dailyActivity.map(day => day.date);
+        const userRegistrations = dailyActivity.map(day => day.new_users);
+        const farmCreations = dailyActivity.map(day => day.new_farms);
+        const photoAnalyses = dailyActivity.map(day => day.new_analyses);
+        
+        // Debug: Log the data to console for verification
+        console.log('Daily Activity Data:', dailyActivity);
+        console.log('Chart Data:', {
+            labels: last7Days,
+            users: userRegistrations,
+            farms: farmCreations,
+            analyses: photoAnalyses
+        });
+        
+        // Ensure we have data for all 7 days (fallback for empty data)
+        if (last7Days.length === 0) {
+            console.warn('No daily activity data available, using fallback');
+            // Generate fallback data for the last 7 days
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                last7Days.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                userRegistrations.push(0);
+                farmCreations.push(0);
+                photoAnalyses.push(0);
+            }
         }
 
         new Chart(activityCtx, {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: last7Days,
                 datasets: [
                     {
                         label: 'New Users',
                         data: userRegistrations,
+                        backgroundColor: colors.primary + '80',
                         borderColor: colors.primary,
-                        backgroundColor: colors.primary + '20',
-                        borderWidth: 3,
-                        fill: false,
-                        tension: 0.4,
-                        pointBackgroundColor: colors.primary,
-                        pointBorderColor: colors.primary,
-                        pointRadius: 5,
-                        pointHoverRadius: 7
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        maxBarThickness: 40
                     },
                     {
                         label: 'New Farms',
                         data: farmCreations,
+                        backgroundColor: colors.success + '80',
                         borderColor: colors.success,
-                        backgroundColor: colors.success + '20',
-                        borderWidth: 3,
-                        fill: false,
-                        tension: 0.4,
-                        pointBackgroundColor: colors.success,
-                        pointBorderColor: colors.success,
-                        pointRadius: 5,
-                        pointHoverRadius: 7
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        maxBarThickness: 40
                     },
                     {
                         label: 'Photo Analyses',
                         data: photoAnalyses,
+                        backgroundColor: colors.warning + '80',
                         borderColor: colors.warning,
-                        backgroundColor: colors.warning + '20',
-                        borderWidth: 3,
-                        fill: false,
-                        tension: 0.4,
-                        pointBackgroundColor: colors.warning,
-                        pointBorderColor: colors.warning,
-                        pointRadius: 5,
-                        pointHoverRadius: 7
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        maxBarThickness: 40
                     }
                 ]
             },
@@ -427,7 +429,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         titleColor: 'white',
                         bodyColor: 'white',
                         borderColor: 'rgba(255, 255, 255, 0.1)',
-                        borderWidth: 1
+                        borderWidth: 1,
+                        callbacks: {
+                            title: function(context) {
+                                return 'Activity for ' + context[0].label;
+                            },
+                            label: function(context) {
+                                const label = context.dataset.label || '';
+                                const value = context.parsed.y;
+                                return label + ': ' + value + (value === 1 ? ' item' : ' items');
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -452,7 +464,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             font: {
                                 size: 11
                             }
-                        }
+                        },
+                        stacked: false
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 10,
+                        bottom: 10
                     }
                 },
                 interaction: {
@@ -460,8 +479,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     mode: 'index'
                 },
                 animation: {
-                    duration: 2000,
-                    easing: 'easeInOutQuart'
+                    duration: 1500,
+                    easing: 'easeOutQuart',
+                    delay: (context) => {
+                        let delay = 0;
+                        if (context.type === 'data' && context.mode === 'default') {
+                            delay = context.dataIndex * 100 + context.datasetIndex * 100;
+                        }
+                        return delay;
+                    }
                 }
             }
         });

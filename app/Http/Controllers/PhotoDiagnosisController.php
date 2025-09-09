@@ -73,8 +73,7 @@ class PhotoDiagnosisController extends Controller
             'analysis_details' => $result['analysis_details'] ?? null,
         ]);
 
-        return redirect()->route('photo-diagnosis.show', $photoAnalysis)
-            ->with('success', 'Photo analysis completed successfully!');
+        return redirect()->route('photo-diagnosis.show', $photoAnalysis);
     }
 
     /**

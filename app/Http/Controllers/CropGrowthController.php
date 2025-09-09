@@ -117,8 +117,7 @@ class CropGrowthController extends Controller
             $cropGrowth->overall_progress = 0;
             $cropGrowth->save();
 
-            return redirect()->route('crop-growth.index', ['selected_farm' => $farm->id])
-                ->with('success', 'Farm created successfully! Your crop growth tracking has begun.');
+            return redirect()->route('crop-growth.index', ['selected_farm' => $farm->id]);
                 
         } catch (\Exception $e) {
             Log::error('Error creating farm', ['error' => $e->getMessage(), 'user_id' => Auth::id()]);

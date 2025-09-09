@@ -24,7 +24,7 @@
         </div>
         <div class="col-12 col-md-6">
             <div class="form-floating">
-                <input type="text" readonly class="form-control" value="{{ $farm->province_name }}, {{ $farm->city_municipality_name }}">
+                <input type="text" readonly class="form-control" value="{{ $farm->barangay_name ? $farm->barangay_name . ', ' : '' }}{{ $farm->city_municipality_name }}, {{ $farm->province_name }}">
                 <label>Location</label>
             </div>
         </div>
@@ -51,5 +51,3 @@
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 </div>
-
-

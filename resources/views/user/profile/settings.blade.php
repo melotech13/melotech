@@ -13,14 +13,6 @@
                 <p class="lead text-muted">Manage your personal information and account preferences</p>
             </div>
 
-            <!-- Success Messages -->
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
 
             <!-- Profile Information Card -->
             <div class="card shadow-lg border-0 mb-4">
@@ -268,4 +260,24 @@
     font-weight: 500;
 }
 </style>
+
+@push('scripts')
+<script>
+// Show success modal if profile was just updated
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we have a URL parameter indicating a successful update
+    const urlParams = new URLSearchParams(window.location.search);
+    const updated = urlParams.get('updated');
+    
+    if (updated === 'true') {
+        showSuccessModal('Profile Updated', 'Your profile has been updated successfully!');
+        
+        // Clean up the URL
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.delete('updated');
+        window.history.replaceState({}, '', newUrl);
+    }
+});
+</script>
+@endpush
 @endsection

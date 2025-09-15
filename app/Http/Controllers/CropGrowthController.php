@@ -87,8 +87,8 @@ class CropGrowthController extends Controller
             'farm_name' => 'required|string|max:255',
             'watermelon_variety' => 'required|string|max:255',
             'planting_date' => 'required|date',
-            'field_size' => 'required|numeric|min:0.1',
-            'field_size_unit' => 'required|in:acres,hectares',
+            'land_size' => 'required|numeric|min:0.1',
+            'land_size_unit' => 'required|in:m2,ha',
             'province_name' => 'required|string|max:255',
             'city_municipality_name' => 'required|string|max:255',
             'barangay_name' => 'nullable|string|max:255',
@@ -102,8 +102,8 @@ class CropGrowthController extends Controller
             $farm->farm_name = $request->farm_name;
             $farm->watermelon_variety = $request->watermelon_variety;
             $farm->planting_date = $request->planting_date;
-            $farm->field_size = $request->field_size;
-            $farm->field_size_unit = $request->field_size_unit;
+            $farm->land_size = $request->land_size;
+            $farm->land_size_unit = $request->land_size_unit;
             $farm->city_municipality_name = $request->city_municipality_name ?? 'Unknown';
             $farm->province_name = $request->province_name ?? 'Unknown';
             $farm->barangay_name = $request->barangay_name;

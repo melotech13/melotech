@@ -204,7 +204,7 @@
                     <th>Owner</th>
                     <th>Location</th>
                     <th>Variety</th>
-                    <th>Field Size</th>
+                    <th>Land Size</th>
                     <th>Planting Date</th>
                     <th>Created</th>
                 </tr>
@@ -228,8 +228,8 @@
                             @endif
                         </td>
                         <td>
-                            @if($farm->field_size)
-                                <span class="badge badge-size">{{ $farm->field_size }} {{ $farm->field_size_unit }}</span>
+                            @if($farm->land_size)
+                                <span class="badge badge-size">{{ $farm->land_size }} {{ $farm->land_size_unit }}</span>
                             @else
                                 N/A
                             @endif

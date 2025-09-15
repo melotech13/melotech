@@ -130,7 +130,7 @@
             data-owner="{{ strtolower($farm->user->name) }}"
             data-location="{{ strtolower(($farm->barangay_name ? $farm->barangay_name . ', ' : '') . $farm->city_municipality_name . ', ' . $farm->province_name) }}"
             data-variety="{{ $farm->watermelon_variety ?: 'N/A' }}"
-            data-field-size="{{ $farm->field_size ? $farm->field_size . ' ' . $farm->field_size_unit : 'N/A' }}"
+            data-land-size="{{ $farm->land_size ? $farm->land_size . ' ' . $farm->land_size_unit : 'N/A' }}"
             data-planting-date="{{ $farm->planting_date ? $farm->planting_date->format('M d, Y') : 'N/A' }}"
             data-created-date="{{ $farm->created_at->format('M d, Y') }}"
             data-status="{{ $farm->planting_date ? 'active' : 'inactive' }}"
@@ -166,7 +166,7 @@
             <div class="user-card-right d-flex align-items-center justify-content-between">
                 <div class="badges">
                     <span class="badge bg-success"><i class="fas fa-seedling me-1"></i>{{ $farm->watermelon_variety ?: 'N/A' }}</span>
-                    <span class="badge bg-primary"><i class="fas fa-ruler-combined me-1"></i>{{ $farm->field_size }} {{ $farm->field_size_unit }}</span>
+                    <span class="badge bg-primary"><i class="fas fa-ruler-combined me-1"></i>{{ $farm->land_size }} {{ $farm->land_size_unit }}</span>
                 </div>
                 <div class="dropdown ms-2">
                     <button class="btn btn-light btn-sm action-menu-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" data-farm-id="{{ $farm->id }}">
@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Edit form found, checking dropdowns...');
                 const provinceSelect = userModalEl.querySelector('#edit_province');
                 const varietySelect = userModalEl.querySelector('#edit_watermelon_variety');
-                const sizeUnitSelect = userModalEl.querySelector('#edit_field_size_unit');
+                const sizeUnitSelect = userModalEl.querySelector('#edit_land_size_unit');
                 
                 console.log('Dropdown elements in modal:', {
                     province: !!provinceSelect,
@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 if (badges) {
                                     badges.innerHTML = `
                                         <span class=\"badge bg-success\"><i class=\"fas fa-seedling me-1\"></i>${farm.watermelon_variety || 'N/A'}</span>
-                                        <span class=\"badge bg-primary\"><i class=\"fas fa-ruler-combined me-1\"></i>${farm.field_size ?? ''} ${farm.field_size_unit ?? ''}</span>`;
+                                        <span class=\"badge bg-primary\"><i class=\"fas fa-ruler-combined me-1\"></i>${farm.land_size ?? ''} ${farm.land_size_unit ?? ''}</span>`;
                                 }
                                 const locEl = card.querySelector('.user-field:nth-child(2) .text-truncate');
                                 if (locEl) {
@@ -610,7 +610,7 @@ function exportFarmsAsExcel() {
     let csvContent = "data:text/csv;charset=utf-8,";
     
     // Add headers
-    const headers = ['Farm Name', 'Owner', 'Location', 'Variety', 'Field Size', 'Planting Date', 'Created Date'];
+    const headers = ['Farm Name', 'Owner', 'Location', 'Variety', 'Land Size', 'Planting Date', 'Created Date'];
     csvContent += headers.join(',') + '\r\n';
     
     // Add data rows
@@ -633,9 +633,9 @@ function exportFarmsAsExcel() {
         const variety = card.getAttribute('data-variety') || 'N/A';
         rowData.push('"' + variety.replace(/"/g, '""') + '"');
         
-        // Field Size
-        const fieldSize = card.getAttribute('data-field-size') || 'N/A';
-        rowData.push('"' + fieldSize.replace(/"/g, '""') + '"');
+        // Land Size
+        const landSize = card.getAttribute('data-land-size') || 'N/A';
+        rowData.push('"' + landSize.replace(/"/g, '""') + '"');
         
         // Planting Date
         const plantingDate = card.getAttribute('data-planting-date') || 'N/A';

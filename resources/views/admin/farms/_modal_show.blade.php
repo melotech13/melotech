@@ -30,7 +30,7 @@
         </div>
         <div class="col-12 col-md-6">
             <div class="form-floating">
-                <input type="text" readonly class="form-control" value="{{ $farm->field_size }} {{ $farm->field_size_unit }}">
+                <input type="text" readonly class="form-control" value="{{ $farm->land_size }} {{ $farm->land_size_unit }}">
                 <label>Size</label>
             </div>
         </div>

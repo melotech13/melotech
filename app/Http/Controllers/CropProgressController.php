@@ -180,7 +180,7 @@ class CropProgressController extends Controller
             'farm_info' => [
                 'farm_name' => $farm->farm_name,
                 'watermelon_variety' => $farm->watermelon_variety,
-                'field_size' => $farm->field_size . ' ' . $farm->field_size_unit,
+                'land_size' => $farm->land_size . ' ' . $farm->land_size_unit,
                 'planting_date' => $farm->planting_date->format('M d, Y')
             ],
             'progress_updates' => $progressUpdates->map(function ($update) {

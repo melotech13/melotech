@@ -20,8 +20,8 @@ class FarmFactory extends Factory
             'barangay_name' => $this->faker->randomElement(['Barangay 1', 'Barangay 2', 'Barangay 3', 'Barangay 4', 'Barangay 5']),
             'watermelon_variety' => $this->faker->randomElement(['Sugar Baby', 'Crimson Sweet', 'Charleston Gray', 'Jubilee', 'Allsweet']),
             'planting_date' => $this->faker->dateTimeBetween('-30 days', '+30 days'),
-            'field_size' => $this->faker->randomFloat(2, 0.5, 10.0),
-            'field_size_unit' => $this->faker->randomElement(['acres', 'hectares']),
+            'land_size' => $this->faker->randomFloat(2, 0.5, 10.0),
+            'land_size_unit' => $this->faker->randomElement(['m2', 'ha']),
         ];
     }
 }

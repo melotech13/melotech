@@ -31,8 +31,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Pansol',
 					'watermelon_variety' => 'Sugar Baby',
 					'planting_date' => '2024-01-15',
-					'field_size' => 2.5,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.5,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -49,8 +49,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Altura Matanda',
 					'watermelon_variety' => 'Crimson Sweet',
 					'planting_date' => '2024-02-01',
-					'field_size' => 1.8,
-					'field_size_unit' => 'hectares'
+					'land_size' => 1.8,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -67,8 +67,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Iyam',
 					'watermelon_variety' => 'Charleston Gray',
 					'planting_date' => '2024-01-20',
-					'field_size' => 3.2,
-					'field_size_unit' => 'hectares'
+					'land_size' => 3.2,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -85,8 +85,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Pulong Bunga',
 					'watermelon_variety' => 'Sugar Baby',
 					'planting_date' => '2024-02-10',
-					'field_size' => 2.0,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.0,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -103,8 +103,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Cupang',
 					'watermelon_variety' => 'Crimson Sweet',
 					'planting_date' => '2024-01-25',
-					'field_size' => 1.5,
-					'field_size_unit' => 'hectares'
+					'land_size' => 1.5,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -121,8 +121,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'San Rafael',
 					'watermelon_variety' => 'Charleston Gray',
 					'planting_date' => '2024-02-05',
-					'field_size' => 2.8,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.8,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -139,8 +139,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Mataas na Lupa',
 					'watermelon_variety' => 'Sugar Baby',
 					'planting_date' => '2024-01-30',
-					'field_size' => 1.2,
-					'field_size_unit' => 'hectares'
+					'land_size' => 1.2,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -157,8 +157,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Ibas',
 					'watermelon_variety' => 'Crimson Sweet',
 					'planting_date' => '2024-02-15',
-					'field_size' => 3.5,
-					'field_size_unit' => 'hectares'
+					'land_size' => 3.5,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -175,8 +175,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Osorio',
 					'watermelon_variety' => 'Charleston Gray',
 					'planting_date' => '2024-01-18',
-					'field_size' => 2.3,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.3,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -193,8 +193,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'San Juan',
 					'watermelon_variety' => 'Sugar Baby',
 					'planting_date' => '2024-02-20',
-					'field_size' => 1.8,
-					'field_size_unit' => 'hectares'
+					'land_size' => 1.8,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -211,8 +211,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Putho',
 					'watermelon_variety' => 'Crimson Sweet',
 					'planting_date' => '2024-01-12',
-					'field_size' => 2.7,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.7,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -229,8 +229,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'San Andres',
 					'watermelon_variety' => 'Charleston Gray',
 					'planting_date' => '2024-02-08',
-					'field_size' => 1.9,
-					'field_size_unit' => 'hectares'
+					'land_size' => 1.9,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -247,8 +247,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Ibabang Dupay',
 					'watermelon_variety' => 'Sugar Baby',
 					'planting_date' => '2024-01-22',
-					'field_size' => 2.1,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.1,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -265,8 +265,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'San Francisco',
 					'watermelon_variety' => 'Crimson Sweet',
 					'planting_date' => '2024-02-12',
-					'field_size' => 3.0,
-					'field_size_unit' => 'hectares'
+					'land_size' => 3.0,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -283,8 +283,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'San Juan',
 					'watermelon_variety' => 'Charleston Gray',
 					'planting_date' => '2024-01-28',
-					'field_size' => 1.6,
-					'field_size_unit' => 'hectares'
+					'land_size' => 1.6,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -301,8 +301,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Pagsawitan',
 					'watermelon_variety' => 'Sugar Baby',
 					'planting_date' => '2024-02-18',
-					'field_size' => 2.4,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.4,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -319,8 +319,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'San Agustin',
 					'watermelon_variety' => 'Crimson Sweet',
 					'planting_date' => '2024-01-14',
-					'field_size' => 1.7,
-					'field_size_unit' => 'hectares'
+					'land_size' => 1.7,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -337,8 +337,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Castañas',
 					'watermelon_variety' => 'Charleston Gray',
 					'planting_date' => '2024-02-03',
-					'field_size' => 2.9,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.9,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -355,8 +355,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Bucandala',
 					'watermelon_variety' => 'Sugar Baby',
 					'planting_date' => '2024-01-26',
-					'field_size' => 2.2,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.2,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -373,8 +373,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'San Jose',
 					'watermelon_variety' => 'Crimson Sweet',
 					'planting_date' => '2024-02-14',
-					'field_size' => 1.4,
-					'field_size_unit' => 'hectares'
+					'land_size' => 1.4,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -391,8 +391,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Malamig',
 					'watermelon_variety' => 'Charleston Gray',
 					'planting_date' => '2024-01-19',
-					'field_size' => 3.1,
-					'field_size_unit' => 'hectares'
+					'land_size' => 3.1,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -409,8 +409,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Lalayat',
 					'watermelon_variety' => 'Sugar Baby',
 					'planting_date' => '2024-02-07',
-					'field_size' => 2.6,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.6,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -427,8 +427,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Malabanban Norte',
 					'watermelon_variety' => 'Crimson Sweet',
 					'planting_date' => '2024-01-24',
-					'field_size' => 1.9,
-					'field_size_unit' => 'hectares'
+					'land_size' => 1.9,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -445,8 +445,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Magdalo',
 					'watermelon_variety' => 'Charleston Gray',
 					'planting_date' => '2024-02-11',
-					'field_size' => 2.8,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.8,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -463,8 +463,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Ampid',
 					'watermelon_variety' => 'Sugar Baby',
 					'planting_date' => '2024-01-17',
-					'field_size' => 1.3,
-					'field_size_unit' => 'hectares'
+					'land_size' => 1.3,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -481,8 +481,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'San Gregorio',
 					'watermelon_variety' => 'Crimson Sweet',
 					'planting_date' => '2024-02-16',
-					'field_size' => 3.3,
-					'field_size_unit' => 'hectares'
+					'land_size' => 3.3,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -499,8 +499,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Aguado',
 					'watermelon_variety' => 'Charleston Gray',
 					'planting_date' => '2024-01-21',
-					'field_size' => 2.5,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.5,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -517,8 +517,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Lalig',
 					'watermelon_variety' => 'Sugar Baby',
 					'planting_date' => '2024-02-09',
-					'field_size' => 1.8,
-					'field_size_unit' => 'hectares'
+					'land_size' => 1.8,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -535,8 +535,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Molino',
 					'watermelon_variety' => 'Crimson Sweet',
 					'planting_date' => '2024-01-23',
-					'field_size' => 2.7,
-					'field_size_unit' => 'hectares'
+					'land_size' => 2.7,
+					'land_size_unit' => 'ha'
 				]
 			],
 			[
@@ -553,8 +553,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => 'Bagong Barrio',
 					'watermelon_variety' => 'Charleston Gray',
 					'planting_date' => '2024-02-13',
-					'field_size' => 1.6,
-					'field_size_unit' => 'hectares'
+					'land_size' => 1.6,
+					'land_size_unit' => 'ha'
 				]
 			]
 		];
@@ -585,8 +585,8 @@ class UsersSeeder extends Seeder
 					'barangay_name' => $f['barangay_name'],
 					'watermelon_variety' => $f['watermelon_variety'],
 					'planting_date' => $f['planting_date'],
-					'field_size' => $f['field_size'],
-					'field_size_unit' => $f['field_size_unit'],
+					'land_size' => $f['land_size'],
+					'land_size_unit' => $f['land_size_unit'],
 				]
 			);
 		}

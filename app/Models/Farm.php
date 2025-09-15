@@ -17,8 +17,8 @@ use Carbon\Carbon;
  * @property string $barangay_name
  * @property string $watermelon_variety
  * @property \Carbon\Carbon $planting_date
- * @property float $field_size
- * @property string $field_size_unit
+ * @property float $land_size
+ * @property string $land_size_unit
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * 
@@ -41,13 +41,13 @@ class Farm extends Model
         'barangay_name',
         'watermelon_variety',
         'planting_date',
-        'field_size',
-        'field_size_unit',
+        'land_size',
+        'land_size_unit',
     ];
 
     protected $casts = [
         'planting_date' => 'date',
-        'field_size' => 'decimal:2',
+        'land_size' => 'decimal:2',
     ];
 
     /**

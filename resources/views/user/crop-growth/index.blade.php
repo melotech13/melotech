@@ -72,7 +72,7 @@
                                          <h4 class="farm-name">{{ $farm->farm_name }}</h4>
                                          <p class="farm-variety">{{ $farm->watermelon_variety }}</p>
                                          <div class="farm-details">
-                                             <span class="farm-size">{{ $farm->field_size }} {{ $farm->field_size_unit }}</span>
+                                             <span class="farm-size">{{ $farm->land_size }} {{ $farm->land_size_unit }}</span>
                                              <span class="farm-date">{{ $farm->planting_date->format('M d, Y') }}</span>
                                          </div>
                                      </div>

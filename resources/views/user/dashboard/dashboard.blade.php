@@ -70,8 +70,8 @@
                             <span class="info-value">{{ $farm->watermelon_variety }}</span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">Field Size</span>
-                            <span class="info-value">{{ $farm->field_size }} {{ $farm->field_size_unit }}</span>
+                            <span class="info-label">Land Size</span>
+                            <span class="info-value">{{ $farm->land_size }} {{ $farm->land_size_unit }}</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">Planting Date</span>

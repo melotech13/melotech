@@ -373,8 +373,8 @@ class AdminController extends Controller
             'barangay_name' => 'nullable|string|max:255',
             'watermelon_variety' => 'nullable|string|max:255',
             'planting_date' => 'nullable|date',
-            'field_size' => 'nullable|numeric|min:0',
-            'field_size_unit' => 'nullable|string|max:20',
+            'land_size' => 'nullable|numeric|min:0',
+            'land_size_unit' => 'nullable|string|max:20',
         ];
 
         $farmRulesWhenAdmin = [
@@ -384,8 +384,8 @@ class AdminController extends Controller
             'barangay_name' => 'nullable|string|max:255',
             'watermelon_variety' => 'nullable|string|max:255',
             'planting_date' => 'nullable|date',
-            'field_size' => 'nullable|numeric|min:0',
-            'field_size_unit' => 'nullable|string|max:20',
+            'land_size' => 'nullable|numeric|min:0',
+            'land_size_unit' => 'nullable|string|max:20',
         ];
 
         $rules = array_merge($baseRules, $role === 'admin' ? $farmRulesWhenAdmin : $farmRulesWhenUser);
@@ -411,8 +411,8 @@ class AdminController extends Controller
                 'barangay_name' => $validated['barangay_name'] ?? null,
                 'watermelon_variety' => $validated['watermelon_variety'] ?? '',
                 'planting_date' => $validated['planting_date'] ?? null,
-                'field_size' => $validated['field_size'] ?? null,
-                'field_size_unit' => $validated['field_size_unit'] ?? null,
+                'land_size' => $validated['land_size'] ?? null,
+                'land_size_unit' => $validated['land_size_unit'] ?? null,
             ]);
             
             // Notify about admin-created farm
@@ -576,8 +576,8 @@ class AdminController extends Controller
             'province_name' => 'required|string|max:255',
             'city_municipality_name' => 'required|string|max:255',
             'barangay_name' => 'nullable|string|max:255',
-            'field_size' => 'nullable|numeric|min:0',
-            'field_size_unit' => 'nullable|string|max:20',
+            'land_size' => 'nullable|numeric|min:0',
+            'land_size_unit' => 'nullable|string|max:20',
             'planting_date' => 'nullable|date',
         ]);
 

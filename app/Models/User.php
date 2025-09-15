@@ -21,6 +21,8 @@ use App\Models\Notification;
  * @property string $role
  * @property string|null $phone
  * @property \Carbon\Carbon|null $email_verified_at
+ * @property string|null $email_verification_code
+ * @property \Carbon\Carbon|null $email_verification_code_expires_at
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * 
@@ -50,6 +52,9 @@ class User extends Authenticatable
         'password',
         'role',
         'phone',
+        'email_verified_at',
+        'email_verification_code',
+        'email_verification_code_expires_at',
     ];
 
     /**
@@ -70,6 +75,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'email_verification_code_expires_at' => 'datetime',
             // Removed 'password' => 'hashed' to allow plain text passwords
         ];
     }
@@ -132,5 +138,60 @@ class User extends Authenticatable
     public function notifications(): HasMany
     {
         return $this->hasMany(Notification::class);
+    }
+
+    /**
+     * Check if the user's email is verified.
+     *
+     * @return bool
+     */
+    public function isEmailVerified(): bool
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    /**
+     * Check if the verification code is valid and not expired.
+     *
+     * @param string $code
+     * @return bool
+     */
+    public function isVerificationCodeValid(string $code): bool
+    {
+        return $this->email_verification_code === $code 
+            && $this->email_verification_code_expires_at 
+            && $this->email_verification_code_expires_at->isFuture();
+    }
+
+    /**
+     * Generate and set a new verification code.
+     *
+     * @return string
+     */
+    public function generateVerificationCode(): string
+    {
+        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        
+        $this->update([
+            'email_verification_code' => $code,
+            'email_verification_code_expires_at' => now()->addMinutes(15), // Code expires in 15 minutes
+        ]);
+
+        return $code;
+    }
+
+    /**
+     * Mark the user's email as verified.
+     * Keeps the verification code for evidence purposes.
+     *
+     * @return bool
+     */
+    public function markEmailAsVerified(): bool
+    {
+        return $this->update([
+            'email_verified_at' => now(),
+            // Keep email_verification_code for evidence
+            // Keep email_verification_code_expires_at for evidence
+        ]);
     }
 }

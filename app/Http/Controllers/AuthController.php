@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Farm;
+use App\Services\EmailVerificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -67,8 +68,8 @@ class AuthController extends Controller
             'farm_name' => ['required', 'string', 'max:255'],
             'watermelon_variety' => ['required', 'string', 'max:255'],
             'planting_date' => ['required', 'date'],
-            'field_size' => ['required', 'numeric', 'min:0.1'],
-            'field_size_unit' => ['required', 'in:acres,hectares'],
+            'land_size' => ['required', 'numeric', 'min:0.1'],
+            'land_size_unit' => ['required', 'in:m2,ha'],
         ]);
 
         if ($validator->fails()) {
@@ -92,15 +93,33 @@ class AuthController extends Controller
             'farm_name' => $request->farm_name,
             'watermelon_variety' => $request->watermelon_variety,
             'planting_date' => $request->planting_date,
-            'field_size' => $request->field_size,
-            'field_size_unit' => $request->field_size_unit,
+            'land_size' => $request->land_size,
+            'land_size_unit' => $request->land_size_unit,
             'province_name' => $request->province_name,
             'city_municipality_name' => $request->city_municipality_name,
             'barangay_name' => $request->barangay_name,
         ]);
 
-        // Redirect to login page
-        return redirect()->route('login');
+        // Send verification email
+        $emailVerificationService = app(EmailVerificationService::class);
+        $result = $emailVerificationService->sendVerificationEmail($user);
+
+        if ($result['success']) {
+            $message = $result['message'];
+            
+            // If using cache fallback, show the verification code
+            if ($result['method'] === 'cache' && isset($result['code'])) {
+                $message .= " Your verification code is: " . $result['code'];
+            }
+            
+            return redirect()->route('verification.show')
+                ->with('success', $message)
+                ->with('email', $user->email);
+        } else {
+            return redirect()->back()
+                ->with('error', $result['message'])
+                ->withInput();
+        }
     }
 
     public function showLogin()
@@ -172,5 +191,134 @@ class AuthController extends Controller
         }
         
         return redirect()->route('home');
+    }
+
+    /**
+     * Show the email verification form.
+     */
+    public function showVerification()
+    {
+        return view('auth.verify-email');
+    }
+
+    /**
+     * Verify the user's email with the provided code.
+     */
+    public function verifyEmail(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+            'verification_code' => ['required', 'string', 'size:6'],
+        ]);
+
+        Log::info('AuthController::verifyEmail called', [
+            'email' => $request->email,
+            'verification_code' => $request->verification_code
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            Log::warning('User not found for verification', ['email' => $request->email]);
+            return redirect()->back()
+                ->withErrors(['email' => 'User not found.'])
+                ->withInput();
+        }
+
+        Log::info('User found for verification', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'is_email_verified' => $user->isEmailVerified(),
+            'email_verified_at' => $user->email_verified_at
+        ]);
+
+        if ($user->isEmailVerified()) {
+            Log::info('User email already verified', ['user_id' => $user->id]);
+            return redirect()->route('login')
+                ->with('success', 'Your email is already verified. You can now log in.');
+        }
+
+        $emailVerificationService = app(EmailVerificationService::class);
+        $result = $emailVerificationService->verifyEmail($user, $request->verification_code);
+        
+        Log::info('Verification result', [
+            'user_id' => $user->id,
+            'success' => $result['success'],
+            'message' => $result['message']
+        ]);
+        
+        if ($result['success']) {
+            // Refresh user to get updated verification status
+            $user->refresh();
+            Log::info('User refreshed after verification', [
+                'user_id' => $user->id,
+                'is_email_verified' => $user->isEmailVerified(),
+                'email_verified_at' => $user->email_verified_at
+            ]);
+            
+            return redirect()->route('login')
+                ->with('success', $result['message']);
+        }
+
+        return redirect()->back()
+            ->withErrors(['verification_code' => $result['message']])
+            ->withInput();
+    }
+
+    /**
+     * Resend verification email.
+     */
+    public function resendVerification(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found.'
+                ]);
+            }
+            return redirect()->back()
+                ->withErrors(['email' => 'User not found.'])
+                ->withInput();
+        }
+
+        if ($user->isEmailVerified()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Your email is already verified. You can now log in.'
+                ]);
+            }
+            return redirect()->route('login')
+                ->with('success', 'Your email is already verified. You can now log in.');
+        }
+
+        $emailVerificationService = app(EmailVerificationService::class);
+        $result = $emailVerificationService->resendVerificationEmail($user);
+        
+        if ($request->expectsJson()) {
+            return response()->json($result);
+        }
+        
+        if ($result['success']) {
+            $message = $result['message'];
+            
+            // If using cache fallback, show the verification code
+            if ($result['method'] === 'cache' && isset($result['code'])) {
+                $message .= " Your verification code is: " . $result['code'];
+            }
+            
+            return redirect()->back()
+                ->with('success', $message);
+        }
+
+        return redirect()->back()
+            ->with('error', $result['message']);
     }
 }

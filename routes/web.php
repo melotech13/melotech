@@ -28,6 +28,11 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
+// Email verification routes
+Route::get('/verify-email', [AuthController::class, 'showVerification'])->name('verification.show');
+Route::post('/verify-email', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+Route::post('/resend-verification', [AuthController::class, 'resendVerification'])->name('verification.resend');
+
 // Location endpoints (PSGC proxy)
 Route::get('/locations/provinces', [LocationController::class, 'provinces']);
 Route::get('/locations/cities-municipalities', [LocationController::class, 'citiesMunicipalities']);
@@ -39,7 +44,7 @@ Route::get('/locations.json', [LocationController::class, 'locationsJson'])->nam
 
 
 // Protected routes
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified.email'])->group(function () {
 	Route::get('/dashboard', function () {
 		if (Auth::user() && Auth::user()->role === 'admin') {
 			return redirect()->route('admin.dashboard');
@@ -237,7 +242,7 @@ if (config('app.debug')) {
 });
 
 // Admin routes (protected by admin middleware)
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified.email', 'admin'])->prefix('admin')->name('admin.')->group(function () {
 	Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 	Route::get('/statistics', [AdminController::class, 'statistics'])->name('statistics');
 	

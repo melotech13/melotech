@@ -78,19 +78,19 @@
             
             <div class="col-12 col-md-6">
                 <div class="form-floating">
-                    <input type="number" step="0.01" class="form-control" id="edit_field_size" name="field_size" value="{{ old('field_size', $farm->field_size) }}" min="0">
-                    <label for="edit_field_size">Field Size</label>
+                    <input type="number" step="0.01" class="form-control" id="edit_land_size" name="land_size" value="{{ old('land_size', $farm->land_size) }}" min="0">
+                    <label for="edit_land_size">Land Size</label>
                 </div>
             </div>
             
             <div class="col-12 col-md-6">
                 <div class="form-floating">
-                    <select class="form-select" id="edit_field_size_unit" name="field_size_unit">
+                    <select class="form-select" id="edit_land_size_unit" name="land_size_unit">
                         <option value="">Select unit</option>
-                        <option value="acres" {{ old('field_size_unit', $farm->field_size_unit) == 'acres' ? 'selected' : '' }}>Acres</option>
-                        <option value="hectares" {{ old('field_size_unit', $farm->field_size_unit) == 'hectares' ? 'selected' : '' }}>Hectares</option>
+                        <option value="m2" {{ old('land_size_unit', $farm->land_size_unit) == 'm2' ? 'selected' : '' }}>Square Meters (m²)</option>
+                        <option value="ha" {{ old('land_size_unit', $farm->land_size_unit) == 'ha' ? 'selected' : '' }}>Hectares (ha)</option>
                     </select>
-                    <label for="edit_field_size_unit">Size Unit</label>
+                    <label for="edit_land_size_unit">Size Unit</label>
                 </div>
             </div>
             

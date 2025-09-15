@@ -1108,24 +1108,24 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label for="field_size" class="form-label">Field Size</label>
-                            <input type="number" class="form-control @error('field_size') is-invalid @enderror"
-                                id="field_size" name="field_size" value="{{ old('field_size') }}"
+                            <label for="land_size" class="form-label">Land Size</label>
+                            <input type="number" class="form-control @error('land_size') is-invalid @enderror"
+                                id="land_size" name="land_size" value="{{ old('land_size') }}"
                                 step="0.1" min="0.1" required placeholder="0.0">
-                            @error('field_size')
+                            @error('land_size')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="col-md-3">
-                            <label for="field_size_unit" class="form-label">Unit</label>
-                            <select class="form-select @error('field_size_unit') is-invalid @enderror"
-                                id="field_size_unit" name="field_size_unit" required>
+                            <label for="land_size_unit" class="form-label">Unit</label>
+                            <select class="form-select @error('land_size_unit') is-invalid @enderror"
+                                id="land_size_unit" name="land_size_unit" required>
                                 <option value="">Unit</option>
-                                <option value="acres" {{ old('field_size_unit') == 'acres' ? 'selected' : '' }}>Acres</option>
-                                <option value="hectares" {{ old('field_size_unit') == 'hectares' ? 'selected' : '' }}>Hectares</option>
+                                <option value="m2" {{ old('land_size_unit') == 'm2' ? 'selected' : '' }}>Square Meters (m²)</option>
+                                <option value="ha" {{ old('land_size_unit') == 'ha' ? 'selected' : '' }}>Hectares (ha)</option>
                             </select>
-                            @error('field_size_unit')
+                            @error('land_size_unit')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

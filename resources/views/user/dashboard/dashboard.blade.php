@@ -218,54 +218,37 @@
     <div class="section">
         <div class="section-header">
             <h2 class="section-title">
-                <i class="fas fa-chart-pie section-icon"></i>
+                <i class="fas fa-chart-line section-icon"></i>
                 System Overview
             </h2>
             <p class="section-subtitle">Monitor your farming system performance and key metrics</p>
         </div>
         
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-seedling"></i>
+        <div class="chart-container">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Farming System Metrics</h3>
+                    <p class="chart-subtitle">Track your farming activities over time</p>
                 </div>
-                <div class="stat-content">
-                    <h3 class="stat-number">{{ Auth::user()->farms->count() }}</h3>
-                    <p class="stat-label">Active Farms</p>
-                    <p class="stat-description">Watermelon farms under management</p>
+                <div class="chart-wrapper">
+                    <canvas id="systemOverviewChart" height="400"></canvas>
                 </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-camera"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-number">{{ App\Models\PhotoAnalysis::where('user_id', Auth::id())->count() }}</h3>
-                    <p class="stat-label">Photo Analyses</p>
-                    <p class="stat-description">AI-powered crop health assessments</p>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-number">{{ App\Models\CropProgressUpdate::where('user_id', Auth::id())->count() }}</h3>
-                    <p class="stat-label">Progress Updates</p>
-                    <p class="stat-description">Crop growth monitoring records</p>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-cloud-sun"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-number">{{ Auth::user()->farms->where('weather_enabled', true)->count() }}</h3>
-                    <p class="stat-label">Weather Monitoring</p>
-                    <p class="stat-description">Farms with weather integration</p>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #3b82f6;"></div>
+                        <span class="legend-label">Active Farms</span>
+                        <span class="legend-value">1</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #10b981;"></div>
+                        <span class="legend-label">Photo Analyses</span>
+                        <span class="legend-value">2</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #f59e0b;"></div>
+                        <span class="legend-label">Progress Updates</span>
+                        <span class="legend-value">1</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -7231,7 +7214,214 @@ function displayHistoricalWeather(container, data) {
     color: #06b6d4;
 }
 
+/* Chart Container Styles */
+.chart-container {
+    margin-top: 1.5rem;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.chart-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.chart-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.chart-subtitle {
+    color: #6b7280;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 400px;
+    margin-bottom: 2rem;
+}
+
+.chart-legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.legend-label {
+    font-weight: 500;
+    color: #374151;
+    flex: 1;
+}
+
+.legend-value {
+    font-weight: 700;
+    color: #1f2937;
+    font-size: 1.1rem;
+}
+
+/* Responsive chart styles */
+@media (max-width: 768px) {
+    .chart-card {
+        padding: 1.5rem;
+    }
+    
+    .chart-wrapper {
+        height: 300px;
+    }
+    
+    .chart-legend {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .legend-item {
+        padding: 0.5rem;
+    }
+}
 
 </style>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script id="chart-data" type="application/json">
+{
+    "activeFarms": {!! json_encode(Auth::user()->farms->count()) !!},
+    "photoAnalyses": {!! json_encode(App\Models\PhotoAnalysis::where('user_id', Auth::id())->count()) !!},
+    "progressUpdates": {!! json_encode(App\Models\CropProgressUpdate::where('user_id', Auth::id())->count()) !!}
+}
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('systemOverviewChart');
+    if (!ctx) return;
+
+    // Get the data from the JSON script tag
+    const chartDataEl = document.getElementById('chart-data');
+    const chartData = chartDataEl ? JSON.parse(chartDataEl.textContent || '{}') : {};
+    
+    const activeFarms = chartData.activeFarms || 0;
+    const photoAnalyses = chartData.photoAnalyses || 0;
+    const progressUpdates = chartData.progressUpdates || 0;
+
+    // Simple bar chart data - showing current metrics
+    const labels = ['Active Farms', 'Photo Analyses', 'Progress Updates'];
+    const data = [activeFarms, photoAnalyses, progressUpdates];
+    const colors = ['#3b82f6', '#10b981', '#f59e0b'];
+    const backgroundColors = ['rgba(59, 130, 246, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(245, 158, 11, 0.8)'];
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Count',
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    borderColor: colors,
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false // We're using custom legend
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: true,
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label;
+                        },
+                        label: function(context) {
+                            return context.parsed.y + ' ' + context.label.toLowerCase();
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6b7280',
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#6b7280',
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        },
+                        callback: function(value) {
+                            return Number.isInteger(value) ? value : null;
+                        }
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'nearest'
+            },
+            animation: {
+                duration: 2000,
+                easing: 'easeInOutQuart'
+            },
+        }
+    });
+    
+});
+</script>
 @endpush
 @endsection

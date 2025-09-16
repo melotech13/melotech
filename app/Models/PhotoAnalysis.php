@@ -12,6 +12,8 @@ class PhotoAnalysis extends Model
         'photo_path',
         'analysis_type',
         'identified_type',
+        'identified_condition',
+        'condition_key',
         'confidence_score',
         'recommendations',
         'analysis_date',

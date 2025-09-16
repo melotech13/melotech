@@ -47,6 +47,12 @@ class EmailVerificationService
         if ($user->isVerificationCodeValid($code)) {
             Log::info('Database verification code is valid', ['user_id' => $user->id]);
             
+            // Set audit trail fields before marking as verified
+            $user->update([
+                'used_verification_code' => $code,
+                'verification_completed_at' => now(),
+            ]);
+            
             $result = $user->markEmailAsVerified();
             $this->emailService->clearVerificationCodeFromCache($user);
             
@@ -54,6 +60,8 @@ class EmailVerificationService
                 'user_id' => $user->id,
                 'result' => $result,
                 'verification_code' => $user->email_verification_code,
+                'used_verification_code' => $user->used_verification_code,
+                'verification_completed_at' => $user->verification_completed_at,
                 'email_verified_at' => $user->fresh()->email_verified_at
             ]);
             
@@ -74,6 +82,12 @@ class EmailVerificationService
         if ($cachedCode === $code) {
             Log::info('Cached verification code is valid', ['user_id' => $user->id]);
             
+            // Set audit trail fields before marking as verified
+            $user->update([
+                'used_verification_code' => $code,
+                'verification_completed_at' => now(),
+            ]);
+            
             $result = $user->markEmailAsVerified();
             $this->emailService->clearVerificationCodeFromCache($user);
             
@@ -81,6 +95,8 @@ class EmailVerificationService
                 'user_id' => $user->id,
                 'result' => $result,
                 'verification_code' => $user->email_verification_code,
+                'used_verification_code' => $user->used_verification_code,
+                'verification_completed_at' => $user->verification_completed_at,
                 'email_verified_at' => $user->fresh()->email_verified_at
             ]);
             

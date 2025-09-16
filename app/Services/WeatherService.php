@@ -5,15 +5,19 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use App\Services\AIWeatherRecommendationService;
 
 class WeatherService
 {
     protected $apiKey;
     protected $baseUrl = 'https://api.openweathermap.org/data/2.5';
 
+    protected $aiRecommendationService;
+
     public function __construct()
     {
         $this->apiKey = config('services.openweathermap.api_key');
+        $this->aiRecommendationService = new AIWeatherRecommendationService($this);
     }
 
     /**
@@ -915,6 +919,9 @@ class WeatherService
         
         // Get current weather to base estimates on
         $currentWeather = $this->getCurrentWeather($latitude, $longitude);
+        if (!$currentWeather) {
+            $currentWeather = $this->getFallbackWeatherData($latitude, $longitude);
+        }
         
         for ($i = 1; $i <= $days; $i++) {
             $date = $currentDate->copy()->subDays($i);
@@ -1149,5 +1156,104 @@ class WeatherService
         }
         
         return $conditions;
+    }
+
+    /**
+     * Get comprehensive weather data with AI recommendations for a farm
+     */
+    public function getFarmWeatherWithAIRecommendations($farm)
+    {
+        try {
+            // Get coordinates for the farm location
+            $coordinates = $this->getCoordinates(
+                $farm->city_municipality_name,
+                $farm->province_name,
+                $farm->barangay_name
+            );
+
+            if (!$coordinates) {
+                return [
+                    'success' => false,
+                    'message' => 'Unable to get coordinates for farm location'
+                ];
+            }
+
+            // Get current weather
+            $currentWeather = $this->getCurrentWeather(
+                $coordinates['lat'],
+                $coordinates['lon']
+            );
+
+            if (!$currentWeather) {
+                return [
+                    'success' => false,
+                    'message' => 'Unable to fetch current weather data'
+                ];
+            }
+
+            // Get weather forecast
+            $forecast = $this->getForecast(
+                $coordinates['lat'],
+                $coordinates['lon']
+            );
+
+            // Get weather alerts
+            $alerts = $this->getWeatherAlerts(
+                $coordinates['lat'],
+                $coordinates['lon']
+            );
+
+            // Generate AI recommendations
+            $aiRecommendations = $this->aiRecommendationService->generateRecommendations(
+                $farm,
+                $currentWeather,
+                $forecast,
+                $alerts
+            );
+
+            return [
+                'success' => true,
+                'data' => [
+                    'current' => $currentWeather,
+                    'forecast' => $forecast,
+                    'alerts' => $alerts,
+                    'coordinates' => $coordinates,
+                    'ai_recommendations' => $aiRecommendations,
+                    'farm' => [
+                        'id' => $farm->id,
+                        'name' => $farm->farm_name,
+                        'location' => $farm->city_municipality_name . ', ' . $farm->province_name,
+                        'land_size' => $farm->land_size,
+                        'land_size_unit' => $farm->land_size_unit
+                    ]
+                ]
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Farm weather with AI recommendations error', [
+                'message' => $e->getMessage(),
+                'farm_id' => $farm->id,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'An error occurred while fetching weather data with AI recommendations',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ];
+        }
+    }
+
+    /**
+     * Get AI-powered weather recommendations only
+     */
+    public function getAIWeatherRecommendations($farm, $currentWeather, $forecast = null, $alerts = [])
+    {
+        return $this->aiRecommendationService->generateRecommendations(
+            $farm,
+            $currentWeather,
+            $forecast,
+            $alerts
+        );
     }
 }

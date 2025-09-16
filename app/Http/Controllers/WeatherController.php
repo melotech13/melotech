@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Farm;
+use App\Models\User;
 use App\Services\WeatherService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http; // Added for Http facade
+use Illuminate\Support\Facades\Auth;
 
 class WeatherController extends Controller
 {
@@ -19,13 +21,13 @@ class WeatherController extends Controller
     }
 
     /**
-     * Get weather data for a specific farm
+     * Get weather data for a specific farm with AI recommendations
      */
     public function getFarmWeather(Request $request, $farmId): JsonResponse
     {
         try {
             $farm = Farm::where('id', $farmId)
-                       ->where('user_id', auth()->id())
+                       ->where('user_id', Auth::id())
                        ->first();
 
             if (!$farm) {
@@ -36,133 +38,33 @@ class WeatherController extends Controller
             }
 
             // Log the attempt for debugging
-            Log::info('Weather request for farm', [
+            Log::info('Weather request for farm with AI recommendations', [
                 'farm_id' => $farmId,
                 'farm_name' => $farm->farm_name,
                 'city' => $farm->city_municipality_name,
                 'province' => $farm->province_name
             ]);
 
-            // Debug: Check if API key is loaded
-            $apiKey = config('services.openweathermap.api_key');
-            Log::info('API Key check', [
-                'has_api_key' => !empty($apiKey),
-                'api_key_length' => strlen($apiKey ?? ''),
-                'api_key_preview' => $apiKey ? substr($apiKey, 0, 8) . '...' : 'null'
-            ]);
+            // Get comprehensive weather data with AI recommendations
+            $weatherData = $this->weatherService->getFarmWeatherWithAIRecommendations($farm);
 
-            // Get coordinates for the farm location
-            $coordinates = $this->weatherService->getCoordinates(
-                $farm->city_municipality_name,
-                $farm->province_name,
-                $farm->barangay_name
-            );
-
-            if (!$coordinates) {
-                Log::warning('Failed to get coordinates for farm location', [
-                    'farm_id' => $farmId,
-                    'city' => $farm->city_municipality_name,
-                    'province' => $farm->province_name
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unable to get coordinates for farm location. Please check your farm location details.',
-                    'debug_info' => [
-                        'city' => $farm->city_municipality_name,
-                        'province' => $farm->province_name,
-                        'suggestion' => 'Try updating your farm location with standard Philippine city/province names'
-                    ]
-                ], 400);
+            if (!$weatherData['success']) {
+                return response()->json($weatherData, 500);
             }
 
-            Log::info('Coordinates obtained successfully', [
+            Log::info('Weather data with AI recommendations fetched successfully', [
                 'farm_id' => $farmId,
-                'coordinates' => $coordinates
+                'has_current' => !empty($weatherData['data']['current']),
+                'has_forecast' => !empty($weatherData['data']['forecast']),
+                'has_alerts' => !empty($weatherData['data']['alerts']),
+                'has_ai_recommendations' => !empty($weatherData['data']['ai_recommendations']),
+                'ai_confidence' => $weatherData['data']['ai_recommendations']['ai_confidence'] ?? 0
             ]);
 
-            // Get current weather
-            $currentWeather = $this->weatherService->getCurrentWeather(
-                $coordinates['lat'],
-                $coordinates['lon']
-            );
-
-            if (!$currentWeather) {
-                Log::error('Failed to fetch current weather data', [
-                    'farm_id' => $farmId,
-                    'coordinates' => $coordinates,
-                    'api_key_available' => !empty($apiKey)
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unable to fetch current weather data. Please try again later.',
-                    'debug_info' => [
-                        'coordinates' => $coordinates,
-                        'suggestion' => 'Weather service may be temporarily unavailable',
-                        'api_key_status' => !empty($apiKey) ? 'Available' : 'Missing or Invalid'
-                    ]
-                ], 500);
-            }
-
-            // Get weather forecast
-            $forecast = $this->weatherService->getForecast(
-                $coordinates['lat'],
-                $coordinates['lon']
-            );
-
-            // Get weather alerts
-            $alerts = $this->weatherService->getWeatherAlerts(
-                $coordinates['lat'],
-                $coordinates['lon']
-            );
-
-            if (!$forecast) {
-                Log::warning('Failed to fetch forecast data, but current weather is available', [
-                    'farm_id' => $farmId,
-                    'coordinates' => $coordinates
-                ]);
-                
-                // Return current weather only if forecast fails
-                return response()->json([
-                    'success' => true,
-                    'data' => [
-                        'current' => $currentWeather,
-                        'forecast' => null,
-                        'alerts' => $alerts,
-                        'coordinates' => $coordinates,
-                        'farm' => [
-                            'name' => $farm->farm_name,
-                            'location' => $farm->city_municipality_name . ', ' . $farm->province_name
-                        ]
-                    ],
-                    'message' => 'Current weather available, but forecast data is temporarily unavailable'
-                ]);
-            }
-
-            Log::info('Weather data fetched successfully', [
-                'farm_id' => $farmId,
-                'has_current' => !empty($currentWeather),
-                'has_forecast' => !empty($forecast),
-                'has_alerts' => !empty($alerts)
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'current' => $currentWeather,
-                    'forecast' => $forecast,
-                    'alerts' => $alerts,
-                    'coordinates' => $coordinates,
-                    'farm' => [
-                        'name' => $farm->farm_name,
-                        'location' => $farm->city_municipality_name . ', ' . $farm->province_name
-                    ]
-                ]
-            ]);
+            return response()->json($weatherData);
 
         } catch (\Exception $e) {
-            Log::error('Weather service error', [
+            Log::error('Weather service with AI recommendations error', [
                 'message' => $e->getMessage(),
                 'farm_id' => $farmId,
                 'trace' => $e->getTraceAsString()
@@ -170,7 +72,7 @@ class WeatherController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while fetching weather data. Please try again later.',
+                'message' => 'An error occurred while fetching weather data with AI recommendations. Please try again later.',
                 'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
             ], 500);
         }
@@ -182,7 +84,8 @@ class WeatherController extends Controller
     public function getUserFarmWeather(Request $request): JsonResponse
     {
         try {
-            $user = auth()->user();
+            /** @var User $user */
+            $user = Auth::user();
             $farm = $user->farms()->first();
 
             if (!$farm) {
@@ -254,7 +157,7 @@ class WeatherController extends Controller
     {
         try {
             $farm = Farm::where('id', $farmId)
-                       ->where('user_id', auth()->id())
+                       ->where('user_id', Auth::id())
                        ->first();
 
             if (!$farm) {
@@ -401,7 +304,7 @@ class WeatherController extends Controller
     {
         try {
             $farm = Farm::where('id', $farmId)
-                       ->where('user_id', auth()->id())
+                       ->where('user_id', Auth::id())
                        ->first();
 
             if (!$farm) {
@@ -473,10 +376,104 @@ class WeatherController extends Controller
      */
     public function showWeatherPage()
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         $farms = $user->farms;
         
         return view('user.weather.index', compact('farms'));
+    }
+
+    /**
+     * Get AI weather recommendations for a specific farm
+     */
+    public function getAIRecommendations(Request $request, $farmId): JsonResponse
+    {
+        try {
+            $farm = Farm::where('id', $farmId)
+                       ->where('user_id', Auth::id())
+                       ->first();
+
+            if (!$farm) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Farm not found or access denied'
+                ], 404);
+            }
+
+            // Get current weather data
+            $coordinates = $this->weatherService->getCoordinates(
+                $farm->city_municipality_name,
+                $farm->province_name,
+                $farm->barangay_name
+            );
+
+            if (!$coordinates) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to get coordinates for farm location'
+                ], 400);
+            }
+
+            $currentWeather = $this->weatherService->getCurrentWeather(
+                $coordinates['lat'],
+                $coordinates['lon']
+            );
+
+            if (!$currentWeather) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to fetch current weather data'
+                ], 500);
+            }
+
+            $forecast = $this->weatherService->getForecast(
+                $coordinates['lat'],
+                $coordinates['lon']
+            );
+
+            $alerts = $this->weatherService->getWeatherAlerts(
+                $coordinates['lat'],
+                $coordinates['lon']
+            );
+
+            // Get AI recommendations
+            $recommendations = $this->weatherService->getAIWeatherRecommendations(
+                $farm,
+                $currentWeather,
+                $forecast,
+                $alerts
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'recommendations' => $recommendations,
+                    'farm' => [
+                        'id' => $farm->id,
+                        'name' => $farm->farm_name,
+                        'location' => $farm->city_municipality_name . ', ' . $farm->province_name
+                    ],
+                    'weather_summary' => [
+                        'temperature' => $currentWeather['temperature'],
+                        'humidity' => $currentWeather['humidity'],
+                        'description' => $currentWeather['description']
+                    ]
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('AI recommendations error', [
+                'message' => $e->getMessage(),
+                'farm_id' => $farmId,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while generating AI recommendations',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
     /**

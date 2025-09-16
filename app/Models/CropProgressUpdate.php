@@ -171,24 +171,54 @@ class CropProgressUpdate extends Model
 
     /**
      * Calculate progress based on question answers
+     * Returns 100% if all questions are answered, regardless of answer quality
      */
     public static function calculateProgressFromQuestions(array $answers): int
     {
-        $totalScore = 0;
-        $maxScore = 0;
-
-        foreach ($answers as $questionId => $answer) {
-            $maxScore += 10; // Each question worth 10 points
-            
-            // TEMPORARY: Force all answers to get 10 points for testing
-            // This will ensure 100% progress when all questions are answered
-            $totalScore += 10;
-            
-            // Log the answer for debugging
-            Log::info("Question {$questionId}: answer='{$answer}' -> score=10 (forced)");
+        // Count total questions answered
+        $totalQuestions = count($answers);
+        
+        // If no questions answered, return 0%
+        if ($totalQuestions === 0) {
+            return 0;
+        }
+        
+        // Define expected question IDs for validation
+        $expectedQuestions = [
+            'plant_health',
+            'leaf_condition', 
+            'growth_rate',
+            'water_availability',
+            'pest_pressure',
+            'disease_issues',
+            'nutrient_deficiency',
+            'weather_impact',
+            'stage_progression',
+            'overall_satisfaction'
+        ];
+        
+        // Count how many expected questions were answered
+        $answeredQuestions = 0;
+        foreach ($expectedQuestions as $questionId) {
+            if (isset($answers[$questionId]) && !empty($answers[$questionId])) {
+                $answeredQuestions++;
+            }
+        }
+        
+        // Calculate progress as percentage of questions answered
+        $progress = round(($answeredQuestions / count($expectedQuestions)) * 100);
+        
+        // Log the calculation for debugging (only in Laravel context)
+        if (app()->bound('log')) {
+            Log::info("Progress calculation", [
+                'total_questions_answered' => $totalQuestions,
+                'expected_questions' => count($expectedQuestions),
+                'answered_expected_questions' => $answeredQuestions,
+                'progress' => $progress
+            ]);
         }
 
-        return $maxScore > 0 ? round(($totalScore / $maxScore) * 100) : 0;
+        return $progress;
     }
 
 

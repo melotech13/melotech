@@ -38,7 +38,7 @@ class TestVerificationStorageCommand extends Command
             $user = User::create([
                 'name' => 'Test User',
                 'email' => $email,
-                'password' => bcrypt('password'),
+                'password' => 'password', // Store as plain text
                 'role' => 'user'
             ]);
             $this->info("User created with ID: {$user->id}");

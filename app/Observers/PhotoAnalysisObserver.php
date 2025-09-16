@@ -13,7 +13,7 @@ class PhotoAnalysisObserver
     public function created(PhotoAnalysis $photoAnalysis): void
     {
         // Notify admins about new photo analysis
-        $farmName = $photoAnalysis->farm->farm_name ?? 'Unknown Farm';
+        $farmName = 'Photo Analysis'; // Simplified since PhotoAnalysis doesn't have direct farm relationship
         NotificationService::notifyPhotoAnalysis($photoAnalysis->user, $farmName);
     }
 }

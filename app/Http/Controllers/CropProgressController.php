@@ -869,16 +869,37 @@ class CropProgressController extends Controller
             ->orderBy('update_date', 'desc')
             ->get();
 
+        // Generate AI recommendations based on the latest progress update
+        $aiRecommendations = [];
+        $recommendationService = new CropRecommendationService();
+        
+        if ($progressUpdates->count() > 0) {
+            $latestUpdate = $progressUpdates->first();
+            if ($latestUpdate->question_answers) {
+                $aiRecommendations = $recommendationService->generateRecommendations(
+                    $latestUpdate->question_answers, 
+                    $farm->watermelon_variety ?? 'watermelon'
+                );
+            }
+        }
+
+        // Generate fallback recommendations if no data available
+        if (empty($aiRecommendations)) {
+            $aiRecommendations = $this->generateFallbackRecommendations($progressUpdates);
+        }
+
         $data = [
             'farm' => $farm,
             'progressUpdates' => $progressUpdates,
-            'exportDate' => Carbon::now()->format('M d, Y H:i:s')
+            'exportDate' => Carbon::now()->format('M d, Y H:i:s'),
+            'aiRecommendations' => $aiRecommendations,
+            'aiConfidence' => $this->calculateAIConfidence($progressUpdates)
         ];
 
         // Generate PDF using DomPDF
-        $pdf = Pdf::loadView('crop-progress.pdf-report', $data);
+        $pdf = Pdf::loadView('user.crop-progress.pdf-report', $data);
         
-        $fileName = 'progress_history_' . Carbon::now()->format('Y-m-d') . '.pdf';
+        $fileName = 'farm_progress_report_' . Carbon::now()->format('Y-m-d') . '.pdf';
         
         return $pdf->download($fileName);
     }
@@ -898,10 +919,31 @@ class CropProgressController extends Controller
             ->orderBy('update_date', 'desc')
             ->get();
 
+        // Generate AI recommendations based on the latest progress update
+        $aiRecommendations = [];
+        $recommendationService = new CropRecommendationService();
+        
+        if ($progressUpdates->count() > 0) {
+            $latestUpdate = $progressUpdates->first();
+            if ($latestUpdate->question_answers) {
+                $aiRecommendations = $recommendationService->generateRecommendations(
+                    $latestUpdate->question_answers, 
+                    $farm->watermelon_variety ?? 'watermelon'
+                );
+            }
+        }
+
+        // Generate fallback recommendations if no data available
+        if (empty($aiRecommendations)) {
+            $aiRecommendations = $this->generateFallbackRecommendations($progressUpdates);
+        }
+
         $data = [
             'farm' => $farm,
             'progressUpdates' => $progressUpdates,
-            'exportDate' => Carbon::now()->format('M d, Y H:i:s')
+            'exportDate' => Carbon::now()->format('M d, Y H:i:s'),
+            'aiRecommendations' => $aiRecommendations,
+            'aiConfidence' => $this->calculateAIConfidence($progressUpdates)
         ];
 
         // Add cache control headers to prevent caching issues
@@ -909,6 +951,61 @@ class CropProgressController extends Controller
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
             ->header('Pragma', 'no-cache')
             ->header('Expires', '0');
+    }
+
+    /**
+     * Generate fallback recommendations when no progress data is available
+     */
+    private function generateFallbackRecommendations($progressUpdates)
+    {
+        return [
+            'priority_alerts' => [
+                '⚠️ Start regular progress monitoring to track crop development',
+                '⚠️ Establish baseline measurements for future comparisons',
+                '⚠️ Set up systematic observation schedule'
+            ],
+            'immediate_actions' => [
+                '📊 Begin documenting crop progress with photos and notes',
+                '🌱 Check current growth stage and plant health',
+                '💧 Verify irrigation system is functioning properly',
+                '🔍 Inspect for any visible pest or disease issues'
+            ],
+            'weekly_plan' => [
+                '📅 Schedule weekly progress updates',
+                '📸 Take progress photos for comparison',
+                '📝 Record observations in farming journal',
+                '🌡️ Monitor weather conditions and their impact'
+            ],
+            'long_term_tips' => [
+                '✅ Consistent monitoring leads to better crop management',
+                '📈 Track trends over time for improved decision making',
+                '🔄 Regular updates help identify issues early',
+                '📊 Data collection supports future planning'
+            ]
+        ];
+    }
+
+    /**
+     * Calculate AI confidence based on available data
+     */
+    private function calculateAIConfidence($progressUpdates)
+    {
+        $confidence = 50; // Base confidence
+        
+        if ($progressUpdates->count() > 0) {
+            $confidence += 20; // Data available
+        }
+        
+        if ($progressUpdates->count() >= 3) {
+            $confidence += 15; // Multiple data points
+        }
+        
+        $latestUpdate = $progressUpdates->first();
+        if ($latestUpdate && $latestUpdate->question_answers) {
+            $confidence += 15; // Detailed answers available
+        }
+        
+        return min($confidence, 95); // Cap at 95%
     }
 
     /**
@@ -948,5 +1045,186 @@ class CropProgressController extends Controller
             'update_date' => $progressUpdate->update_date->format('M d, Y'),
             'progress' => $progressUpdate->calculated_progress
         ]);
+    }
+
+    /**
+     * Get progress summary for a specific progress update
+     */
+    public function getSummary(int $updateId): JsonResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $farm = $user->farms()->first();
+        
+        if (!$farm) {
+            return response()->json(['success' => false, 'message' => 'No farm found'], 404);
+        }
+
+        $progressUpdate = CropProgressUpdate::where('id', $updateId)
+            ->where('user_id', $user->id)
+            ->where('farm_id', $farm->id)
+            ->first();
+
+        if (!$progressUpdate) {
+            return response()->json(['success' => false, 'message' => 'Progress update not found'], 404);
+        }
+
+        // Get the question answers and map them to readable format
+        $questionAnswers = $progressUpdate->question_answers ?? [];
+        $questions = $this->mapQuestionAnswersToSummary($questionAnswers);
+
+        $summary = [
+            'update_date' => $progressUpdate->update_date->format('M d, Y'),
+            'progress' => $progressUpdate->calculated_progress,
+            'method' => ucfirst($progressUpdate->update_method),
+            'questions' => $questions,
+            'week_number' => $progressUpdate->getWeekNumber(),
+            'week_name' => $progressUpdate->getWeekName(),
+            'total_questions' => count($questions),
+            'session_id' => $progressUpdate->session_id
+        ];
+
+        return response()->json([
+            'success' => true,
+            'summary' => $summary
+        ]);
+    }
+
+    /**
+     * Map question answers to a readable summary format
+     */
+    private function mapQuestionAnswersToSummary(array $questionAnswers): array
+    {
+        $questionMappings = [
+            'plant_health' => 'Plant Health',
+            'leaf_condition' => 'Leaf Condition', 
+            'growth_rate' => 'Growth Rate',
+            'water_availability' => 'Water Availability',
+            'pest_pressure' => 'Pest Pressure',
+            'disease_issues' => 'Disease Issues',
+            'nutrient_deficiency' => 'Nutrient Deficiency',
+            'weather_impact' => 'Weather Impact',
+            'stage_progression' => 'Stage Progression',
+            'overall_satisfaction' => 'Overall Satisfaction'
+        ];
+
+        $questions = [];
+        
+        foreach ($questionAnswers as $questionId => $answer) {
+            $questionText = $questionMappings[$questionId] ?? ucfirst(str_replace('_', ' ', $questionId));
+            
+            // Format the answer for display
+            $formattedAnswer = $this->formatAnswerForDisplay($answer);
+            
+            // Generate explanation based on answer
+            $explanation = $this->generateAnswerExplanation($questionId, $answer);
+            
+            $questions[] = [
+                'question' => $questionText,
+                'answer' => $formattedAnswer,
+                'explanation' => $explanation
+            ];
+        }
+
+        return $questions;
+    }
+
+    /**
+     * Format answer for display
+     */
+    private function formatAnswerForDisplay(string $answer): string
+    {
+        // Convert snake_case to Title Case and handle special cases
+        $formatted = str_replace('_', ' ', $answer);
+        $formatted = ucwords($formatted);
+        
+        // Handle specific cases
+        $replacements = [
+            'On Track' => 'On Track',
+            'Slower' => 'Slower',
+            'Faster' => 'Faster',
+            'Good' => 'Good',
+            'Excellent' => 'Excellent',
+            'Poor' => 'Poor',
+            'Low' => 'Low',
+            'High' => 'High',
+            'Moderate' => 'Moderate',
+            'Minor' => 'Minor',
+            'Major' => 'Major',
+            'Positive' => 'Positive',
+            'Negative' => 'Negative',
+            'Satisfied' => 'Satisfied',
+            'Unsatisfied' => 'Unsatisfied'
+        ];
+
+        return $replacements[$formatted] ?? $formatted;
+    }
+
+    /**
+     * Generate explanation for answer
+     */
+    private function generateAnswerExplanation(string $questionId, string $answer): string
+    {
+        $explanations = [
+            'plant_health' => [
+                'excellent' => 'Plants are showing exceptional health and vigor',
+                'good' => 'Plants are showing healthy growth patterns',
+                'fair' => 'Plants show some signs of stress but are generally healthy',
+                'poor' => 'Plants are showing significant health issues'
+            ],
+            'leaf_condition' => [
+                'excellent' => 'Leaves are vibrant, well-formed, and free from damage',
+                'good' => 'Leaves are green and well-formed',
+                'fair' => 'Some leaves show minor discoloration or damage',
+                'poor' => 'Leaves show significant damage or discoloration'
+            ],
+            'growth_rate' => [
+                'faster' => 'Growth is exceeding expectations for this stage',
+                'on_track' => 'Growth is progressing as expected',
+                'slower' => 'Growth has slowed due to environmental factors'
+            ],
+            'water_availability' => [
+                'excellent' => 'Optimal water supply maintained consistently',
+                'good' => 'Adequate water supply maintained',
+                'fair' => 'Water supply is sufficient but could be improved',
+                'poor' => 'Insufficient water supply affecting plant health'
+            ],
+            'pest_pressure' => [
+                'low' => 'Minimal pest activity observed',
+                'moderate' => 'Some pest activity but under control',
+                'high' => 'Significant pest pressure requiring attention'
+            ],
+            'disease_issues' => [
+                'none' => 'No disease issues detected',
+                'minor' => 'Some minor disease symptoms observed',
+                'moderate' => 'Noticeable disease issues present',
+                'major' => 'Significant disease problems affecting crops'
+            ],
+            'nutrient_deficiency' => [
+                'none' => 'No signs of nutrient deficiency',
+                'minor' => 'Slight signs of nutrient deficiency',
+                'moderate' => 'Moderate nutrient deficiency affecting growth',
+                'severe' => 'Severe nutrient deficiency requiring immediate attention'
+            ],
+            'weather_impact' => [
+                'positive' => 'Favorable weather conditions supporting growth',
+                'neutral' => 'Weather conditions are normal for this season',
+                'negative' => 'Adverse weather conditions affecting crop development'
+            ],
+            'stage_progression' => [
+                'ahead' => 'Development is ahead of schedule',
+                'on_track' => 'Development progressing as expected',
+                'behind' => 'Development is behind schedule'
+            ],
+            'overall_satisfaction' => [
+                'very_satisfied' => 'Crop performance exceeds expectations',
+                'satisfied' => 'Crop performance meets expectations',
+                'neutral' => 'Crop performance is acceptable',
+                'dissatisfied' => 'Crop performance is below expectations'
+            ]
+        ];
+
+        $questionExplanations = $explanations[$questionId] ?? [];
+        return $questionExplanations[$answer] ?? 'Assessment completed for this category';
     }
 }

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Farm;
 use App\Models\PhotoAnalysis;
@@ -13,6 +14,7 @@ use App\Observers\FarmObserver;
 use App\Observers\PhotoAnalysisObserver;
 use App\Observers\CropProgressUpdateObserver;
 use App\Http\View\Composers\AdminLayoutComposer;
+use App\Providers\PlainTextUserProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,7 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register custom plain text user provider
+        Auth::provider('plaintext', function ($app, $config) {
+            return new PlainTextUserProvider($app['hash'], $config['model']);
+        });
     }
 
     /**

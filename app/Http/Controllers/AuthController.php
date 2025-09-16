@@ -134,29 +134,15 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        // Enhanced authentication with better error handling
-        $user = User::where('email', $credentials['email'])->first();
-        
-        if ($user) {
-            // Check if password matches (support both plain text and hashed passwords)
-            $passwordMatches = false;
+        // Use Laravel's built-in authentication with our custom plain text provider
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
             
-            // First try plain text comparison (for admin users)
-            if ($user->password === $credentials['password']) {
-                $passwordMatches = true;
-            }
-            // Then try hashed password verification (for regular users)
-            elseif (Hash::check($credentials['password'], $user->password)) {
-                $passwordMatches = true;
-            }
-            
-            if ($passwordMatches) {
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            if ($user) {
                 // Update last login time
                 $user->update(['last_login_at' => now()]);
-                
-                // Login the user
-                Auth::login($user, $request->boolean('remember'));
-                $request->session()->regenerate();
                 
                 // Redirect based on user role
                 if ($user->isAdmin()) {

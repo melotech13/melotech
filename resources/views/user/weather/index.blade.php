@@ -86,6 +86,156 @@
                 </div>
             @endif
 
+            <!-- AI-Powered Weather Recommendations Section -->
+            <div class="weather-tips-section mt-5" id="ai-recommendations-section">
+                <div class="tips-header text-center mb-5">
+                    <div class="ai-header-container">
+                        <div class="ai-header-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h2 class="tips-main-title">
+                            AI-Powered Weather Recommendations
+                        </h2>
+                        <p class="tips-subtitle">
+                            Personalized farming advice based on your farm's current conditions and weather data
+                        </p>
+                        <div class="ai-confidence-badge mt-4" id="ai-confidence-badge" style="display: none;">
+                            <div class="confidence-container">
+                                <div class="confidence-icon">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <div class="confidence-content">
+                                    <span class="confidence-label">AI Confidence</span>
+                                    <span class="confidence-value" id="ai-confidence-value">0%</span>
+                                </div>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" id="confidence-fill"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="ai-loading" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading AI recommendations...</span>
+                    </div>
+                    <p class="mt-3 text-muted">AI is analyzing your farm's weather conditions...</p>
+                </div>
+
+                <!-- AI Recommendations Container -->
+                <div id="ai-recommendations-container" style="display: none;">
+                    <!-- Immediate Actions -->
+                    <div id="immediate-actions-section" class="mb-5">
+                        <div class="enhanced-alert immediate-alert">
+                            <div class="alert-header">
+                                <div class="alert-icon-container">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="alert-content">
+                                    <h4 class="alert-title">🚨 Immediate Actions Required</h4>
+                                    <p class="alert-description">Take these actions right away to protect your crops!</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="immediate-actions-list"></div>
+                    </div>
+
+                    <!-- Short-term Planning -->
+                    <div id="short-term-planning-section" class="mb-5">
+                        <div class="enhanced-alert planning-alert">
+                            <div class="alert-header">
+                                <div class="alert-icon-container">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="alert-content">
+                                    <h4 class="alert-title">📅 Plan for Next Few Days</h4>
+                                    <p class="alert-description">Plan your farm work based on upcoming weather.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="short-term-planning-list"></div>
+                    </div>
+
+                    <!-- Crop-specific Advice -->
+                    <div id="crop-specific-advice-section" class="mb-5">
+                        <div class="enhanced-alert crop-alert">
+                            <div class="alert-header">
+                                <div class="alert-icon-container">
+                                    <i class="fas fa-seedling"></i>
+                                </div>
+                                <div class="alert-content">
+                                    <h4 class="alert-title">🌾 Crop Care Tips</h4>
+                                    <p class="alert-description">Special care tips for your specific crops.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="crop-specific-advice-list"></div>
+                    </div>
+
+                    <!-- Risk Assessment -->
+                    <div id="risk-assessment-section" class="mb-5">
+                        <div class="enhanced-alert risk-alert">
+                            <div class="alert-header">
+                                <div class="alert-icon-container">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="alert-content">
+                                    <h4 class="alert-title">⚠️ Weather Risks</h4>
+                                    <p class="alert-description">Watch out for these weather-related risks to your crops.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="risk-assessment-list"></div>
+                    </div>
+
+                    <!-- Optimization Tips -->
+                    <div id="optimization-tips-section" class="mb-5">
+                        <div class="enhanced-alert optimization-alert">
+                            <div class="alert-header">
+                                <div class="alert-icon-container">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                                <div class="alert-content">
+                                    <h4 class="alert-title">💡 Money-Saving Tips</h4>
+                                    <p class="alert-description">Tips to save water, energy, and money on your farm.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="optimization-tips-list"></div>
+                    </div>
+
+                    <!-- Seasonal Insights -->
+                    <div id="seasonal-insights-section" class="mb-5">
+                        <div class="enhanced-alert seasonal-alert">
+                            <div class="alert-header">
+                                <div class="alert-icon-container">
+                                    <i class="fas fa-leaf"></i>
+                                </div>
+                                <div class="alert-content">
+                                    <h4 class="alert-title">🌿 Seasonal Tips</h4>
+                                    <p class="alert-description">Seasonal farming tips for this time of year.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="seasonal-insights-list"></div>
+                    </div>
+                </div>
+
+                <!-- Error State -->
+                <div id="ai-error" class="text-center py-5" style="display: none;">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Unable to load AI recommendations. Please try again later.
+                    </div>
+                    <button class="btn btn-primary" onclick="loadAIRecommendations()">
+                        <i class="fas fa-refresh me-2"></i>
+                        Retry
+                    </button>
+                </div>
+            </div>
+
 <!-- Weather Styles -->
 <style>
     /* Basic styling */
@@ -867,6 +1017,844 @@
     line-height: 1.5;
 }
 
+/* Weather Tips Section */
+.weather-tips-section {
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+    margin-top: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.weather-tips-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+}
+
+/* AI Header Container */
+.ai-header-container {
+    position: relative;
+    padding: 2rem 0;
+}
+
+.ai-header-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+    animation: float 3s ease-in-out infinite;
+}
+
+.ai-header-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Enhanced AI Confidence Badge */
+.confidence-container {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    max-width: 400px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.confidence-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+}
+
+.confidence-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.confidence-icon i {
+    font-size: 1.25rem;
+    color: white;
+}
+
+.confidence-content {
+    flex: 1;
+    text-align: left;
+}
+
+.confidence-label {
+    display: block;
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.confidence-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.confidence-bar {
+    width: 100px;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.confidence-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius: 4px;
+    transition: width 0.8s ease-in-out;
+    width: 0%;
+}
+
+/* Enhanced Alert Styles */
+.enhanced-alert {
+    border-radius: 20px;
+    padding: 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.enhanced-alert:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+.alert-header {
+    display: flex;
+    align-items: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.alert-icon-container {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1.5rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+    color: #1e293b;
+    letter-spacing: -0.025em;
+}
+
+.alert-description {
+    font-size: 1rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Alert Type Specific Styles */
+.immediate-alert {
+    background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+    border-left: 6px solid #dc2626;
+}
+
+.immediate-alert .alert-icon-container {
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    color: white;
+}
+
+.immediate-alert .alert-icon-container i {
+    font-size: 1.5rem;
+}
+
+.planning-alert {
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+    border-left: 6px solid #3b82f6;
+}
+
+.planning-alert .alert-icon-container {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+.planning-alert .alert-icon-container i {
+    font-size: 1.5rem;
+}
+
+.crop-alert {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+    border-left: 6px solid #059669;
+}
+
+.crop-alert .alert-icon-container {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    color: white;
+}
+
+.crop-alert .alert-icon-container i {
+    font-size: 1.5rem;
+}
+
+.risk-alert {
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+    border-left: 6px solid #d97706;
+}
+
+.risk-alert .alert-icon-container {
+    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+    color: white;
+}
+
+.risk-alert .alert-icon-container i {
+    font-size: 1.5rem;
+}
+
+.optimization-alert {
+    background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%);
+    border-left: 6px solid #f59e0b;
+}
+
+.optimization-alert .alert-icon-container {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.optimization-alert .alert-icon-container i {
+    font-size: 1.5rem;
+}
+
+.seasonal-alert {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+    border-left: 6px solid #059669;
+}
+
+.seasonal-alert .alert-icon-container {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    color: white;
+}
+
+.seasonal-alert .alert-icon-container i {
+    font-size: 1.5rem;
+}
+
+/* AI Recommendations Styles */
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.recommendation-card .card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    border-left: 4px solid;
+}
+
+.recommendation-card .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-card .card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.recommendation-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.recommendation-card .card-text {
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.recommendation-card .list-unstyled li {
+    padding: 0.25rem 0;
+    color: #475569;
+}
+
+.recommendation-card .badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ai-confidence-badge {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Priority-based styling */
+.border-danger {
+    border-left-color: #dc2626 !important;
+}
+
+.border-warning {
+    border-left-color: #d97706 !important;
+}
+
+.border-info {
+    border-left-color: #0891b2 !important;
+}
+
+.border-primary {
+    border-left-color: #3b82f6 !important;
+}
+
+/* Category badge colors */
+.bg-danger { background-color: #dc2626 !important; }
+.bg-warning { background-color: #d97706 !important; }
+.bg-info { background-color: #0891b2 !important; }
+.bg-success { background-color: #059669 !important; }
+.bg-primary { background-color: #3b82f6 !important; }
+.bg-secondary { background-color: #6b7280 !important; }
+
+.tips-header {
+    margin-bottom: 2rem;
+}
+
+.tips-main-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 0.75rem 0;
+    letter-spacing: -0.025em;
+}
+
+.tips-subtitle {
+    font-size: 1.125rem;
+    color: #64748b;
+    margin: 0;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.tip-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f1f5f9;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.tip-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+}
+
+.tip-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    border-color: #cbd5e1;
+}
+
+.tip-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.tip-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.rainy-tips .tip-icon {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+}
+
+.hot-tips .tip-icon {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+}
+
+.windy-tips .tip-icon {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+}
+
+.general-tips .tip-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.tip-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    letter-spacing: -0.025em;
+}
+
+.tip-content {
+    margin-top: 0.5rem;
+}
+
+.tip-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tip-list li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #475569;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.tip-list li:last-child {
+    border-bottom: none;
+}
+
+.tip-list li::before {
+    content: '✓';
+    color: #10b981;
+    font-weight: bold;
+    font-size: 1rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+.tip-list li strong {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+
+/* Enhanced Recommendation Cards Responsive Design */
+@media (max-width: 768px) {
+    .weather-tips-section {
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        border-radius: 20px;
+    }
+    
+    .ai-header-container {
+        padding: 1rem 0;
+    }
+    
+    .ai-header-icon {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1rem;
+    }
+    
+    .ai-header-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .tips-main-title {
+        font-size: 1.875rem;
+    }
+    
+    .tips-subtitle {
+        font-size: 1rem;
+    }
+    
+    .confidence-container {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+        padding: 1.25rem;
+    }
+    
+    .confidence-content {
+        text-align: center;
+    }
+    
+    .confidence-bar {
+        width: 80px;
+    }
+    
+    .enhanced-alert {
+        margin-bottom: 1.5rem;
+        border-radius: 16px;
+    }
+    
+    .alert-header {
+        padding: 1.5rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .alert-icon-container {
+        width: 56px;
+        height: 56px;
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .alert-icon-container i {
+        font-size: 1.25rem;
+    }
+    
+    .alert-title {
+        font-size: 1.25rem;
+    }
+    
+    .alert-description {
+        font-size: 0.9rem;
+    }
+    
+    .tips-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .tip-card {
+        padding: 1.25rem;
+    }
+    
+    .tip-header {
+        gap: 0.75rem;
+    }
+    
+    .tip-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .tip-title {
+        font-size: 1.125rem;
+    }
+    
+    .tip-list li {
+        font-size: 0.9rem;
+        padding: 0.625rem 0;
+    }
+    
+    /* Enhanced recommendation cards mobile styles */
+    .enhanced-recommendation-card {
+        margin-bottom: 1rem !important;
+    }
+    
+    .recommendation-header {
+        padding: 1rem !important;
+    }
+    
+    .recommendation-icon {
+        width: 40px !important;
+        height: 40px !important;
+        margin-right: 0.75rem !important;
+    }
+    
+    .recommendation-title {
+        font-size: 1.1rem !important;
+    }
+    
+    .recommendation-description {
+        margin-left: 3.25rem !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .recommendation-content {
+        padding: 1rem !important;
+    }
+    
+    .action-item, .mitigation-item, .risk-item, .monitoring-item {
+        padding: 0.75rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .action-number, .mitigation-number, .risk-number, .monitoring-number {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.8rem !important;
+        margin-right: 0.75rem !important;
+    }
+    
+    .action-text, .mitigation-text, .risk-text, .monitoring-text {
+        font-size: 0.85rem !important;
+    }
+    
+    .section-title {
+        font-size: 0.9rem !important;
+    }
+    
+    .ai-reasoning {
+        padding: 0.75rem !important;
+        margin-top: 1rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .weather-tips-section {
+        padding: 1rem;
+        border-radius: 16px;
+    }
+    
+    .ai-header-container {
+        padding: 0.5rem 0;
+    }
+    
+    .ai-header-icon {
+        width: 56px;
+        height: 56px;
+        margin-bottom: 0.75rem;
+    }
+    
+    .ai-header-icon i {
+        font-size: 1.25rem;
+    }
+    
+    .tips-main-title {
+        font-size: 1.5rem;
+    }
+    
+    .tips-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .confidence-container {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+    
+    .confidence-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .confidence-icon i {
+        font-size: 1rem;
+    }
+    
+    .confidence-value {
+        font-size: 1.25rem;
+    }
+    
+    .confidence-bar {
+        width: 60px;
+        height: 6px;
+    }
+    
+    .enhanced-alert {
+        margin-bottom: 1rem;
+        border-radius: 12px;
+    }
+    
+    .alert-header {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+    
+    .alert-icon-container {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .alert-icon-container i {
+        font-size: 1rem;
+    }
+    
+    .alert-title {
+        font-size: 1.125rem;
+    }
+    
+    .alert-description {
+        font-size: 0.85rem;
+    }
+    
+    .tip-card {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+    
+    .tip-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .tip-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+    
+    .tip-title {
+        font-size: 1rem;
+    }
+    
+    .tip-list li {
+        font-size: 0.85rem;
+        padding: 0.5rem 0;
+    }
+    
+    .resource-item {
+        padding: 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Enhanced recommendation cards small mobile styles */
+    .enhanced-recommendation-card {
+        border-radius: 12px !important;
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .recommendation-header {
+        padding: 0.75rem !important;
+    }
+    
+    .recommendation-icon {
+        width: 36px !important;
+        height: 36px !important;
+        margin-right: 0.5rem !important;
+    }
+    
+    .recommendation-title {
+        font-size: 1rem !important;
+    }
+    
+    .recommendation-urgency {
+        font-size: 0.75rem !important;
+    }
+    
+    .recommendation-description {
+        margin-left: 2.75rem !important;
+        font-size: 0.85rem !important;
+    }
+    
+    .recommendation-content {
+        padding: 0.75rem !important;
+    }
+    
+    .action-item, .mitigation-item, .risk-item, .monitoring-item {
+        padding: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
+        border-radius: 8px !important;
+    }
+    
+    .action-number, .mitigation-number, .risk-number, .monitoring-number {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 0.75rem !important;
+        margin-right: 0.5rem !important;
+    }
+    
+    .action-text, .mitigation-text, .risk-text, .monitoring-text {
+        font-size: 0.8rem !important;
+    }
+    
+    .section-title {
+        font-size: 0.85rem !important;
+    }
+    
+    .ai-reasoning {
+        padding: 0.5rem !important;
+        margin-top: 0.75rem !important;
+        border-radius: 8px !important;
+    }
+    
+    .ai-reasoning h6 {
+        font-size: 0.85rem !important;
+    }
+    
+    .ai-reasoning p {
+        font-size: 0.8rem !important;
+    }
+}
+
 /* Error States */
 .weather-error {
     background: #fef2f2;
@@ -961,12 +1949,24 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchWeatherData(farmId);
     });
 
+    // Load AI recommendations for the first farm
+    if (farmContainers.length > 0) {
+        const firstFarmId = farmContainers[0].dataset.farmId;
+        loadAIRecommendations(firstFarmId);
+    }
+
     // Set up auto-refresh every 10 minutes
     setInterval(() => {
         farmContainers.forEach(container => {
             const farmId = container.dataset.farmId;
             fetchWeatherData(farmId, true);
         });
+        
+        // Refresh AI recommendations as well
+        if (farmContainers.length > 0) {
+            const firstFarmId = farmContainers[0].dataset.farmId;
+            loadAIRecommendations(firstFarmId);
+        }
     }, 10 * 60 * 1000);
 
     // Refresh all weather button - using event delegation for better reliability
@@ -1840,6 +2840,336 @@ document.addEventListener('DOMContentLoaded', function() {
     document.head.appendChild(style);
 });
 
- 
+// AI Recommendations Functions
+function loadAIRecommendations(farmId) {
+    console.log('Loading AI recommendations for farm:', farmId);
+    
+    // Show loading state
+    document.getElementById('ai-loading').style.display = 'block';
+    document.getElementById('ai-recommendations-container').style.display = 'none';
+    document.getElementById('ai-error').style.display = 'none';
+    
+    fetch(`/weather/farm/${farmId}/ai-recommendations`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('AI recommendations data:', data);
+            
+            if (data.success) {
+                displayAIRecommendations(data.data.recommendations);
+                document.getElementById('ai-loading').style.display = 'none';
+                document.getElementById('ai-recommendations-container').style.display = 'block';
+            } else {
+                throw new Error(data.message || 'Failed to load AI recommendations');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading AI recommendations:', error);
+            document.getElementById('ai-loading').style.display = 'none';
+            document.getElementById('ai-error').style.display = 'block';
+        });
+}
+
+function displayAIRecommendations(recommendations) {
+    console.log('Displaying AI recommendations:', recommendations);
+    
+    // Display AI confidence with animation
+    if (recommendations.ai_confidence) {
+        const confidenceValue = recommendations.ai_confidence;
+        document.getElementById('ai-confidence-value').textContent = confidenceValue + '%';
+        document.getElementById('ai-confidence-badge').style.display = 'block';
+        
+        // Animate the confidence bar
+        setTimeout(() => {
+            const confidenceFill = document.getElementById('confidence-fill');
+            if (confidenceFill) {
+                confidenceFill.style.width = confidenceValue + '%';
+            }
+        }, 500);
+    }
+    
+    // Display immediate actions
+    displayRecommendationSection('immediate-actions-list', recommendations.immediate_actions, 'immediate-actions-section');
+    
+    // Display short-term planning
+    displayRecommendationSection('short-term-planning-list', recommendations.short_term_planning, 'short-term-planning-section');
+    
+    // Display crop-specific advice
+    displayRecommendationSection('crop-specific-advice-list', recommendations.crop_specific_advice, 'crop-specific-advice-section');
+    
+    // Display risk assessment
+    displayRecommendationSection('risk-assessment-list', recommendations.risk_assessment, 'risk-assessment-section');
+    
+    // Display optimization tips
+    displayRecommendationSection('optimization-tips-list', recommendations.optimization_tips, 'optimization-tips-section');
+    
+    // Display seasonal insights
+    displayRecommendationSection('seasonal-insights-list', recommendations.seasonal_insights, 'seasonal-insights-section');
+}
+
+function displayRecommendationSection(containerId, items, sectionId) {
+    const container = document.getElementById(containerId);
+    const section = document.getElementById(sectionId);
+    
+    if (!items || items.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    
+    section.style.display = 'block';
+    container.innerHTML = '';
+    
+    items.forEach(item => {
+        const card = createRecommendationCard(item);
+        container.appendChild(card);
+    });
+}
+
+function createRecommendationCard(item) {
+    const card = document.createElement('div');
+    card.className = 'recommendation-card mb-4';
+    
+    const priorityClass = getPriorityClass(item.priority || item.level || 'medium');
+    const categoryClass = getCategoryClass(item.category || item.type || 'general');
+    const priorityIcon = getPriorityIcon(item.priority || item.level || 'medium');
+    const itemIcon = item.icon || 'fas fa-lightbulb';
+    const itemColor = item.color || '#6b7280';
+    const urgency = item.urgency || 'Plan accordingly';
+    
+    // Create colored container with icon
+    const containerStyle = `
+        background: linear-gradient(135deg, ${itemColor}15 0%, ${itemColor}08 100%);
+        border: 2px solid ${itemColor}40;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px ${itemColor}20;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    `;
+    
+    // Add hover effect
+    const hoverStyle = `
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px ${itemColor}30;
+        border-color: ${itemColor}60;
+    `;
+    
+    card.innerHTML = `
+        <div class="enhanced-recommendation-card" style="${containerStyle}" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 40px ${itemColor}30'; this.style.borderColor='${itemColor}60';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 32px ${itemColor}20'; this.style.borderColor='${itemColor}40';">
+            <!-- Header with icon and urgency -->
+            <div class="recommendation-header" style="padding: 1.5rem 1.5rem 1rem 1.5rem; border-bottom: 1px solid ${itemColor}30;">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="recommendation-icon" style="width: 48px; height: 48px; background: linear-gradient(135deg, ${itemColor} 0%, ${itemColor}CC 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem; box-shadow: 0 4px 16px ${itemColor}40;">
+                            <i class="${itemIcon}" style="color: white; font-size: 1.25rem;"></i>
+                        </div>
+                        <div>
+                            <h5 class="recommendation-title mb-1" style="color: #1e293b; font-weight: 700; font-size: 1.25rem; margin: 0;">${item.title || 'Recommendation'}</h5>
+                            <div class="recommendation-urgency" style="color: ${itemColor}; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <i class="fas fa-clock me-1"></i>${urgency}
+                            </div>
+                        </div>
+                    </div>
+                    <span class="badge" style="background: ${itemColor}; color: white; font-size: 0.75rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 20px;">
+                        ${getCategoryLabel(item.category || item.type || 'general')}
+                    </span>
+                </div>
+                <p class="recommendation-description mb-0" style="color: #475569; font-size: 1rem; line-height: 1.6; margin-left: 4rem;">
+                    ${item.description || ''}
+                </p>
+            </div>
+            
+            <!-- Content -->
+            <div class="recommendation-content" style="padding: 1.5rem;">
+                ${item.actions || item.recommendations || item.tips || item.insights ? `
+                    <div class="action-section mb-4">
+                        <h6 class="section-title mb-3" style="color: ${itemColor}; font-weight: 700; font-size: 1rem; display: flex; align-items: center;">
+                            <i class="fas fa-tasks me-2" style="background: ${itemColor}20; padding: 0.5rem; border-radius: 8px; color: ${itemColor};"></i>
+                            Immediate Actions Required
+                        </h6>
+                        <div class="action-list">
+                            ${(item.actions || item.recommendations || item.tips || item.insights).map((action, index) => 
+                                `<div class="action-item mb-3" style="display: flex; align-items: flex-start; padding: 1rem; background: white; border-radius: 12px; border-left: 4px solid ${itemColor}; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                    <div class="action-number" style="width: 32px; height: 32px; background: ${itemColor}; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem; margin-right: 1rem; flex-shrink: 0;">${index + 1}</div>
+                                    <div class="action-text" style="color: #374151; font-size: 0.95rem; line-height: 1.6; flex: 1;">${action}</div>
+                                </div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${item.mitigation ? `
+                    <div class="mitigation-section mb-4">
+                        <h6 class="section-title mb-3" style="color: #f59e0b; font-weight: 700; font-size: 1rem; display: flex; align-items: center;">
+                            <i class="fas fa-shield-alt me-2" style="background: #f59e0b20; padding: 0.5rem; border-radius: 8px; color: #f59e0b;"></i>
+                            Protection & Mitigation Strategies
+                        </h6>
+                        <div class="mitigation-list">
+                            ${item.mitigation.map((mitigation, index) => 
+                                `<div class="mitigation-item mb-2" style="display: flex; align-items: flex-start; padding: 0.75rem; background: #fef3c7; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                                    <div class="mitigation-number" style="width: 24px; height: 24px; background: #f59e0b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; margin-right: 0.75rem; flex-shrink: 0;">${index + 1}</div>
+                                    <div class="mitigation-text" style="color: #92400e; font-size: 0.9rem; line-height: 1.5; flex: 1;">${mitigation}</div>
+                                </div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${item.risk_factors ? `
+                    <div class="risk-section mb-4">
+                        <h6 class="section-title mb-3" style="color: #dc2626; font-weight: 700; font-size: 1rem; display: flex; align-items: center;">
+                            <i class="fas fa-exclamation-triangle me-2" style="background: #dc262620; padding: 0.5rem; border-radius: 8px; color: #dc2626;"></i>
+                            Risk Factors to Watch
+                        </h6>
+                        <div class="risk-list">
+                            ${item.risk_factors.map((risk, index) => 
+                                `<div class="risk-item mb-2" style="display: flex; align-items: flex-start; padding: 0.75rem; background: #fef2f2; border-radius: 8px; border-left: 3px solid #dc2626;">
+                                    <div class="risk-number" style="width: 24px; height: 24px; background: #dc2626; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; margin-right: 0.75rem; flex-shrink: 0;">${index + 1}</div>
+                                    <div class="risk-text" style="color: #991b1b; font-size: 0.9rem; line-height: 1.5; flex: 1;">${risk}</div>
+                                </div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${item.monitoring ? `
+                    <div class="monitoring-section mb-4">
+                        <h6 class="section-title mb-3" style="color: #3b82f6; font-weight: 700; font-size: 1rem; display: flex; align-items: center;">
+                            <i class="fas fa-eye me-2" style="background: #3b82f620; padding: 0.5rem; border-radius: 8px; color: #3b82f6;"></i>
+                            Monitoring Checklist
+                        </h6>
+                        <div class="monitoring-list">
+                            ${item.monitoring.map((monitor, index) => 
+                                `<div class="monitoring-item mb-2" style="display: flex; align-items: flex-start; padding: 0.75rem; background: #eff6ff; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                    <div class="monitoring-number" style="width: 24px; height: 24px; background: #3b82f6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; margin-right: 0.75rem; flex-shrink: 0;">${index + 1}</div>
+                                    <div class="monitoring-text" style="color: #1e40af; font-size: 0.9rem; line-height: 1.5; flex: 1;">${monitor}</div>
+                                </div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${item.ai_reasoning ? `
+                    <div class="ai-reasoning" style="margin-top: 1.5rem; padding: 1rem; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border-left: 4px solid ${itemColor};">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-robot me-3" style="color: ${itemColor}; font-size: 1.25rem; margin-top: 0.25rem;"></i>
+                            <div>
+                                <h6 class="mb-2" style="color: #1e293b; font-weight: 700; font-size: 0.95rem;">AI Analysis & Reasoning</h6>
+                                <p class="mb-0" style="color: #475569; font-size: 0.9rem; line-height: 1.6;">${item.ai_reasoning}</p>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
+
+function getPriorityClass(priority) {
+    switch (priority.toLowerCase()) {
+        case 'critical':
+        case 'high':
+            return 'border-danger';
+        case 'medium':
+            return 'border-warning';
+        case 'low':
+            return 'border-info';
+        default:
+            return 'border-primary';
+    }
+}
+
+function getCategoryClass(category) {
+    switch (category.toLowerCase()) {
+        case 'heat_management':
+        case 'heat_stress':
+            return 'bg-danger';
+        case 'cold_protection':
+            return 'bg-info';
+        case 'disease_prevention':
+        case 'disease':
+            return 'bg-warning';
+        case 'wind_protection':
+        case 'wind_damage':
+            return 'bg-secondary';
+        case 'rain_management':
+            return 'bg-primary';
+        case 'water_optimization':
+            return 'bg-info';
+        case 'energy_optimization':
+            return 'bg-success';
+        case 'seasonal':
+            return 'bg-success';
+        case 'crop_advice':
+            return 'bg-success';
+        case 'planning':
+            return 'bg-info';
+        case 'weather_alert':
+            return 'bg-danger';
+        default:
+            return 'bg-primary';
+    }
+}
+
+function getPriorityIcon(priority) {
+    switch (priority.toLowerCase()) {
+        case 'critical':
+            return '🚨';
+        case 'high':
+            return '⚠️';
+        case 'medium':
+            return '💡';
+        case 'low':
+            return 'ℹ️';
+        default:
+            return '📋';
+    }
+}
+
+function getCategoryLabel(category) {
+    switch (category.toLowerCase()) {
+        case 'heat_management':
+            return 'Heat Care';
+        case 'cold_protection':
+            return 'Cold Care';
+        case 'disease_prevention':
+            return 'Disease Prevention';
+        case 'moisture_management':
+            return 'Water Care';
+        case 'wind_protection':
+            return 'Wind Safety';
+        case 'rain_management':
+            return 'Rain Care';
+        case 'weather_alert':
+            return 'Weather Alert';
+        case 'planning':
+        case 'temperature_planning':
+        case 'rain_planning':
+        case 'dry_planning':
+            return 'Planning';
+        case 'crop_advice':
+            return 'Crop Care';
+        case 'heat_stress':
+            return 'Heat Risk';
+        case 'disease':
+            return 'Disease Risk';
+        case 'wind_damage':
+            return 'Wind Risk';
+        case 'water_optimization':
+            return 'Water Tips';
+        case 'energy_optimization':
+            return 'Energy Tips';
+        case 'seasonal':
+            return 'Seasonal Tips';
+        default:
+            return 'General';
+    }
+}
+
+
+// Global function for retry button
+window.loadAIRecommendations = loadAIRecommendations;
+
 </script>
 @endsection

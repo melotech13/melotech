@@ -2115,71 +2115,51 @@ function showQuestionsSummary(updateId, type) {
         }
     }, 100);
     
-    // Use mock data instead of API call
-    const mockSummary = {
-        update_date: '{{ $lastUpdate ? $lastUpdate->update_date->format("M d, Y") : "N/A" }}',
-        progress: '{{ $lastUpdate ? $lastUpdate->calculated_progress : 0 }}',
-        method: '{{ $lastUpdate ? ucfirst($lastUpdate->update_method) : "N/A" }}',
-        questions: [
-            {
-                question: 'Plant Health:',
-                answer: 'Good',
-                explanation: 'Plants are showing healthy growth patterns'
-            },
-            {
-                question: 'Leaf Condition:',
-                answer: 'Good',
-                explanation: 'Leaves are green and well-formed'
-            },
-            {
-                question: 'Growth Rate:',
-                answer: 'Slower',
-                explanation: 'Growth has slowed due to seasonal changes'
-            },
-            {
-                question: 'Water Availability:',
-                answer: 'Excellent',
-                explanation: 'Adequate water supply maintained'
-            },
-            {
-                question: 'Pest Pressure:',
-                answer: 'Low',
-                explanation: 'Minimal pest activity observed'
-            },
-            {
-                question: 'Disease Issues:',
-                answer: 'Minor',
-                explanation: 'Some minor leaf spots detected'
-            },
-            {
-                question: 'Nutrient Deficiency:',
-                answer: 'Moderate',
-                explanation: 'Slight yellowing indicates nutrient needs'
-            },
-            {
-                question: 'Weather Impact:',
-                answer: 'Positive',
-                explanation: 'Favorable weather conditions'
-            },
-            {
-                question: 'Stage Progression:',
-                answer: 'On_track',
-                explanation: 'Development progressing as expected'
-            },
-            {
-                question: 'Overall Satisfaction:',
-                answer: 'Satisfied',
-                explanation: 'Crop performance meets expectations'
-            }
-        ]
-    };
+    // Show loading state
+    modalContent.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading progress summary...</p>
+        </div>
+    `;
     
-    // Display content based on type
-    if (type === 'full') {
-        modalContent.innerHTML = generateFullSummaryHTML(mockSummary);
-    } else {
-        modalContent.innerHTML = generateAnswerSummaryHTML(mockSummary);
-    }
+    // Fetch real data from the server
+    fetch(`/crop-progress/${updateId}/summary`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Display content based on type
+                if (type === 'full') {
+                    modalContent.innerHTML = generateFullSummaryHTML(data.summary);
+                } else {
+                    modalContent.innerHTML = generateAnswerSummaryHTML(data.summary);
+                }
+            } else {
+                modalContent.innerHTML = `
+                    <div class="text-center text-danger">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                        <p>Unable to load progress summary. Please try again.</p>
+                        <button class="btn btn-primary" onclick="showQuestionsSummary('${updateId}', '${type}')">
+                            <i class="fas fa-refresh me-2"></i>Retry
+                        </button>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching summary:', error);
+            modalContent.innerHTML = `
+                <div class="text-center text-danger">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                    <p>Error loading progress summary. Please try again.</p>
+                    <button class="btn btn-primary" onclick="showQuestionsSummary('${updateId}', '${type}')">
+                        <i class="fas fa-refresh me-2"></i>Retry
+                    </button>
+                </div>
+            `;
+        });
 }
 
 function showRecommendations(updateId) {
@@ -2342,7 +2322,7 @@ function generateFullSummaryHTML(summary) {
         <div class="summary-container">
             <div class="summary-header text-center mb-4">
                 <h5 class="text-primary mb-2">📊 Progress Summary</h5>
-                <p class="text-muted mb-0">Updated on ${summary.update_date}</p>
+                <p class='text-muted mb-0'>Updated on ${summary.update_date} | Week: ${summary.week_name || 'N/A'}</p>
             </div>
             
             <div class="row">
@@ -2370,19 +2350,19 @@ function generateFullSummaryHTML(summary) {
                 <!-- Right Column -->
                 <div class="col-md-6">
                     <div class="summary-status">
-                        <h6 class="text-secondary mb-3">🌱 Current Status:</h6>
+                        <h6 class="text-secondary mb-3">📊 Key Insights:</h6>
                         <div class="status-grid">
                             <div class="status-item d-flex align-items-center mb-2">
-                                <i class="fas fa-leaf text-success me-3"></i>
-                                <span>Plants are healthy and growing well</span>
+                                <i class="fas fa-chart-bar text-success me-3"></i>
+                                <span>Based on ${summary.questions ? summary.questions.length : 0} detailed responses</span>
                             </div>
                             <div class="status-item d-flex align-items-center mb-2">
-                                <i class="fas fa-tint text-info me-3"></i>
-                                <span>Water supply is adequate</span>
+                                <i class="fas fa-calculator text-info me-3"></i>
+                                <span>Progress calculated using weighted scoring</span>
                             </div>
                             <div class="status-item d-flex align-items-center mb-2">
-                                <i class="fas fa-clock text-warning me-3"></i>
-                                <span>Growth is on schedule</span>
+                                <i class="fas fa-calendar text-warning me-3"></i>
+                                <span>Assessment completed on ${summary.update_date}</span>
                             </div>
                         </div>
                     </div>
@@ -2391,7 +2371,7 @@ function generateFullSummaryHTML(summary) {
             
             <div class="summary-note mt-4 p-3 bg-light rounded text-center">
                 <i class="fas fa-info-circle text-info me-2"></i>
-                <span class="text-muted">Your crops are progressing well! Keep up the good work.</span>
+                <span class="text-muted">Progress calculated based on your detailed responses to crop assessment questions.</span>
             </div>
         </div>
     `;
@@ -2402,17 +2382,20 @@ function generateAnswerSummaryHTML(summary) {
         <div class="summary-container">
             <div class="summary-header mb-4">
                 <h6 class="text-primary mb-2">Answer Summary</h6>
-                <p class="text-muted mb-0">Date: ${summary.update_date}</p>
+                <p class="text-muted mb-0">Date: ${summary.update_date} | Week: ${summary.week_name || 'N/A'}</p>
             </div>
             
             <div class="row">
                 ${summary.questions.map((q, index) => `
                     <div class="col-md-6 mb-3">
                         <div class="answer-item p-3 border rounded h-100">
-                            <div class="d-flex align-items-center">
-                                <div class="question-answer">
-                                    <strong class="question-label d-block mb-1">${q.question}</strong>
-                                    <span class="answer-value badge bg-primary">${q.answer}</span>
+                            <div class="question-answer">
+                                <strong class="question-label d-block mb-2">${q.question}</strong>
+                                <div class="answer-section mb-2">
+                                    <span class="answer-value badge bg-primary fs-6">${q.answer}</span>
+                                </div>
+                                <div class="explanation-section">
+                                    <small class="text-muted">${q.explanation}</small>
                                 </div>
                             </div>
                         </div>
@@ -2421,7 +2404,14 @@ function generateAnswerSummaryHTML(summary) {
             </div>
             
             <div class="summary-footer mt-4 p-3 bg-light rounded text-center">
-                <strong>Total Progress:</strong> ${summary.progress}%
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Total Progress:</strong> ${summary.progress}%
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Update Method:</strong> ${summary.method || 'Questions'}
+                    </div>
+                </div>
             </div>
         </div>
     `;
@@ -2837,71 +2827,51 @@ function showQuestionsSummary(updateId, type) {
         }
     }, 100);
     
-    // Use mock data instead of API call
-    const mockSummary = {
-        update_date: '{{ $lastUpdate ? $lastUpdate->update_date->format("M d, Y") : "N/A" }}',
-        progress: '{{ $lastUpdate ? $lastUpdate->calculated_progress : 0 }}',
-        method: '{{ $lastUpdate ? ucfirst($lastUpdate->update_method) : "N/A" }}',
-        questions: [
-            {
-                question: 'Plant Health:',
-                answer: 'Good',
-                explanation: 'Plants are showing healthy growth patterns'
-            },
-            {
-                question: 'Leaf Condition:',
-                answer: 'Good',
-                explanation: 'Leaves are green and well-formed'
-            },
-            {
-                question: 'Growth Rate:',
-                answer: 'Slower',
-                explanation: 'Growth has slowed due to seasonal changes'
-            },
-            {
-                question: 'Water Availability:',
-                answer: 'Excellent',
-                explanation: 'Adequate water supply maintained'
-            },
-            {
-                question: 'Pest Pressure:',
-                answer: 'Low',
-                explanation: 'Minimal pest activity observed'
-            },
-            {
-                question: 'Disease Issues:',
-                answer: 'Minor',
-                explanation: 'Some minor leaf spots detected'
-            },
-            {
-                question: 'Nutrient Deficiency:',
-                answer: 'Moderate',
-                explanation: 'Slight yellowing indicates nutrient needs'
-            },
-            {
-                question: 'Weather Impact:',
-                answer: 'Positive',
-                explanation: 'Favorable weather conditions'
-            },
-            {
-                question: 'Stage Progression:',
-                answer: 'On_track',
-                explanation: 'Development progressing as expected'
-            },
-            {
-                question: 'Overall Satisfaction:',
-                answer: 'Satisfied',
-                explanation: 'Crop performance meets expectations'
-            }
-        ]
-    };
+    // Show loading state
+    modalContent.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading progress summary...</p>
+        </div>
+    `;
     
-    // Display content based on type
-    if (type === 'full') {
-        modalContent.innerHTML = generateFullSummaryHTML(mockSummary);
-    } else {
-        modalContent.innerHTML = generateAnswerSummaryHTML(mockSummary);
-    }
+    // Fetch real data from the server
+    fetch(`/crop-progress/${updateId}/summary`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Display content based on type
+                if (type === 'full') {
+                    modalContent.innerHTML = generateFullSummaryHTML(data.summary);
+                } else {
+                    modalContent.innerHTML = generateAnswerSummaryHTML(data.summary);
+                }
+            } else {
+                modalContent.innerHTML = `
+                    <div class="text-center text-danger">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                        <p>Unable to load progress summary. Please try again.</p>
+                        <button class="btn btn-primary" onclick="showQuestionsSummary('${updateId}', '${type}')">
+                            <i class="fas fa-refresh me-2"></i>Retry
+                        </button>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching summary:', error);
+            modalContent.innerHTML = `
+                <div class="text-center text-danger">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                    <p>Error loading progress summary. Please try again.</p>
+                    <button class="btn btn-primary" onclick="showQuestionsSummary('${updateId}', '${type}')">
+                        <i class="fas fa-refresh me-2"></i>Retry
+                    </button>
+                </div>
+            `;
+        });
 }
 
 function showRecommendations(updateId) {
@@ -3064,7 +3034,7 @@ function generateFullSummaryHTML(summary) {
         <div class="summary-container">
             <div class="summary-header text-center mb-4">
                 <h5 class="text-primary mb-2">📊 Progress Summary</h5>
-                <p class="text-muted mb-0">Updated on ${summary.update_date}</p>
+                <p class='text-muted mb-0'>Updated on ${summary.update_date} | Week: ${summary.week_name || 'N/A'}</p>
             </div>
             
             <div class="row">
@@ -3092,19 +3062,19 @@ function generateFullSummaryHTML(summary) {
                 <!-- Right Column -->
                 <div class="col-md-6">
                     <div class="summary-status">
-                        <h6 class="text-secondary mb-3">🌱 Current Status:</h6>
+                        <h6 class="text-secondary mb-3">📊 Key Insights:</h6>
                         <div class="status-grid">
                             <div class="status-item d-flex align-items-center mb-2">
-                                <i class="fas fa-leaf text-success me-3"></i>
-                                <span>Plants are healthy and growing well</span>
+                                <i class="fas fa-chart-bar text-success me-3"></i>
+                                <span>Based on ${summary.questions ? summary.questions.length : 0} detailed responses</span>
                             </div>
                             <div class="status-item d-flex align-items-center mb-2">
-                                <i class="fas fa-tint text-info me-3"></i>
-                                <span>Water supply is adequate</span>
+                                <i class="fas fa-calculator text-info me-3"></i>
+                                <span>Progress calculated using weighted scoring</span>
                             </div>
                             <div class="status-item d-flex align-items-center mb-2">
-                                <i class="fas fa-clock text-warning me-3"></i>
-                                <span>Growth is on schedule</span>
+                                <i class="fas fa-calendar text-warning me-3"></i>
+                                <span>Assessment completed on ${summary.update_date}</span>
                             </div>
                         </div>
                     </div>
@@ -3113,7 +3083,7 @@ function generateFullSummaryHTML(summary) {
             
             <div class="summary-note mt-4 p-3 bg-light rounded text-center">
                 <i class="fas fa-info-circle text-info me-2"></i>
-                <span class="text-muted">Your crops are progressing well! Keep up the good work.</span>
+                <span class="text-muted">Progress calculated based on your detailed responses to crop assessment questions.</span>
             </div>
         </div>
     `;
@@ -3124,17 +3094,20 @@ function generateAnswerSummaryHTML(summary) {
         <div class="summary-container">
             <div class="summary-header mb-4">
                 <h6 class="text-primary mb-2">Answer Summary</h6>
-                <p class="text-muted mb-0">Date: ${summary.update_date}</p>
+                <p class="text-muted mb-0">Date: ${summary.update_date} | Week: ${summary.week_name || 'N/A'}</p>
             </div>
             
             <div class="row">
                 ${summary.questions.map((q, index) => `
                     <div class="col-md-6 mb-3">
                         <div class="answer-item p-3 border rounded h-100">
-                            <div class="d-flex align-items-center">
-                                <div class="question-answer">
-                                    <strong class="question-label d-block mb-1">${q.question}</strong>
-                                    <span class="answer-value badge bg-primary">${q.answer}</span>
+                            <div class="question-answer">
+                                <strong class="question-label d-block mb-2">${q.question}</strong>
+                                <div class="answer-section mb-2">
+                                    <span class="answer-value badge bg-primary fs-6">${q.answer}</span>
+                                </div>
+                                <div class="explanation-section">
+                                    <small class="text-muted">${q.explanation}</small>
                                 </div>
                             </div>
                         </div>
@@ -3143,7 +3116,14 @@ function generateAnswerSummaryHTML(summary) {
             </div>
             
             <div class="summary-footer mt-4 p-3 bg-light rounded text-center">
-                <strong>Total Progress:</strong> ${summary.progress}%
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Total Progress:</strong> ${summary.progress}%
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Update Method:</strong> ${summary.method || 'Questions'}
+                    </div>
+                </div>
             </div>
         </div>
     `;
@@ -3270,4 +3250,7 @@ function exportAsExcel() {
 
 
 </script>
+
+<script src="{{ asset('js/enhanced-print-summary.js') }}"></script>
+<script src="{{ asset('js/enhanced-print-recommendations.js') }}"></script>
 @endpush

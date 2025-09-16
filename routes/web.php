@@ -63,6 +63,7 @@ Route::middleware(['auth', 'verified.email'])->group(function () {
 	
 	// Weather routes
 	Route::get('/weather/farm/{farmId}', [App\Http\Controllers\WeatherController::class, 'getFarmWeather'])->name('weather.farm');
+	Route::get('/weather/farm/{farmId}/ai-recommendations', [App\Http\Controllers\WeatherController::class, 'getAIRecommendations'])->name('weather.ai-recommendations');
 	Route::get('/weather/user-farm', [App\Http\Controllers\WeatherController::class, 'getUserFarmWeather'])->name('weather.user-farm');
 	Route::get('/weather/farm/{farmId}/refresh', [App\Http\Controllers\WeatherController::class, 'refreshWeather'])->name('weather.refresh');
 	Route::get('/weather/historical/{farmId}', [App\Http\Controllers\WeatherController::class, 'getHistoricalWeather'])->name('weather.historical');
@@ -102,6 +103,7 @@ Route::get('/crop-progress/print-test', function() {
 	]);
 })->name('crop-progress.print-test');
 			 Route::get('/crop-progress/{id}/recommendations', [App\Http\Controllers\CropProgressController::class, 'getRecommendations'])->name('crop-progress.recommendations');
+			 Route::get('/crop-progress/{id}/summary', [App\Http\Controllers\CropProgressController::class, 'getSummary'])->name('crop-progress.summary');
 	
 	// Photo Diagnosis routes
 	Route::get('/photo-diagnosis', [PhotoDiagnosisController::class, 'index'])->name('photo-diagnosis.index');

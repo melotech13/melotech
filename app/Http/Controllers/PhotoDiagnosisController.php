@@ -65,6 +65,8 @@ class PhotoDiagnosisController extends Controller
             'photo_path' => $photoPath,
             'analysis_type' => $request->analysis_type,
             'identified_type' => $result['identified_type'],
+            'identified_condition' => $result['identified_condition'] ?? null,
+            'condition_key' => $result['condition_key'] ?? null,
             'confidence_score' => $result['confidence_score'],
             'recommendations' => $result['recommendations'] ?? null,
             'analysis_date' => now(),

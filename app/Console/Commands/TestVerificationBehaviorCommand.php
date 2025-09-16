@@ -38,7 +38,7 @@ class TestVerificationBehaviorCommand extends Command
         $user1 = User::create([
             'name' => 'Test User 1',
             'email' => 'testuser1@example.com',
-            'password' => bcrypt('password'),
+            'password' => 'password', // Store as plain text
             'role' => 'user'
         ]);
         

@@ -23,6 +23,8 @@ use App\Models\Notification;
  * @property \Carbon\Carbon|null $email_verified_at
  * @property string|null $email_verification_code
  * @property \Carbon\Carbon|null $email_verification_code_expires_at
+ * @property string|null $used_verification_code
+ * @property \Carbon\Carbon|null $verification_completed_at
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * 
@@ -55,6 +57,8 @@ class User extends Authenticatable
         'email_verified_at',
         'email_verification_code',
         'email_verification_code_expires_at',
+        'used_verification_code',
+        'verification_completed_at',
     ];
 
     /**
@@ -76,7 +80,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'email_verification_code_expires_at' => 'datetime',
-            // Removed 'password' => 'hashed' to allow plain text passwords
+            'verification_completed_at' => 'datetime',
+            // Keep passwords as plain text for admin management
         ];
     }
 
@@ -193,5 +198,29 @@ class User extends Authenticatable
             // Keep email_verification_code for evidence
             // Keep email_verification_code_expires_at for evidence
         ]);
+    }
+
+    /**
+     * Override the password mutator to store passwords as plain text.
+     * This prevents Laravel's default password hashing behavior.
+     *
+     * @param string $value
+     * @return void
+     */
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = $value; // Store as plain text
+    }
+
+    /**
+     * Verify the given password against the user's password.
+     * Since we store passwords as plain text, we do a simple string comparison.
+     *
+     * @param string $password
+     * @return bool
+     */
+    public function verifyPassword(string $password): bool
+    {
+        return $this->password === $password;
     }
 }

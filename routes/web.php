@@ -63,7 +63,6 @@ Route::middleware(['auth', 'verified.email'])->group(function () {
 	
 	// Weather routes
 	Route::get('/weather/farm/{farmId}', [App\Http\Controllers\WeatherController::class, 'getFarmWeather'])->name('weather.farm');
-	Route::get('/weather/farm/{farmId}/ai-recommendations', [App\Http\Controllers\WeatherController::class, 'getAIRecommendations'])->name('weather.ai-recommendations');
 	Route::get('/weather/user-farm', [App\Http\Controllers\WeatherController::class, 'getUserFarmWeather'])->name('weather.user-farm');
 	Route::get('/weather/farm/{farmId}/refresh', [App\Http\Controllers\WeatherController::class, 'refreshWeather'])->name('weather.refresh');
 	Route::get('/weather/historical/{farmId}', [App\Http\Controllers\WeatherController::class, 'getHistoricalWeather'])->name('weather.historical');

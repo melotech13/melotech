@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('land_size', function (Blueprint $table) {
-            //
+        Schema::table('farms', function (Blueprint $table) {
+            $table->renameColumn('field_size', 'land_size');
+            $table->renameColumn('field_size_unit', 'land_size_unit');
         });
     }
 
@@ -21,8 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('land_size', function (Blueprint $table) {
-            //
+        Schema::table('farms', function (Blueprint $table) {
+            $table->renameColumn('land_size', 'field_size');
+            $table->renameColumn('land_size_unit', 'field_size_unit');
         });
     }
 };

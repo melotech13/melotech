@@ -152,7 +152,11 @@
                     <div class="user-field">
                         <div class="field-label">Password</div>
                         <div class="cell-with-action">
-                            <span class="password-value text-truncate" title="Click to reveal password" style="font-family: monospace; font-size: 0.85em; cursor: pointer;" onclick="togglePassword(this, '{{ $user->password }}')">{{ str_repeat('•', strlen($user->password)) }}</span>
+                            @if($user->isPasswordHashed())
+                                <span class="password-value text-truncate" title="Click to convert hashed password" style="font-family: monospace; font-size: 0.85em; cursor: pointer; color: #dc3545;" data-user-id="{{ $user->id }}" data-user-name="{{ $user->name }}" data-action="convert">{{ $user->getDisplayPassword() }}</span>
+                            @else
+                                <span class="password-value text-truncate" title="Click to reveal password" style="font-family: monospace; font-size: 0.85em; cursor: pointer;" data-password="{{ $user->password }}" data-action="toggle">{{ str_repeat('•', strlen($user->password)) }}</span>
+                            @endif
                         </div>
                     </div>
                     <div class="user-field">
@@ -534,6 +538,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // (Removed) Temporary password reset functionality
     
+    // Add click event listeners for password fields
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('password-value')) {
+            const action = e.target.getAttribute('data-action');
+            
+            if (action === 'convert') {
+                const userId = e.target.getAttribute('data-user-id');
+                const userName = e.target.getAttribute('data-user-name');
+                showConvertPasswordModal(userId, userName);
+            } else if (action === 'toggle') {
+                const password = e.target.getAttribute('data-password');
+                togglePassword(e.target, password);
+            }
+        }
+    });
+    
 });
 
 // Function to toggle password visibility in the main list
@@ -639,6 +659,117 @@ function exportUsersAsPDF() {
         exportBtn.innerHTML = originalText;
         alert('PDF export failed. Please try again or use the Print option instead.');
     }
+}
+
+// Function to show convert password modal
+function showConvertPasswordModal(userId, userName) {
+    const modalHtml = `
+        <div class="modal fade" id="convertPasswordModal" tabindex="-1" aria-labelledby="convertPasswordModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="convertPasswordModalLabel">
+                            <i class="fas fa-key me-2"></i>Convert Password
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            This user has a hashed password that cannot be displayed. You can set a new plain text password for admin management.
+                        </div>
+                        <form id="convertPasswordForm">
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="newPassword" name="password" required minlength="8">
+                                <div class="form-text">Enter a new password for ${userName}</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="password_confirmation" required minlength="8">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="convertPassword(${userId})">Convert Password</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('convertPasswordModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('convertPasswordModal'));
+    modal.show();
+}
+
+// Function to convert password
+function convertPassword(userId) {
+    const password = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+    }
+    
+    if (password.length < 8) {
+        alert('Password must be at least 8 characters long!');
+        return;
+    }
+    
+    // Show loading state
+    const convertBtn = document.querySelector('#convertPasswordModal .btn-primary');
+    const originalText = convertBtn.innerHTML;
+    convertBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Converting...';
+    convertBtn.disabled = true;
+    
+    // Send request
+    fetch(`/admin/users/${userId}/convert-password`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            password: password,
+            password_confirmation: confirmPassword
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('convertPasswordModal'));
+            modal.hide();
+            
+            // Show success message
+            alert('Password converted successfully!');
+            
+            // Reload page to show updated password
+            location.reload();
+        } else {
+            alert(data.message || 'Failed to convert password');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while converting the password');
+    })
+    .finally(() => {
+        convertBtn.innerHTML = originalText;
+        convertBtn.disabled = false;
+    });
 }
 
 </script>

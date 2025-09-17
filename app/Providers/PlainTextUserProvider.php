@@ -10,6 +10,7 @@ class PlainTextUserProvider extends EloquentUserProvider
 {
     /**
      * Validate a user against the given credentials.
+     * This provider handles plain text passwords only.
      *
      * @param  \Illuminate\Contracts\Auth\Authenticatable  $user
      * @param  array  $credentials
@@ -19,7 +20,7 @@ class PlainTextUserProvider extends EloquentUserProvider
     {
         $plain = $credentials['password'];
         
-        // For plain text passwords, do a simple string comparison
+        // Direct string comparison for plain text passwords
         return $user->getAuthPassword() === $plain;
     }
 }

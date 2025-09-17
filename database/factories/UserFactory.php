@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-// Removed Hash facade - using plain text passwords
 use Illuminate\Support\Str;
 
 /**

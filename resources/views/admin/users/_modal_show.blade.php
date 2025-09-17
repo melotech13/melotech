@@ -36,7 +36,11 @@
         </div>
         <div class="col-12 col-md-6">
             <div class="form-floating">
-                <input type="text" readonly class="form-control" id="viewPassword" value="{{ str_repeat('•', strlen($user->password)) }}" style="font-family: monospace;" onclick="toggleModalPassword(this, '{{ $user->password }}')" title="Click to reveal password">
+                @if($user->isPasswordHashed())
+                    <input type="text" readonly class="form-control" id="viewPassword" value="{{ $user->getDisplayPassword() }}" style="font-family: monospace; color: #dc3545;" data-user-id="{{ $user->id }}" data-user-name="{{ $user->name }}" data-action="convert" title="Click to convert hashed password">
+                @else
+                    <input type="text" readonly class="form-control" id="viewPassword" value="{{ str_repeat('•', strlen($user->password)) }}" style="font-family: monospace;" data-password="{{ $user->password }}" data-action="toggle" title="Click to reveal password">
+                @endif
                 <label for="viewPassword">Password</label>
             </div>
         </div>
@@ -51,5 +55,25 @@
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('viewPassword');
+    if (passwordInput) {
+        passwordInput.addEventListener('click', function() {
+            const action = this.getAttribute('data-action');
+            
+            if (action === 'convert') {
+                const userId = this.getAttribute('data-user-id');
+                const userName = this.getAttribute('data-user-name');
+                showConvertPasswordModal(userId, userName);
+            } else if (action === 'toggle') {
+                const password = this.getAttribute('data-password');
+                toggleModalPassword(this, password);
+            }
+        });
+    }
+});
+</script>
 
 

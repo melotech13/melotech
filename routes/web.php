@@ -261,6 +261,7 @@ Route::middleware(['auth', 'verified.email', 'admin'])->prefix('admin')->name('a
 	Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
 	Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
 	Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
+	Route::post('/users/{user}/convert-password', [AdminController::class, 'convertPassword'])->name('users.convert-password');
 	
 	// Farm management exports (must be before parameterized routes)
 	Route::get('/farms/export-pdf', [AdminController::class, 'exportFarmsPDF'])->name('farms.export-pdf');

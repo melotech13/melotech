@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -16,6 +16,7 @@ class ProfileController extends Controller
      */
     public function index()
     {
+        /** @var User $user */
         $user = Auth::user();
         return view('user.profile.settings', compact('user'));
     }
@@ -28,6 +29,7 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
+        /** @var User $user */
         $user = Auth::user();
 
         $request->validate([
@@ -58,6 +60,7 @@ class ProfileController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
+        /** @var User $user */
         $user = Auth::user();
 
         if ($request->current_password !== $user->password) {

@@ -10,7 +10,6 @@ use App\Models\Notification;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -946,6 +945,39 @@ class AdminController extends Controller
         return response()->json([
             'unread_count' => $unreadCount
         ]);
+    }
+
+    /**
+     * Convert hashed password to plain text for admin management.
+     */
+    public function convertPassword(Request $request, User $user)
+    {
+        $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        // Check if the user actually has a hashed password
+        if (!$user->isPasswordHashed()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This user already has a plain text password.'
+            ], 400);
+        }
+
+        // Convert to plain text
+        $success = $user->convertToPlainText($request->password);
+
+        if ($success) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Password converted successfully!'
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to convert password. Please try again.'
+            ], 500);
+        }
     }
 
 

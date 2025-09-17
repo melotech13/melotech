@@ -81,7 +81,6 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'email_verification_code_expires_at' => 'datetime',
             'verification_completed_at' => 'datetime',
-            // Keep passwords as plain text for admin management
         ];
     }
 
@@ -201,20 +200,59 @@ class User extends Authenticatable
     }
 
     /**
-     * Override the password mutator to store passwords as plain text.
-     * This prevents Laravel's default password hashing behavior.
+     * Store passwords as plain text for admin management.
      *
      * @param string $value
      * @return void
      */
     public function setPasswordAttribute($value)
     {
-        $this->attributes['password'] = $value; // Store as plain text
+        $this->attributes['password'] = $value;
+    }
+
+    /**
+     * Check if the stored password is hashed (bcrypt format).
+     *
+     * @return bool
+     */
+    public function isPasswordHashed(): bool
+    {
+        return preg_match('/^\$2[ayb]\$.{56}$/', $this->password);
+    }
+
+    /**
+     * Get the display password for admin panel.
+     * Returns plain text if available, otherwise indicates it's hashed.
+     *
+     * @return string
+     */
+    public function getDisplayPassword(): string
+    {
+        if ($this->isPasswordHashed()) {
+            return '[HASHED - Click to convert]';
+        }
+        return $this->password;
+    }
+
+    /**
+     * Convert hashed password to plain text.
+     * This should only be used for admin management purposes.
+     *
+     * @param string $newPlainPassword
+     * @return bool
+     */
+    public function convertToPlainText(string $newPlainPassword): bool
+    {
+        if (!$this->isPasswordHashed()) {
+            return false; // Already plain text
+        }
+        
+        return $this->update(['password' => $newPlainPassword]);
     }
 
     /**
      * Verify the given password against the user's password.
-     * Since we store passwords as plain text, we do a simple string comparison.
+     * Since we use plain text passwords, we do a simple string comparison.
      *
      * @param string $password
      * @return bool

@@ -91,62 +91,98 @@
                     </div>
                     <div class="card-content">
                         <div class="details-grid">
-                            <div class="detail-item">
+                            <div class="detail-item detail-accent analysis-type-accent">
                                 <div class="detail-label">Analysis Type</div>
                                 <div class="detail-value">{{ $photoAnalysis->analysis_type_label }}</div>
                             </div>
-                            
-                            <div class="detail-item">
-                                <div class="detail-label">Identified Type</div>
-                                <div class="detail-value primary">{{ $photoAnalysis->identified_type_label }}</div>
-                            </div>
-                            
-                            <div class="detail-item">
-                                <div class="detail-label">Analysis Date</div>
-                                <div class="detail-value">{{ $photoAnalysis->formatted_analysis_date }}</div>
-                            </div>
-                            
-                            <div class="detail-item confidence-detail">
-                                <div class="detail-label">
-                                    <i class="fas fa-chart-line me-2"></i>
-                                    Confidence Score
-                                </div>
-                                <div class="detail-value confidence-value">
+
+                            <div class="detail-item detail-accent confidence-accent">
+                                <div class="detail-label">Confidence</div>
+                                <div class="detail-value">
                                     @if($photoAnalysis->confidence_score)
-                                        <div class="confidence-inline">
-                                            <div class="score-container">
-                                                <span class="score-number-inline">{{ $photoAnalysis->confidence_score }}%</span>
-                                                <div class="score-subtitle">Accuracy Level</div>
-                                            </div>
-                                            <div class="confidence-level-inline">
-                                                @if($photoAnalysis->confidence_score >= 80)
-                                                    <i class="fas fa-check-circle me-1"></i>
-                                                    <span>High Confidence</span>
-                                                @elseif($photoAnalysis->confidence_score >= 60)
-                                                    <i class="fas fa-exclamation-triangle me-1"></i>
-                                                    <span>Medium Confidence</span>
-                                                @else
-                                                    <i class="fas fa-times-circle me-1"></i>
-                                                    <span>Low Confidence</span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        <div class="confidence-progress-inline">
-                                            <div class="progress-label">
-                                                <span>Analysis Reliability</span>
-                                                <span class="progress-percentage">{{ $photoAnalysis->confidence_score }}%</span>
-                                            </div>
-                                            <div class="progress-inline">
-                                                <div class="progress-bar-inline @if($photoAnalysis->confidence_score >= 80) bg-success @elseif($photoAnalysis->confidence_score >= 60) bg-warning @else bg-danger @endif"
-                                                    style="--progress-width: {{ $photoAnalysis->confidence_score }}%; width: var(--progress-width);" data-width="{{ $photoAnalysis->confidence_score }}">
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <span class="confidence-badge" title="Confidence">
+                                            <i class="fas fa-shield-check" style="margin-right: 6px;"></i>{{ $photoAnalysis->confidence_score }}%
+                                        </span>
                                     @else
                                         <span class="text-muted">Not available</span>
                                     @endif
                                 </div>
                             </div>
+
+                            
+                            
+
+                            @if(is_array($photoAnalysis->condition_scores))
+                            <div class="detail-item full-width probabilities-card">
+                                <div class="probabilities-header">
+                                    <div class="title">
+                                        <i class="fas fa-percentage"></i>
+                                        <span>Condition Probabilities</span>
+                                    </div>
+                                    @if($photoAnalysis->model_version)
+                                        <span class="model-badge" title="Model version">Model: {{ $photoAnalysis->model_version }}</span>
+                                    @endif
+                                </div>
+                                <div class="condition-probabilities">
+                                    @php
+                                        $labels = [
+                                            'healthy' => 'Healthy',
+                                            'fungal_infection' => 'Fungal Infection',
+                                            'nutrient_deficiency' => 'Nutrient Deficiency',
+                                            'pest_damage' => 'Pest Damage',
+                                            'viral_infection' => 'Viral Infection',
+                                        ];
+                                        $icons = [
+                                            'healthy' => 'fas fa-leaf',
+                                            'fungal_infection' => 'fas fa-biohazard',
+                                            'nutrient_deficiency' => 'fas fa-flask',
+                                            'pest_damage' => 'fas fa-bug',
+                                            'viral_infection' => 'fas fa-virus',
+                                        ];
+                                        $colors = [
+                                            'healthy' => '#10b981',
+                                            'fungal_infection' => '#ef4444',
+                                            'nutrient_deficiency' => '#f59e0b',
+                                            'pest_damage' => '#3b82f6',
+                                            'viral_infection' => '#8b5cf6',
+                                        ];
+                                        $scores = is_array($photoAnalysis->condition_scores) ? $photoAnalysis->condition_scores : [];
+                                        $sortedKeys = collect($scores)->sortDesc()->keys()->toArray();
+                                        // Fallback to default order if collect() not available or scores empty
+                                        if (empty($sortedKeys)) { $sortedKeys = array_keys($labels); }
+                                    @endphp
+                                    <div class="probabilities-list">
+                                        @foreach($sortedKeys as $loopKey)
+                                            @php
+                                                $key = $loopKey;
+                                                $label = $labels[$key] ?? ucfirst(str_replace('_',' ', $key));
+                                                $value = (int)($scores[$key] ?? 0);
+                                                $isTop = $loop->first;
+                                            @endphp
+                                            <div class="probability-row key-{{ $key }} @if($isTop) top @endif" role="group" aria-label="{{ $label }} {{ $value }} percent">
+                                                <div class="left">
+                                                    <span class="icon" aria-hidden="true" data-color="{{ $colors[$key] }}"><i class="{{ $icons[$key] ?? 'fas fa-info-circle' }}"></i></span>
+                                                    <span class="label">{{ $label }}</span>
+                                                    @if($isTop)
+                                                        <span class="top-badge" title="Most likely condition"><i class="fas fa-crown"></i> Top</span>
+                                                    @endif
+                                                </div>
+                                                <div class="right">
+                                                    <div class="probability-bar" aria-hidden="true">
+                                                        <div class="probability-fill" data-width="{{ $value }}" data-color="{{ $colors[$key] }}"></div>
+                                                    </div>
+                                                    <span class="percent-badge" data-color="{{ $colors[$key] }}">{{ $value }}%</span>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="probabilities-footer">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>These percentages are generated by our AI model to help you quickly assess plant health and choose the right care or treatment.</span>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -676,6 +712,46 @@
         border: 1px solid #e5e7eb;
     }
 
+    /* Decorative background combinations for key details */
+    .detail-accent {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #ffffff 0%, #eef2f7 100%);
+        border: 1px solid #e2e8f0;
+    }
+
+    .detail-accent::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(800px 160px at -10% -40%, rgba(59,130,246,0.10), transparent 60%),
+                    radial-gradient(600px 140px at 120% 140%, rgba(16,185,129,0.10), transparent 60%);
+        pointer-events: none;
+        opacity: 1;
+    }
+
+    .analysis-type-accent {
+        background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+        border-color: #bfdbfe;
+        border-left: 4px solid #3b82f6;
+    }
+
+    .analysis-type-accent::before {
+        background: radial-gradient(900px 200px at -10% -40%, rgba(59,130,246,0.18), transparent 60%),
+                    radial-gradient(700px 200px at 120% 140%, rgba(96,165,250,0.12), transparent 60%);
+    }
+
+    .confidence-accent {
+        background: linear-gradient(135deg, #ecfeff 0%, #ffffff 100%);
+        border-color: #99f6e4;
+        border-left: 4px solid #10b981;
+    }
+
+    .confidence-accent::before {
+        background: radial-gradient(900px 200px at -10% -40%, rgba(34,197,94,0.15), transparent 60%),
+                    radial-gradient(700px 200px at 120% 140%, rgba(16,185,129,0.12), transparent 60%);
+    }
+
     .detail-item.full-width {
         grid-column: 1 / -1;
     }
@@ -697,6 +773,27 @@
 
     .detail-value.primary {
         color: #3b82f6;
+    }
+
+    /* Compact confidence badge */
+    .confidence-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        line-height: 1;
+        color: #0f172a;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        border: 1px solid #cbd5e1;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .confidence-badge i {
+        color: #16a34a;
+        font-size: 0.85rem;
     }
 
     /* Confidence Score in Analysis Details */
@@ -1437,6 +1534,165 @@
         margin-top: 1rem;
     }
 
+    /* Probabilities Card - improved UI */
+    .probabilities-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .probabilities-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        background: linear-gradient(135deg, #f1f5f9, #eef2f7);
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .probabilities-header .title {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .probabilities-header .title i {
+        color: #3b82f6;
+    }
+
+    .model-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #0f172a;
+        background: #e2e8f0;
+        border-radius: 9999px;
+        border: 1px solid #cbd5e1;
+    }
+
+    .probabilities-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1.25rem;
+    }
+
+    .probability-row {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 1rem;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 0.75rem 0.9rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .probability-row.top {
+        border-color: #3b82f6;
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.10);
+    }
+
+    .probability-row:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    }
+
+    .probability-row .left {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        min-width: 0;
+    }
+
+    .probability-row .left .icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+    }
+
+    .probability-row .left .label {
+        font-weight: 700;
+        color: #111827;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .top-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #1e3a8a;
+        background: #dbeafe;
+        border: 1px solid #bfdbfe;
+        border-radius: 9999px;
+        margin-left: 0.5rem;
+    }
+
+    .probability-row .right {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .probability-bar {
+        height: 12px;
+        background: #eef2f7;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        border: 1px solid #e5e7eb;
+    }
+
+    .probability-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 8px;
+        transition: width 0.6s ease;
+        box-shadow: inset 0 0 8px rgba(255,255,255,0.35);
+    }
+
+    .percent-badge {
+        font-weight: 800;
+        font-size: 0.9rem;
+        padding: 0.2rem 0.4rem;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        min-width: 56px;
+        text-align: center;
+    }
+
+    .probabilities-footer {
+        display: flex;
+        align-items: start;
+        gap: 0.5rem;
+        padding: 0 1.25rem 1.25rem 1.25rem;
+        color: #4b5563;
+        font-size: 0.9rem;
+    }
+
+    .probabilities-footer i {
+        color: #3b82f6;
+        margin-top: 0.2rem;
+    }
+
     .recommendation-tip {
         display: flex;
         align-items: flex-start;
@@ -1834,6 +2090,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load growth progress and weather info
     loadGrowthProgress();
     loadWeatherInfo();
+
+    // Apply dynamic styles for probability bars to avoid inline CSS parsing issues
+    document.querySelectorAll('.probability-fill[data-width][data-color]').forEach(function(el) {
+        var width = el.getAttribute('data-width');
+        var color = el.getAttribute('data-color');
+        if (width !== null) {
+            el.style.width = String(width) + '%';
+        }
+        if (color) {
+            el.style.background = color;
+        }
+    });
+
+    // Apply dynamic colors to icon chips and percent badges
+    document.querySelectorAll('.probability-row .icon[data-color]').forEach(function(el) {
+        var color = el.getAttribute('data-color');
+        if (color) {
+            el.style.color = color;
+            el.style.background = color + '20';
+        }
+    });
+
+    document.querySelectorAll('.percent-badge[data-color]').forEach(function(el) {
+        var color = el.getAttribute('data-color');
+        if (color) {
+            el.style.color = color;
+            el.style.borderColor = color + '40';
+        }
+    });
 });
 
 function shareResults() {

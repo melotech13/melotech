@@ -17,39 +17,82 @@ class WatermelonRecommendationService
             $growthStage = $this->determineGrowthStage($current, $forecast);
         }
         
-        $recommendations = [];
+		$recommendations = [];
+		$usedIds = [];
         
         // 1. Growth stage-specific recommendations
-        $stageRecommendations = $this->getGrowthStageRecommendations($current, $forecast, $growthStage);
-        if ($stageRecommendations) {
-            $recommendations[] = $stageRecommendations;
-        }
+		$stageRecommendations = $this->getGrowthStageRecommendations($current, $forecast, $growthStage);
+		if ($stageRecommendations) {
+			$section = $this->sanitizeSection($stageRecommendations);
+			if ($section && !in_array($section['id'], $usedIds, true)) {
+				$recommendations[] = $section;
+				$usedIds[] = $section['id'];
+			}
+		}
         
         // 2. Weather-based recommendations for watermelon
-        $weatherRecommendations = $this->getWatermelonWeatherRecommendations($current, $forecast, $growthStage);
-        if ($weatherRecommendations) {
-            $recommendations[] = $weatherRecommendations;
-        }
+		$weatherRecommendations = $this->getWatermelonWeatherRecommendations($current, $forecast, $growthStage);
+		if ($weatherRecommendations) {
+			$section = $this->sanitizeSection($weatherRecommendations);
+			if ($section && !in_array($section['id'], $usedIds, true)) {
+				$recommendations[] = $section;
+				$usedIds[] = $section['id'];
+			}
+		}
         
         // 3. Pest and disease management based on weather
-        $pestRecommendations = $this->getPestDiseaseRecommendations($current, $forecast, $growthStage);
-        if ($pestRecommendations) {
-            $recommendations[] = $pestRecommendations;
-        }
+		$pestRecommendations = $this->getPestDiseaseRecommendations($current, $forecast, $growthStage);
+		if ($pestRecommendations) {
+			$section = $this->sanitizeSection($pestRecommendations);
+			if ($section && !in_array($section['id'], $usedIds, true)) {
+				$recommendations[] = $section;
+				$usedIds[] = $section['id'];
+			}
+		}
         
         // 4. Irrigation and nutrition recommendations
-        $irrigationRecommendations = $this->getIrrigationNutritionRecommendations($current, $forecast, $growthStage);
-        if ($irrigationRecommendations) {
-            $recommendations[] = $irrigationRecommendations;
-        }
+		$irrigationRecommendations = $this->getIrrigationNutritionRecommendations($current, $forecast, $growthStage);
+		if ($irrigationRecommendations) {
+			$section = $this->sanitizeSection($irrigationRecommendations);
+			if ($section && !in_array($section['id'], $usedIds, true)) {
+				$recommendations[] = $section;
+				$usedIds[] = $section['id'];
+			}
+		}
         
-        // Ensure we have exactly 4 recommendations
-        while (count($recommendations) < 4) {
-            $recommendations[] = $this->getGeneralWatermelonRecommendation($growthStage);
-        }
+		// Ensure we have exactly 4 unique sections; fill with distinct general tips
+		while (count($recommendations) < 4) {
+			$general = $this->getGeneralWatermelonRecommendation($growthStage);
+			$general = $this->sanitizeSection($general);
+			if ($general && !in_array($general['id'], $usedIds, true)) {
+				$recommendations[] = $general;
+				$usedIds[] = $general['id'];
+			}
+			// Prevent potential infinite loop: if both general tips are used, break
+			if (count($usedIds) >= 10) {
+				break;
+			}
+		}
         
-        return array_slice($recommendations, 0, 4);
+		return array_slice($recommendations, 0, 4);
     }
+
+	/**
+	 * Normalize a section: ensure unique inner recommendations and required keys
+	 */
+	private function sanitizeSection(?array $section): ?array
+	{
+		if (!$section) {
+			return null;
+		}
+		if (isset($section['recommendations']) && is_array($section['recommendations'])) {
+			$unique = array_values(array_filter(array_unique($section['recommendations']), function ($line) {
+				return is_string($line) && trim($line) !== '';
+			}));
+			$section['recommendations'] = $unique;
+		}
+		return $section;
+	}
     
     /**
      * Determine watermelon growth stage based on weather and time patterns

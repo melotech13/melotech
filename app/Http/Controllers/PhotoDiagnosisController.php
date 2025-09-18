@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use App\Models\PhotoAnalysis;
 use App\Services\Diagnosis\PhotoDiagnosisService;
@@ -50,10 +51,22 @@ class PhotoDiagnosisController extends Controller
 
         $user = Auth::user();
 
-        $photoPath = $request->file('photo')->store('photo-analyses', 'public');
-        Log::info('Photo stored at: ' . $photoPath);
+        // Analyze FIRST while the temporary file is intact
+        $uploaded = $request->file('photo');
+        $result = $this->diagnosisService->analyze($uploaded, $request->analysis_type);
 
-        $result = $this->diagnosisService->analyze($request->file('photo'), $request->analysis_type);
+        // Then save directly under public/uploads so no storage:link is required
+        $uploadDir = public_path('uploads/photo-analyses');
+        if (!File::exists($uploadDir)) {
+            File::makeDirectory($uploadDir, 0755, true);
+        }
+        $originalName = pathinfo($uploaded->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $uploaded->getClientOriginalExtension();
+        $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $originalName);
+        $fileName = $safeName . '_' . time() . '.' . $extension;
+        $uploaded->move($uploadDir, $fileName);
+        $photoPath = 'uploads/photo-analyses/' . $fileName;
+        Log::info('Photo stored at public path: ' . $photoPath);
 
         if (empty($result['identified_type']) || !isset($result['confidence_score'])) {
             Log::error('Diagnosis result incomplete', $result ?? []);
@@ -73,6 +86,8 @@ class PhotoDiagnosisController extends Controller
             'processing_time' => $result['processing_time'] ?? null,
             'image_metadata' => $result['image_metadata'] ?? null,
             'analysis_details' => $result['analysis_details'] ?? null,
+            'condition_scores' => $result['condition_scores'] ?? null,
+            'model_version' => $result['model_version'] ?? null,
         ]);
 
         return redirect()->route('photo-diagnosis.show', $photoAnalysis);

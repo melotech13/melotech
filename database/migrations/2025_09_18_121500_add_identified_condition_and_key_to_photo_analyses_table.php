@@ -12,10 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('photo_analyses', function (Blueprint $table) {
-            // Check if the column doesn't exist before adding it
-            if (!Schema::hasColumn('photo_analyses', 'identified_type')) {
-                $table->string('identified_type')->after('analysis_type');
-            }
+            $table->string('identified_condition')->nullable()->after('identified_type');
+            $table->string('condition_key')->nullable()->after('identified_condition');
+            $table->index('condition_key');
         });
     }
 
@@ -25,9 +24,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('photo_analyses', function (Blueprint $table) {
-            if (Schema::hasColumn('photo_analyses', 'identified_type')) {
-                $table->dropColumn('identified_type');
-            }
+            $table->dropIndex(['condition_key']);
+            $table->dropColumn(['identified_condition', 'condition_key']);
         });
     }
 };
+
+

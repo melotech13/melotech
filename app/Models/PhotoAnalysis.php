@@ -21,7 +21,9 @@ class PhotoAnalysis extends Model
         'analysis_id',
         'processing_time',
         'image_metadata',
-        'analysis_details'
+        'analysis_details',
+        'condition_scores',
+        'model_version'
     ];
 
     protected $casts = [
@@ -30,7 +32,8 @@ class PhotoAnalysis extends Model
         'recommendations' => 'array',
         'image_metadata' => 'array',
         'analysis_details' => 'array',
-        'processing_time' => 'decimal:2'
+        'processing_time' => 'decimal:2',
+        'condition_scores' => 'array'
     ];
 
     /**
@@ -73,8 +76,12 @@ class PhotoAnalysis extends Model
         if (!$this->photo_path) {
             return '';
         }
-        
-        return Storage::url($this->photo_path);
+        $relative = ltrim($this->photo_path, '/');
+        // If saved directly under public/ (e.g., 'uploads/...'), link without the storage prefix
+        if (str_starts_with($relative, 'uploads/')) {
+            return asset($relative);
+        }
+        return asset('storage/' . $relative);
     }
 
     /**

@@ -140,25 +140,30 @@ class PhotoDiagnosisService
      */
     private function performMultiTechniqueAnalysis($image, string $analysisType): array
     {
-        $width = imagesx($image);
-        $height = imagesy($image);
-        $totalPixels = $width * $height;
-        
-        // Adaptive sampling based on image size
-        $sampleSize = min(max(self::MIN_SAMPLE_SIZE, $totalPixels / 10), self::MAX_SAMPLE_SIZE);
-        
-        // Initialize analysis counters
-        $colorAnalysis = $this->performColorAnalysis($image, $sampleSize);
-        $textureAnalysis = $this->performTextureAnalysis($image, $sampleSize);
-        $patternAnalysis = $this->performPatternAnalysis($image, $sampleSize);
-        
-        return [
-            'color' => $colorAnalysis,
-            'texture' => $textureAnalysis,
-            'pattern' => $patternAnalysis,
-            'sample_size' => $sampleSize,
-            'image_quality' => $this->assessImageQuality($image)
-        ];
+		$width = imagesx($image);
+		$height = imagesy($image);
+		$totalPixels = $width * $height;
+		
+		// Build a green-leaf mask (HSV-based) to focus analysis on plant tissue
+		$maskSummary = $this->buildLeafMaskSummary($image);
+		$leafCoverage = $maskSummary['coverage'];
+		
+		// Adaptive sampling based on image size
+		$sampleSize = min(max(self::MIN_SAMPLE_SIZE, $totalPixels / 10), self::MAX_SAMPLE_SIZE);
+		
+		// Initialize analysis counters using the mask-aware samplers
+		$colorAnalysis = $this->performColorAnalysis($image, $sampleSize, $maskSummary);
+		$textureAnalysis = $this->performTextureAnalysis($image, $sampleSize, $maskSummary);
+		$patternAnalysis = $this->performPatternAnalysis($image, $sampleSize, $maskSummary);
+		
+		return [
+			'color' => $colorAnalysis,
+			'texture' => $textureAnalysis,
+			'pattern' => $patternAnalysis,
+			'sample_size' => $sampleSize,
+			'image_quality' => $this->assessImageQuality($image),
+			'leaf_coverage' => $leafCoverage
+		];
     }
 
     /**
@@ -166,11 +171,8 @@ class PhotoDiagnosisService
      */
     private function getTypeSpecificRecommendations(string $analysisType, string $condition): array
     {
-        if ($analysisType === 'leaves') {
-            return $this->getLeavesRecommendations($condition);
-        } else {
-            return $this->getWatermelonRecommendations($condition);
-        }
+        // Deprecated legacy path removed in favor of score-based engine
+        return [];
     }
 
     /**
@@ -178,69 +180,8 @@ class PhotoDiagnosisService
      */
     private function getLeavesRecommendations(string $condition): array
     {
-        switch ($condition) {
-            case 'Healthy Green Leaves':
-                return [
-                    '✅ Excellent! Your leaves show healthy green coloration with good structure',
-                    '💧 Continue current watering practices: 1-1.5 inches per week, allowing soil to dry between waterings',
-                    '🌱 Apply balanced fertilizer (10-10-10) every 4-6 weeks at rate of 1 pound per 100 square feet',
-                    '☀️ Ensure 6-8 hours of direct sunlight daily - trim nearby plants if shading occurs',
-                    '🔍 Monitor regularly for any changes in leaf color or texture',
-                    '📸 For ongoing monitoring, upload clear, well-lit images of individual leaves'
-                ];
-            case 'Yellowing Leaves (Nutrient Deficiency)':
-                return [
-                    '⚠️ Yellowing indicates nutrient deficiency - immediate action required',
-                    '💧 Check soil moisture: insert finger 2 inches deep - if wet, reduce watering frequency',
-                    '🌱 Apply nitrogen-rich fertilizer (21-0-0) at rate of 1/2 cup per plant',
-                    '🔍 Test soil pH: optimal range is 6.0-7.0 - if below 6.0, add 1 cup lime per plant',
-                    '🍃 Remove severely yellowed leaves to redirect nutrients to healthy growth',
-                    '📸 Monitor progress with follow-up photos in 1-2 weeks'
-                ];
-            case 'Yellowing with Disease Spots':
-                return [
-                    '🚨 Combined yellowing and spots indicate serious plant stress - urgent treatment needed',
-                    '🧪 Apply copper-based fungicide (copper sulfate) at rate of 2 tablespoons per gallon of water',
-                    '🍃 Remove all affected leaves immediately: cut at base, place in sealed bag',
-                    '💧 Water only at soil level - avoid wetting leaves, use soaker hose or drip irrigation',
-                    '🌱 Apply balanced fertilizer to strengthen plant immunity',
-                    '📸 Monitor closely and upload follow-up photos in 3-5 days'
-                ];
-            case 'Spotted/Diseased Leaves':
-                return [
-                    '🚨 Spots indicate fungal/bacterial infection - urgent treatment needed within 24 hours',
-                    '🧪 Apply copper-based fungicide (copper sulfate) at rate of 2 tablespoons per gallon of water',
-                    '🍃 Remove all spotted leaves immediately: cut at base, place in sealed bag',
-                    '💧 Water only at soil level - avoid wetting leaves, use soaker hose or drip irrigation',
-                    '🌡️ Improve air circulation around plants to reduce humidity',
-                    '📸 Monitor treatment progress with follow-up photos in 3-5 days'
-                ];
-            case 'Early Disease Symptoms':
-                return [
-                    '⚠️ Early disease symptoms detected - preventive action recommended',
-                    '🧪 Apply preventive fungicide (neem oil) at rate of 2 tablespoons per gallon of water',
-                    '🍃 Remove any visibly affected leaves to prevent spread',
-                    '💧 Ensure proper drainage and avoid overwatering',
-                    '🌡️ Improve air circulation and reduce plant density if crowded',
-                    '📸 Monitor closely and upload follow-up photos in 1 week'
-                ];
-            case 'Unclear - Poor Image Quality':
-                return [
-                    '⚠️ Analysis limited due to poor image quality - please retry with better photo',
-                    '📸 Use good lighting (natural daylight preferred)',
-                    '🍃 Focus on individual leaves with clear detail',
-                    '📱 Hold camera steady and ensure image is in focus',
-                    '🔄 Try uploading a different angle or closer view',
-                    '📞 Contact support if issues persist with clear images'
-                ];
-            default:
-                return [
-                    '⚠️ This is a simplified analysis due to processing limitations',
-                    '📸 For more accurate results, try uploading a clearer, well-lit image of individual leaves',
-                    '🔄 Consider trying the analysis again with a different photo',
-                    '🍃 Ensure the image shows clear leaf details and good lighting'
-                ];
-        }
+        // Deprecated legacy path removed in favor of score-based engine
+        return [];
     }
 
     /**
@@ -248,49 +189,8 @@ class PhotoDiagnosisService
      */
     private function getWatermelonRecommendations(string $condition): array
     {
-        switch ($condition) {
-            case 'Ripe Watermelon':
-                return [
-                    '🎉 Perfect! Your watermelon is ready for harvest - optimal timing achieved',
-                    '🔊 Check ripeness: tap with knuckle - should produce hollow, deep sound (not dull thud)',
-                    '👁️ Verify ground spot: should be creamy yellow (not white or green) - size of palm of hand',
-                    '⏰ Harvest timing: pick in early morning (6-8 AM) when temperatures are coolest',
-                    '🍉 Store harvested watermelon in cool, dry place for up to 2 weeks',
-                    '📸 Great job! Your watermelon analysis shows excellent ripeness indicators'
-                ];
-            case 'Nearly Ripe Watermelon':
-                return [
-                    '⏳ Almost ready! Wait 3-7 more days for optimal sweetness and flavor',
-                    '👁️ Monitor ground spot: should be transitioning from white to creamy yellow',
-                    '🍃 Check tendrils: the one nearest the fruit should be 50-75% brown and dry',
-                    '💧 Reduce watering: decrease from 1.5 inches to 1 inch per week to concentrate sugars',
-                    '📸 For more accurate analysis, try uploading a clearer, well-lit image of the watermelon'
-                ];
-            case 'Unripe Watermelon':
-                return [
-                    '🌱 Still developing - patience will reward you with sweet, flavorful fruit',
-                    '💧 Maintain consistent watering: 1.5-2 inches per week, never let soil dry completely',
-                    '🌱 Fertilize properly: apply low-nitrogen fertilizer (5-10-10) at rate of 1/2 cup per plant every 3 weeks',
-                    '🛡️ Pest protection: use floating row covers during early development, remove when flowers appear',
-                    '📸 For more accurate analysis, try uploading a clearer, well-lit image of the watermelon'
-                ];
-            case 'Defective/Diseased Watermelon':
-                return [
-                    '🚨 Defects detected - immediate assessment and action required',
-                    '🔍 Check for soft spots, cracks, or unusual odors - if present, harvest immediately',
-                    '🍃 Remove affected fruit from the plant to prevent disease spread',
-                    '💊 Apply appropriate fungicides if disease is confirmed',
-                    '🌡️ Improve air circulation and reduce humidity around remaining fruits',
-                    '📸 Monitor other watermelons closely and upload follow-up photos'
-                ];
-            default:
-                return [
-                    '⚠️ This is a simplified analysis due to processing limitations',
-                    '📸 For more accurate results, try uploading a clearer, well-lit image of the watermelon',
-                    '🔄 Consider trying the analysis again with a different photo',
-                    '🍉 Ensure the image shows the watermelon clearly with good lighting'
-                ];
-        }
+        // Deprecated legacy path removed in favor of score-based engine
+        return [];
     }
 
     /**
@@ -298,19 +198,7 @@ class PhotoDiagnosisService
      */
     private function getUrgencyLevel(string $condition, string $analysisType): string
     {
-        if ($analysisType === 'leaves') {
-            if (str_contains($condition, 'Spotted') || str_contains($condition, 'Diseased')) {
-                return 'high';
-            } elseif (str_contains($condition, 'Yellowing') || str_contains($condition, 'Wilted')) {
-                return 'medium';
-            }
-        } else {
-            if (str_contains($condition, 'Defective') || str_contains($condition, 'Diseased')) {
-                return 'high';
-            } elseif (str_contains($condition, 'Nearly Ripe')) {
-                return 'medium';
-            }
-        }
+        // Deprecated - urgency now computed from probabilities
         return 'low';
     }
 
@@ -319,21 +207,7 @@ class PhotoDiagnosisService
      */
     private function getTreatmentCategory(string $condition, string $analysisType): string
     {
-        if ($analysisType === 'leaves') {
-            if (str_contains($condition, 'Spotted') || str_contains($condition, 'Diseased')) {
-                return 'urgent_treatment';
-            } elseif (str_contains($condition, 'Yellowing') || str_contains($condition, 'Wilted')) {
-                return 'care';
-            }
-        } else {
-            if (str_contains($condition, 'Defective') || str_contains($condition, 'Diseased')) {
-                return 'urgent_treatment';
-            } elseif (str_contains($condition, 'Ripe')) {
-                return 'harvest';
-            } elseif (str_contains($condition, 'Nearly Ripe')) {
-                return 'monitoring';
-            }
-        }
+        // Deprecated - categories now derived from probabilities
         return 'maintenance';
     }
 
@@ -397,7 +271,7 @@ class PhotoDiagnosisService
     /**
      * Perform advanced color analysis
      */
-    private function performColorAnalysis($image, int $sampleSize): array
+	private function performColorAnalysis($image, int $sampleSize, ?array $maskSummary = null): array
     {
         $width = imagesx($image);
         $height = imagesy($image);
@@ -408,6 +282,7 @@ class PhotoDiagnosisService
         $darkCount = 0;
         $redCount = 0;
         $whiteCount = 0;
+		$validSamples = 0;
         
         // Use stratified sampling for better coverage
         $samplesPerRow = max(1, floor(sqrt($sampleSize)));
@@ -415,19 +290,40 @@ class PhotoDiagnosisService
         
         for ($i = 0; $i < $samplesPerRow; $i++) {
             for ($j = 0; $j < $samplesPerCol; $j++) {
-                $x = min($width - 1, floor(($i + 0.5) * $width / $samplesPerRow));
-                $y = min($height - 1, floor(($j + 0.5) * $height / $samplesPerCol));
-                
-                $rgb = imagecolorat($image, $x, $y);
-                $r = ($rgb >> 16) & 0xFF;
-                $g = ($rgb >> 8) & 0xFF;
-                $b = $rgb & 0xFF;
-                
-                $this->classifyPixelColor($r, $g, $b, $greenCount, $yellowCount, $brownCount, $darkCount, $redCount, $whiteCount);
+				$x = min($width - 1, floor(($i + 0.5) * $width / $samplesPerRow));
+				$y = min($height - 1, floor(($j + 0.5) * $height / $samplesPerCol));
+				
+				$consider = true;
+				if ($maskSummary) {
+					$consider = $this->isLeafPixelAt($image, $x, $y);
+					if (!$consider) {
+						$found = false;
+						for ($radius = 1; $radius <= 3 && !$found; $radius++) {
+							for ($dx = -$radius; $dx <= $radius && !$found; $dx++) {
+								for ($dy = -$radius; $dy <= $radius && !$found; $dy++) {
+									$nx = $x + $dx; $ny = $y + $dy;
+									if ($nx >= 0 && $nx < $width && $ny >= 0 && $ny < $height && $this->isLeafPixelAt($image, $nx, $ny)) {
+										$x = $nx; $y = $ny; $found = true; $consider = true;
+									}
+								}
+							}
+						}
+						if (!$found) { $consider = false; }
+					}
+				}
+				if (!$consider) { continue; }
+				
+				$rgb = imagecolorat($image, $x, $y);
+				$r = ($rgb >> 16) & 0xFF;
+				$g = ($rgb >> 8) & 0xFF;
+				$b = $rgb & 0xFF;
+				
+				$this->classifyPixelColor($r, $g, $b, $greenCount, $yellowCount, $brownCount, $darkCount, $redCount, $whiteCount);
+				$validSamples++;
             }
         }
         
-        $totalSamples = $samplesPerRow * $samplesPerCol;
+		$totalSamples = max(1, $validSamples);
         
         return [
             'green_ratio' => $greenCount / $totalSamples,
@@ -482,7 +378,7 @@ class PhotoDiagnosisService
     /**
      * Perform texture analysis for disease patterns
      */
-    private function performTextureAnalysis($image, int $sampleSize): array
+	private function performTextureAnalysis($image, int $sampleSize, ?array $maskSummary = null): array
     {
         $width = imagesx($image);
         $height = imagesy($image);
@@ -490,11 +386,13 @@ class PhotoDiagnosisService
         $textureVariance = 0;
         $edgeCount = 0;
         $smoothAreas = 0;
+		$valid = 0;
         
         // Sample for texture analysis
         for ($i = 0; $i < min($sampleSize, 100); $i++) {
             $x = rand(1, $width - 2);
             $y = rand(1, $height - 2);
+			if ($maskSummary && !$this->isLeafPixelAt($image, $x, $y)) { $i--; continue; }
             
             // Calculate local variance
             $localVariance = $this->calculateLocalVariance($image, $x, $y);
@@ -509,12 +407,13 @@ class PhotoDiagnosisService
             if ($localVariance < 50) {
                 $smoothAreas++;
             }
+			$valid++;
         }
         
         return [
-            'variance' => $textureVariance / min($sampleSize, 100),
-            'edge_density' => $edgeCount / min($sampleSize, 100),
-            'smooth_areas' => $smoothAreas / min($sampleSize, 100)
+			'variance' => $valid ? ($textureVariance / $valid) : 0,
+			'edge_density' => $valid ? ($edgeCount / $valid) : 0,
+			'smooth_areas' => $valid ? ($smoothAreas / $valid) : 0
         ];
     }
 
@@ -578,7 +477,7 @@ class PhotoDiagnosisService
     /**
      * Perform pattern analysis for disease detection
      */
-    private function performPatternAnalysis($image, int $sampleSize): array
+	private function performPatternAnalysis($image, int $sampleSize, ?array $maskSummary = null): array
     {
         $width = imagesx($image);
         $height = imagesy($image);
@@ -586,11 +485,13 @@ class PhotoDiagnosisService
         $spotCount = 0;
         $streakCount = 0;
         $uniformAreas = 0;
+		$valid = 0;
         
         // Sample for pattern analysis
         for ($i = 0; $i < min($sampleSize, 200); $i++) {
             $x = rand(0, $width - 1);
             $y = rand(0, $height - 1);
+			if ($maskSummary && !$this->isLeafPixelAt($image, $x, $y)) { $i--; continue; }
             
             if ($this->isSpotPattern($image, $x, $y)) {
                 $spotCount++;
@@ -601,12 +502,13 @@ class PhotoDiagnosisService
             if ($this->isUniformArea($image, $x, $y)) {
                 $uniformAreas++;
             }
+			$valid++;
         }
         
         return [
-            'spot_density' => $spotCount / min($sampleSize, 200),
-            'streak_density' => $streakCount / min($sampleSize, 200),
-            'uniform_areas' => $uniformAreas / min($sampleSize, 200)
+			'spot_density' => $valid ? ($spotCount / $valid) : 0,
+			'streak_density' => $valid ? ($streakCount / $valid) : 0,
+			'uniform_areas' => $valid ? ($uniformAreas / $valid) : 0
         ];
     }
 
@@ -714,7 +616,7 @@ class PhotoDiagnosisService
         $height = imagesy($image);
         
         // Check for blur, noise, and overall quality
-        $qualityScore = 1.0;
+		$qualityScore = 1.0;
         
         // Penalize very small images
         if ($width < 200 || $height < 200) {
@@ -738,25 +640,95 @@ class PhotoDiagnosisService
             $qualityScore *= 0.6;
         }
         
-        return max(0.1, min(1.0, $qualityScore));
+		// Slightly weigh in coverage of leaf tissue if available to avoid background bias
+		$mask = $this->buildLeafMaskSummary($image);
+		$coverage = $mask['coverage'];
+		if ($coverage < 0.08) { $qualityScore *= 0.75; }
+		elseif ($coverage < 0.15) { $qualityScore *= 0.9; }
+		
+		return max(0.1, min(1.0, $qualityScore));
     }
+
+	/**
+	 * Build a coarse HSV-based mask summary for leaf areas
+	 */
+	private function buildLeafMaskSummary($image): array
+	{
+		$width = imagesx($image);
+		$height = imagesy($image);
+		$sample = 0;
+		$leaf = 0;
+		$grid = max(20, (int)floor(min($width, $height) / 20));
+		$stepX = max(1, (int)floor($width / $grid));
+		$stepY = max(1, (int)floor($height / $grid));
+		for ($x = 0; $x < $width; $x += $stepX) {
+			for ($y = 0; $y < $height; $y += $stepY) {
+				$rgb = imagecolorat($image, $x, $y);
+				$r = ($rgb >> 16) & 0xFF;
+				$g = ($rgb >> 8) & 0xFF;
+				$b = $rgb & 0xFF;
+				if ($this->isLeafPixel($r, $g, $b)) { $leaf++; }
+				$sample++;
+			}
+		}
+		$coverage = $sample ? ($leaf / $sample) : 0.0;
+		return [ 'coverage' => $coverage ];
+	}
+
+	private function isLeafPixelAt($image, int $x, int $y): bool
+	{
+		$rgb = imagecolorat($image, $x, $y);
+		$r = ($rgb >> 16) & 0xFF;
+		$g = ($rgb >> 8) & 0xFF;
+		$b = $rgb & 0xFF;
+		return $this->isLeafPixel($r, $g, $b);
+	}
+
+	private function isLeafPixel(int $r, int $g, int $b): bool
+	{
+		[$h, $s, $v] = $this->rgbToHsv($r, $g, $b);
+		// Green hue band with moderate saturation and brightness
+		return ($h >= 60 && $h <= 170) && ($s >= 0.22) && ($v >= 0.18);
+	}
+
+	private function rgbToHsv(int $r, int $g, int $b): array
+	{
+		$rN = $r / 255.0; $gN = $g / 255.0; $bN = $b / 255.0;
+		$max = max($rN, $gN, $bN); $min = min($rN, $gN, $bN);
+		$delta = $max - $min;
+		$h = 0.0;
+		if ($delta > 0) {
+			if ($max === $rN) { $h = 60 * fmod((($gN - $bN) / $delta), 6); }
+			elseif ($max === $gN) { $h = 60 * ((($bN - $rN) / $delta) + 2); }
+			else { $h = 60 * ((($rN - $gN) / $delta) + 4); }
+			if ($h < 0) { $h += 360; }
+		}
+		$s = $max == 0 ? 0 : ($delta / $max);
+		$v = $max;
+		return [$h, $s, $v];
+	}
 
     /**
      * Generate comprehensive results based on all analyses
      */
-    private function generateComprehensiveResults(array $analysisResults, string $analysisType, array $imageInfo, UploadedFile $photo): array
+	private function generateComprehensiveResults(array $analysisResults, string $analysisType, array $imageInfo, UploadedFile $photo): array
     {
         $color = $analysisResults['color'];
         $texture = $analysisResults['texture'];
         $pattern = $analysisResults['pattern'];
         $imageQuality = $analysisResults['image_quality'];
+        $leafCoverage = $analysisResults['leaf_coverage'] ?? null;
         
         // Determine condition using enhanced logic
-        $condition = $this->determineCondition($color, $texture, $pattern, $analysisType, $imageQuality);
-        $confidence = $this->calculateConfidence($color, $texture, $pattern, $condition, $imageQuality);
+        $conditionScores = $this->computeConditionScores($color, $texture, $pattern, $imageQuality);
+        // Pick the top-scoring condition
+        arsort($conditionScores);
+        $topKey = array_key_first($conditionScores);
+        $condition = $this->conditionKeyToLabel($topKey);
+        $confidence = $this->calculateConfidence($color, $texture, $pattern, $condition, $imageQuality, $leafCoverage);
         
-        // Generate recommendations
-        $recommendations = $this->getTypeSpecificRecommendations($analysisType, $condition);
+        // Generate new recommendations based on condition probabilities
+        $recommendations = $this->buildRecommendationsFromScores($conditionScores, $analysisType);
         
         Log::info('Enhanced analysis completed', [
             'analysis_type' => $analysisType,
@@ -765,38 +737,131 @@ class PhotoDiagnosisService
             'image_quality' => $imageQuality,
             'color_analysis' => $color,
             'texture_analysis' => $texture,
-            'pattern_analysis' => $pattern
+                'pattern_analysis' => $pattern
         ]);
 
         return [
             'identified_type' => $condition,
             'identified_condition' => $condition,
-            'condition_key' => strtolower(str_replace(' ', '_', $condition)),
+            'condition_key' => $topKey,
             'confidence_score' => $confidence,
-            'recommendations' => [
-                'condition' => strtolower(str_replace(' ', '_', $condition)),
-                'condition_label' => $condition,
-                'recommendations' => $recommendations,
-                'urgency_level' => $this->getUrgencyLevel($condition, $analysisType),
-                'treatment_category' => $this->getTreatmentCategory($condition, $analysisType)
-            ],
+            'recommendations' => $recommendations,
+            'condition_scores' => $conditionScores,
+            'model_version' => 'melotech-vision-v2',
             'analysis_details' => [
-                'analysis_method' => 'enhanced_multi_technique',
+                'analysis_method' => 'enhanced_multi_technique_masked',
                 'image_quality' => round($imageQuality, 2),
                 'color_analysis' => $color,
                 'texture_analysis' => $texture,
                 'pattern_analysis' => $pattern,
                 'disease_detected' => $this->isDiseaseDetected($condition),
-                'confidence_factors' => $this->getConfidenceFactors($color, $texture, $pattern, $imageQuality)
+                'confidence_factors' => $this->getConfidenceFactors($color, $texture, $pattern, $imageQuality),
+                'condition_scores' => $conditionScores,
+                'leaf_coverage' => $leafCoverage
             ],
             'image_metadata' => [
                 'width' => $imageInfo[0],
                 'height' => $imageInfo[1],
                 'mime_type' => $imageInfo['mime'],
                 'file_size' => $photo->getSize(),
-                'quality_score' => round($imageQuality, 2)
+                'quality_score' => round($imageQuality, 2),
+                'leaf_coverage' => $leafCoverage
             ]
         ];
+    }
+
+    /**
+     * Compute five-condition probability scores (percentages)
+     */
+	private function computeConditionScores(array $color, array $texture, array $pattern, float $imageQuality): array
+    {
+        // Base scores derived from heuristics
+        $scores = [
+            'healthy' => 0.0,
+            'fungal_infection' => 0.0,
+            'nutrient_deficiency' => 0.0,
+            'pest_damage' => 0.0,
+            'viral_infection' => 0.0,
+        ];
+
+        // Healthy indicators (stronger emphasis when plant area is green and uniform)
+        $scores['healthy'] += max(0.0, ($color['green_ratio'] - 0.30) * 4.0);
+        $scores['healthy'] += max(0.0, ($pattern['uniform_areas'] ?? 0) * 2.0);
+        $scores['healthy'] += max(0.0, ($texture['smooth_areas'] ?? 0) * 1.2);
+
+        // Fungal: white powder, dark/brown spots, higher spot density
+        $scores['fungal_infection'] += ($color['white_ratio'] ?? 0) * 4.0;
+        $scores['fungal_infection'] += ($pattern['spot_density'] ?? 0) * 3.0;
+        $scores['fungal_infection'] += ($color['brown_ratio'] ?? 0) * 2.0;
+
+        // Nutrient deficiency: yellowing without many spots/edges
+        $scores['nutrient_deficiency'] += ($color['yellow_ratio'] ?? 0) * 5.0;
+        $scores['nutrient_deficiency'] += max(0.0, 1.0 - ($pattern['spot_density'] ?? 0) * 3.0);
+
+        // Pest damage: red patches, edges, streaks
+        $scores['pest_damage'] += ($color['red_ratio'] ?? 0) * 4.0;
+        $scores['pest_damage'] += ($texture['edge_density'] ?? 0) * 3.0;
+        $scores['pest_damage'] += ($pattern['streak_density'] ?? 0) * 2.0;
+
+        // Viral infection: mottling/patchy color (variance + mixed ratios)
+        $colorDiversity = ($color['green_ratio'] ?? 0) * ($color['yellow_ratio'] ?? 0) + ($color['white_ratio'] ?? 0) * 0.5;
+        $scores['viral_infection'] += min(1.0, ($texture['variance'] ?? 0) / 250.0) * 3.0;
+        $scores['viral_infection'] += $colorDiversity * 3.0;
+
+		// Penalize healthy if clear disease indicators present (unless strong green uniformity)
+		$diseaseIndicators = ($scores['fungal_infection'] + $scores['pest_damage'] + $scores['viral_infection']);
+		if ($diseaseIndicators > 2.0 && !(($color['green_ratio'] ?? 0) > 0.75 && ($pattern['spot_density'] ?? 0) < 0.08)) {
+			$scores['healthy'] *= 0.6;
+		}
+
+        // Image quality adjustment
+        $qualityFactor = max(0.7, min(1.0, $imageQuality));
+        foreach ($scores as $k => $v) {
+            $scores[$k] = $v * $qualityFactor;
+        }
+
+        // Normalize to percentages
+        $sum = array_sum($scores);
+        if ($sum <= 0) {
+            // Avoid division by zero - default to healthy moderate probability
+            return [
+                'healthy' => 40,
+                'fungal_infection' => 15,
+                'nutrient_deficiency' => 15,
+                'pest_damage' => 15,
+                'viral_infection' => 15,
+            ];
+        }
+
+        $percentages = [];
+        foreach ($scores as $k => $v) {
+            $percentages[$k] = (int) round(($v / $sum) * 100);
+        }
+
+        // Ensure total 100 by adjusting the largest bucket
+        $total = array_sum($percentages);
+        if ($total !== 100) {
+            arsort($percentages);
+            $largestKey = array_key_first($percentages);
+            $percentages[$largestKey] += 100 - $total;
+        }
+
+        return $percentages;
+    }
+
+    /**
+     * Map condition key to human-readable label
+     */
+    private function conditionKeyToLabel(string $key): string
+    {
+        return match ($key) {
+            'healthy' => 'Healthy',
+            'fungal_infection' => 'Fungal Infection',
+            'nutrient_deficiency' => 'Nutrient Deficiency',
+            'pest_damage' => 'Pest Damage',
+            'viral_infection' => 'Viral Infection',
+            default => 'Unknown',
+        };
     }
 
     /**
@@ -891,12 +956,18 @@ class PhotoDiagnosisService
     /**
      * Calculate confidence score based on multiple factors
      */
-    private function calculateConfidence(array $color, array $texture, array $pattern, string $condition, float $imageQuality): int
+	private function calculateConfidence(array $color, array $texture, array $pattern, string $condition, float $imageQuality, ?float $leafCoverage = null): int
     {
         $confidence = 50; // Base confidence
         
         // Image quality factor
         $confidence += (int)($imageQuality * 30);
+		// Leaf coverage factor (lower confidence if very low plant area)
+		if ($leafCoverage !== null) {
+			if ($leafCoverage < 0.10) $confidence -= 15;
+			elseif ($leafCoverage < 0.20) $confidence -= 8;
+			elseif ($leafCoverage > 0.50) $confidence += 5;
+		}
         
         // Consistency factor
         $consistency = $this->calculateConsistency($color, $texture, $pattern);
@@ -952,7 +1023,137 @@ class PhotoDiagnosisService
             'image_quality_impact' => round($imageQuality * 100, 1) . '%',
             'color_consistency' => round($this->calculateConsistency($color, $texture, $pattern) * 100, 1) . '%',
             'analysis_techniques_used' => ['color_analysis', 'texture_analysis', 'pattern_analysis'],
-            'sample_coverage' => $color['total_samples'] . ' pixels analyzed'
+			'sample_coverage' => $color['total_samples'] . ' pixels analyzed'
         ];
+    }
+
+    /**
+     * Build structured recommendations from probability scores
+     */
+    private function buildRecommendationsFromScores(array $scores, string $analysisType): array
+    {
+        arsort($scores);
+        $topKey = array_key_first($scores);
+        $topValue = (int)($scores[$topKey] ?? 0);
+
+        $riskScore = (int)(($scores['fungal_infection'] ?? 0) + ($scores['pest_damage'] ?? 0) + ($scores['viral_infection'] ?? 0));
+        $urgency = $riskScore >= 120 ? 'high' : ($riskScore >= 60 ? 'medium' : 'low');
+
+        // Derive a seed from the scores to encourage variation per analysis
+        $seedMaterial = json_encode([$scores, $analysisType, microtime(true)]);
+        $seed = abs(crc32($seedMaterial));
+        mt_srand($seed);
+
+        // Pools of condition-specific recommendations with placeholders
+        $pools = [
+            'healthy' => [
+                'Keep irrigation steady at ' . $this->rangeFromProb($scores['healthy'] ?? 0, 0.9, 1.6) . ' inches/week; avoid wetting foliage.',
+                'Mulch with ' . $this->rangeFromProb($scores['healthy'] ?? 0, 2, 4) . ' cm organic matter to stabilize soil moisture.',
+                'Side-dress with balanced fertilizer (10-10-10) at ' . $this->rangeFromProb($scores['healthy'] ?? 0, 20, 40) . ' g/plant every ' . $this->rangeFromProb($scores['healthy'] ?? 0, 4, 6) . ' weeks.',
+                'Scout weekly; record leaf color and growth rate to establish a healthy baseline.',
+                'Ensure ' . $this->rangeFromProb($scores['healthy'] ?? 0, 6, 8) . ' hours of direct sun; thin overcrowded vines to improve airflow.'
+            ],
+            'fungal_infection' => [
+                'Begin fungicide rotation: copper (' . $this->rangeFromProb($scores['fungal_infection'] ?? 0, 1.5, 2.5) . ' ml/L) or neem (' . $this->rangeFromProb($scores['fungal_infection'] ?? 0, 2, 4) . ' ml/L) in the evening.',
+                'Prune and bag ' . $this->rangeFromProb($scores['fungal_infection'] ?? 0, 10, 25) . '% most-affected leaves; disinfect tools between cuts.',
+                'Switch to drip or base-watering; keep foliage dry, water early morning only.',
+                'Increase row spacing or selectively thin vines to reach a ' . $this->rangeFromProb($scores['fungal_infection'] ?? 0, 25, 35) . ' cm airflow gap.',
+                'After rain, reapply protectant within ' . $this->rangeFromProb($scores['fungal_infection'] ?? 0, 24, 48) . ' hrs to maintain coverage.'
+            ],
+            'nutrient_deficiency' => [
+                'Apply fast-acting nitrogen (21-0-0) at ' . $this->rangeFromProb($scores['nutrient_deficiency'] ?? 0, 15, 35) . ' g/plant; water in thoroughly.',
+                'Check soil pH targeting 6.0–7.0; if <5.8, add ag lime at ' . $this->rangeFromProb($scores['nutrient_deficiency'] ?? 0, 0.2, 0.5) . ' kg/m².',
+                'Foliar feed with urea ' . $this->rangeFromProb($scores['nutrient_deficiency'] ?? 0, 5, 10) . ' g/L for rapid greening; spray at dusk.',
+                'Mulch and keep moisture uniform to reduce nutrient stress swings.',
+                'Reassess leaf color in ' . $this->rangeFromProb($scores['nutrient_deficiency'] ?? 0, 5, 10) . ' days; repeat light feed if pale persists.'
+            ],
+            'pest_damage' => [
+                'Inspect leaf undersides; if pests present, apply insecticidal soap at ' . $this->rangeFromProb($scores['pest_damage'] ?? 0, 10, 20) . ' ml/L, repeat in ' . $this->rangeFromProb($scores['pest_damage'] ?? 0, 5, 7) . ' days.',
+                'Introduce sticky traps at ' . $this->rangeFromProb($scores['pest_damage'] ?? 0, 1, 2) . ' per 10 m²; monitor weekly counts.',
+                'Remove weeds and plant debris; maintain a clean perimeter to reduce pest harborage.',
+                'Increase airflow and reduce humidity; target morning irrigation only.',
+                'Spot-remove heavily damaged leaves/fruit to lower pest pressure.'
+            ],
+            'viral_infection' => [
+                'Isolate symptomatic plants immediately; handle healthy plants first to reduce spread.',
+                'Control vectors (aphids/whiteflies) with pyrethrin or oil; reapply in ' . $this->rangeFromProb($scores['viral_infection'] ?? 0, 5, 7) . ' days if needed.',
+                'Remove and bag severely mottled or stunted tissue; do not compost infected material.',
+                'Sanitize hands and tools with 70% alcohol when moving between plants/rows.',
+                'Plant resistant varieties in future cycles; rotate away from cucurbits for ' . $this->rangeFromProb($scores['viral_infection'] ?? 0, 4, 6) . ' months.'
+            ],
+        ];
+
+        // Compute treatment category
+        $treatmentCategory = match ($topKey) {
+            'healthy' => 'maintenance',
+            'nutrient_deficiency' => 'nutrition',
+            'fungal_infection' => 'fungicide_management',
+            'pest_damage' => 'ipm_control',
+            'viral_infection' => 'containment',
+            default => 'maintenance',
+        };
+
+        // Build a weighted, varied set of recommendations
+        $primaryPool = $pools[$topKey] ?? [];
+        $secondaryKeys = array_keys(array_diff_key($pools, [$topKey => true]));
+        shuffle($secondaryKeys);
+        $secondaryPool = [];
+        foreach ($secondaryKeys as $k) {
+            // include some secondary tips if that condition has non-trivial probability
+            if (($scores[$k] ?? 0) >= 15) {
+                $subset = $pools[$k];
+                shuffle($subset);
+                $secondaryPool = array_merge($secondaryPool, array_slice($subset, 0, 2));
+            }
+        }
+
+        shuffle($primaryPool);
+        $selected = array_slice($primaryPool, 0, 3);
+        if (!empty($secondaryPool)) {
+            shuffle($secondaryPool);
+            $selected = array_merge($selected, array_slice($secondaryPool, 0, 3));
+        }
+
+        // Ensure at least one general best-practice may overlap across images
+        $general = [
+            'Avoid overhead irrigation; water at the base early in the day.',
+            'Keep good records of inputs and symptoms to fine-tune care.'
+        ];
+        if (count($selected) < 5) {
+            $selected[] = $general[array_rand($general)];
+        }
+
+        // De-duplicate and cap to 6
+        $selected = array_values(array_unique($selected));
+        $selected = array_slice($selected, 0, 6);
+
+        return [
+            'condition' => $topKey,
+            'condition_label' => $this->conditionKeyToLabel($topKey),
+            'recommendations' => $selected,
+            'urgency_level' => $urgency,
+            'treatment_category' => $treatmentCategory,
+            'by_condition' => [
+                'healthy' => $scores['healthy'] ?? 0,
+                'fungal_infection' => $scores['fungal_infection'] ?? 0,
+                'nutrient_deficiency' => $scores['nutrient_deficiency'] ?? 0,
+                'pest_damage' => $scores['pest_damage'] ?? 0,
+                'viral_infection' => $scores['viral_infection'] ?? 0,
+            ]
+        ];
+    }
+
+    private function rangeFromProb(int $probability, float $min, float $max): string
+    {
+        $p = max(0, min(100, $probability));
+        $value = $min + ($max - $min) * ($p / 100.0);
+        // Round sensibly depending on scale
+        if ($max <= 3) {
+            return number_format($value, 1);
+        }
+        if ($max <= 10) {
+            return (string) round($value, 0);
+        }
+        return (string) round($value, 0);
     }
 }

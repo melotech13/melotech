@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class PhotoAnalysis extends Model
 {
@@ -62,5 +63,29 @@ class PhotoAnalysis extends Model
     public function getFormattedAnalysisDateAttribute(): string
     {
         return $this->analysis_date->format('M d, Y \a\t g:i A');
+    }
+
+    /**
+     * Get the photo URL for display.
+     */
+    public function getPhotoUrlAttribute(): string
+    {
+        if (!$this->photo_path) {
+            return '';
+        }
+        
+        return Storage::url($this->photo_path);
+    }
+
+    /**
+     * Check if the photo file exists.
+     */
+    public function getPhotoExistsAttribute(): bool
+    {
+        if (!$this->photo_path) {
+            return false;
+        }
+        
+        return Storage::disk('public')->exists($this->photo_path);
     }
 }

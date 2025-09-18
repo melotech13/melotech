@@ -167,10 +167,15 @@
                         @foreach($analyses->take(6) as $analysis)
                             <div class="analysis-card">
                                 <div class="analysis-image">
-                                    @if($analysis->photo_path && Storage::disk('public')->exists($analysis->photo_path))
-                                        <img src="{{ Storage::url($analysis->photo_path) }}" 
+                                    @if($analysis->photo_url)
+                                        <img src="{{ $analysis->photo_url }}" 
                                              alt="Analysis Photo" 
-                                             class="img-fluid">
+                                             class="img-fluid"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div class="no-image-placeholder" style="display: none;">
+                                            <i class="fas fa-image fa-3x text-muted"></i>
+                                            <p class="text-muted mt-2">Photo not available</p>
+                                        </div>
                                     @else
                                         <div class="no-image-placeholder">
                                             <i class="fas fa-image fa-3x text-muted"></i>
@@ -191,7 +196,8 @@
                                                 @elseif($analysis->confidence_score >= 60) bg-warning
                                                 @else bg-danger
                                                 @endif" 
-                                                style="width: {{ $analysis->confidence_score }}%">
+                                                data-width="{{ $analysis->confidence_score }}"
+                                                style="width: 0%;">
                                                 {{ $analysis->confidence_score }}%
                                             </div>
                                         </div>
@@ -963,6 +969,20 @@
                 ]
             });
         }
+
+        // Animate progress bars with smooth transition
+        $('.progress-bar[data-width]').each(function() {
+            const $this = $(this);
+            const width = $this.data('width');
+            
+            // Add transition for smooth animation
+            $this.css('transition', 'width 0.8s ease-in-out');
+            
+            // Animate to the target width
+            setTimeout(() => {
+                $this.css('width', width + '%');
+            }, 100);
+        });
     });
 </script>
 @endsection

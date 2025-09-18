@@ -54,10 +54,15 @@
                     </div>
                     <div class="card-content">
                         <div class="photo-display">
-                            @if($photoAnalysis->photo_path && Storage::disk('public')->exists($photoAnalysis->photo_path))
-                                <img src="{{ Storage::url($photoAnalysis->photo_path) }}" 
+                            @if($photoAnalysis->photo_url)
+                                <img src="{{ $photoAnalysis->photo_url }}" 
                                      alt="Analysis Photo" 
-                                     class="analysis-photo">
+                                     class="analysis-photo"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="no-image-placeholder" style="display: none;">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                    <p class="text-muted mt-2">Photo not available</p>
+                                </div>
                             @else
                                 <div class="no-image-placeholder">
                                     <i class="fas fa-image fa-3x text-muted"></i>

@@ -273,7 +273,7 @@ class AdminController extends Controller
                 'role' => ['required', Rule::in(['user', 'admin'])],
             ]);
 
-            // Store password as provided (system supports plain or hashed)
+            // Store password as plain text (no hashing)
             $user->update($validated);
 
             // Notify about admin-updated user

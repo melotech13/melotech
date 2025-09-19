@@ -62,6 +62,17 @@ class User extends Authenticatable
     ];
 
     /**
+     * Set the user's password.
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = $value;
+    }
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
@@ -199,16 +210,6 @@ class User extends Authenticatable
         ]);
     }
 
-    /**
-     * Store passwords as plain text for admin management.
-     *
-     * @param string $value
-     * @return void
-     */
-    public function setPasswordAttribute($value)
-    {
-        $this->attributes['password'] = $value;
-    }
 
     /**
      * Check if the stored password is hashed (bcrypt format).
@@ -260,5 +261,15 @@ class User extends Authenticatable
     public function verifyPassword(string $password): bool
     {
         return $this->password === $password;
+    }
+
+    /**
+     * Get the password for the user.
+     *
+     * @return string
+     */
+    public function getAuthPassword()
+    {
+        return $this->password;
     }
 }

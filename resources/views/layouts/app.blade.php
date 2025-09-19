@@ -192,7 +192,7 @@
             margin-left: auto;
         }
 
-        /* User dropdown button */
+        /* New User dropdown button */
         .user-dropdown-btn {
             background: rgba(255, 255, 255, 0.15) !important;
             border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -205,6 +205,8 @@
             align-items: center !important;
             gap: 0.75rem !important;
             min-width: 160px !important;
+            position: relative;
+            z-index: 1001;
         }
 
         .user-dropdown-btn:hover,
@@ -244,11 +246,13 @@
         .user-dropdown-menu {
             background: white !important;
             border: none !important;
-            border-radius: 16px !important;
+            border-radius: 12px !important;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
             padding: 0.5rem 0 !important;
             min-width: 280px !important;
             margin-top: 0.5rem !important;
+            border: 1px solid rgba(0, 0, 0, 0.05) !important;
+            overflow: hidden;
         }
 
         .dropdown-header {
@@ -305,6 +309,11 @@
             border: none !important;
             background: transparent !important;
             text-decoration: none !important;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            text-align: left;
+            border-radius: 0;
         }
         
         /* Prevent active state on dropdown items */
@@ -1421,16 +1430,16 @@
                 <!-- User Menu -->
                 <div class="user-menu">
                     @if(Auth::check())
-                        <!-- User Dropdown for authenticated users -->
                         <div class="dropdown">
-                            <button class="btn dropdown-toggle user-dropdown-btn" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="userDropdownMenu">
+                            <button class="btn user-dropdown-btn" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                                 <div class="user-avatar">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </div>
                                 <span class="user-name">{{ auth()->user()->name }}</span>
+                                <i class="fas fa-chevron-down ms-2" style="font-size: 0.8rem;"></i>
                             </button>
-                            <ul class="dropdown-menu user-dropdown-menu dropdown-menu-end" id="userDropdownMenu" aria-labelledby="userDropdown">
-                                <li class="dropdown-header">
+                            <ul class="dropdown-menu user-dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                                <li class="px-3 py-2">
                                     <div class="dropdown-user-info">
                                         <div class="dropdown-user-avatar">
                                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
@@ -1441,53 +1450,22 @@
                                         </div>
                                     </div>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li><hr class="dropdown-divider my-2"></li>
                                 @if(Auth::user()->role === 'admin')
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('admin.dashboard') }}">
-                                            <i class="fas fa-shield-alt me-2"></i>
-                                            Admin Dashboard
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('admin.users.index') }}">
-                                            <i class="fas fa-users me-2"></i>
-                                            Manage Users
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('admin.farms.index') }}">
-                                            <i class="fas fa-tractor me-2"></i>
-                                            Manage Farms
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('admin.statistics') }}">
-                                            <i class="fas fa-chart-bar me-2"></i>
-                                            Statistics
-                                        </a>
-                                    </li>
+                                    <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}"><i class="fas fa-shield-alt me-2"></i> Admin Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('admin.users.index') }}"><i class="fas fa-users me-2"></i> Manage Users</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('admin.farms.index') }}"><i class="fas fa-tractor me-2"></i> Manage Farms</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('admin.statistics') }}"><i class="fas fa-chart-bar me-2"></i> Statistics</a></li>
                                 @else
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('dashboard') }}">
-                                            <i class="fas fa-tachometer-alt me-2"></i>
-                                            Dashboard
-                                        </a>
-                                    </li>
+                                    <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
                                 @endif
+                                <li><a class="dropdown-item" href="{{ route('profile.settings') }}"><i class="fas fa-user me-2"></i> Profile Settings</a></li>
+                                <li><hr class="dropdown-divider my-2"></li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('profile.settings') }}">
-                                        <i class="fas fa-user me-2"></i>
-                                        Profile Settings
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                    <form method="POST" action="{{ route('logout') }}" class="w-100">
                                         @csrf
-                                        <button type="submit" class="dropdown-item logout-dropdown-item">
-                                            <i class="fas fa-sign-out-alt me-2"></i>
-                                            Logout
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="fas fa-sign-out-alt me-2"></i> Logout
                                         </button>
                                     </form>
                                 </li>
@@ -1573,37 +1551,42 @@
     
 
     
-    <!-- User Dropdown Enhancement Script -->
+    <!-- User Dropdown Script -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Enhanced dropdown functionality
-        const userDropdown = document.getElementById('userDropdown');
-        const dropdownMenu = document.getElementById('userDropdownMenu');
+        // Initialize dropdown with Bootstrap
+        const userMenuButton = document.getElementById('userMenuButton');
+        const dropdownMenu = userMenuButton ? userMenuButton.nextElementSibling : null;
         
-        // Remove active state from all dropdown items when clicking any item
-        const dropdownItems = document.querySelectorAll('.user-dropdown-menu .dropdown-item');
-        dropdownItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                // Remove active class from all dropdown items
-                dropdownItems.forEach(i => i.classList.remove('active'));
-                // Add active class to clicked item
-                this.classList.add('active');
-                // Allow default navigation
-                window.location.href = this.getAttribute('href');
-                e.preventDefault();
-            });
-        });
-        
-        if (userDropdown && dropdownMenu) {
-            // Initialize Bootstrap dropdown
-            const bsDropdown = new bootstrap.Dropdown(userDropdown);
+        if (userMenuButton && dropdownMenu) {
+            const dropdown = new bootstrap.Dropdown(userMenuButton);
             
-            // Reset all dropdown items when dropdown closes
-            const resetDropdownItems = () => {
-                const items = dropdownMenu.querySelectorAll('.dropdown-item');
-                items.forEach(item => {
-                    // Remove any inline styles that might be causing issues
-                    item.style.transform = 'none';
+            // Handle dropdown item clicks
+            const dropdownItems = dropdownMenu.querySelectorAll('.dropdown-item');
+            dropdownItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    // If it's a link, let it navigate naturally
+                    if (this.tagName === 'A') {
+                        return true;
+                    }
+                    // If it's a button in a form, let the form submit
+                    if (this.tagName === 'BUTTON' && this.form) {
+                        return true;
+                    }
+                    // Prevent default for other cases
+                    e.preventDefault();
+                });
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!userMenuButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdown.hide();
+                }
+            });
+            
+            // Clean up active states when dropdown is hidden
+            dropdownMenu.addEventListener('hidden.bs.dropdown', function() {
                     item.style.background = 'transparent';
                     item.style.backgroundColor = 'transparent';
                     item.style.color = '#374151';

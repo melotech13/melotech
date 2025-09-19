@@ -458,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                             
                             // Show success modal
-                            const farmName = found?.querySelector('.farm-name')?.textContent?.trim() || '';
+                            const farmName = card?.querySelector('.user-name')?.textContent?.trim() || farm.farm_name || '';
                             showOperationSuccess('update', 'farm', farmName);
                             
                             // Refresh notifications after successful update

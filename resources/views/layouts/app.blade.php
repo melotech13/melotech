@@ -4,8 +4,43 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Force favicon refresh -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Primary Favicon - Must be first -->
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v={{ time() }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v={{ time() }}" type="image/x-icon">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.ico') }}?v={{ time() }}">
+    <link rel="icon" href="/favicon.ico?v={{ time() }}" type="image/x-icon">
 
     <title>@yield('title', 'MeloTech')</title>
+    
+    <!-- Favicon for all browsers and devices - with cache busting -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v={{ time() }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v={{ time() }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}?v={{ time() }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v={{ time() }}">
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v={{ time() }}">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v={{ time() }}">
+    
+    <!-- Android Chrome Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/melotech.png') }}?v={{ time() }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/melotech.png') }}?v={{ time() }}">
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileImage" content="{{ asset('images/melotech.png') }}?v={{ time() }}">
+    <meta name="msapplication-TileColor" content="#2E8B57">
+    
+    <!-- Theme Color for mobile browsers -->
+    <meta name="theme-color" content="#2E8B57">
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -14,12 +49,18 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
+    <!-- Custom Dropdown CSS -->
+    <link href="{{ asset('css/dropdowns.css') }}" rel="stylesheet">
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Heroicons CSS -->
     <link rel="stylesheet" href="{{ asset('css/heroicons.css') }}">
 
+    <!-- Custom Dropdown JS -->
+    <script src="{{ asset('js/dropdowns.js') }}" defer></script>
+    
     <!-- Custom Styles -->
     @stack('styles')
     
@@ -265,12 +306,18 @@
             background: transparent !important;
             text-decoration: none !important;
         }
+        
+        /* Prevent active state on dropdown items */
+        .user-dropdown-menu .dropdown-item.active,
+        .user-dropdown-menu .dropdown-item:active {
+            background: transparent !important;
+            color: #374151 !important;
+        }
 
         .dropdown-item:hover,
         .dropdown-item:focus {
             background: #f3f4f6 !important;
             color: #1f2937 !important;
-            transform: translateX(4px) !important;
         }
 
         .dropdown-item i {
@@ -1376,13 +1423,13 @@
                     @if(Auth::check())
                         <!-- User Dropdown for authenticated users -->
                         <div class="dropdown">
-                            <button class="btn dropdown-toggle user-dropdown-btn" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn dropdown-toggle user-dropdown-btn" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="userDropdownMenu">
                                 <div class="user-avatar">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </div>
                                 <span class="user-name">{{ auth()->user()->name }}</span>
                             </button>
-                            <ul class="dropdown-menu user-dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <ul class="dropdown-menu user-dropdown-menu dropdown-menu-end" id="userDropdownMenu" aria-labelledby="userDropdown">
                                 <li class="dropdown-header">
                                     <div class="dropdown-user-info">
                                         <div class="dropdown-user-avatar">
@@ -1495,11 +1542,11 @@
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
     <!-- jQuery (if needed) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
     
     <!-- Custom Scripts -->
     @stack('scripts')
@@ -1509,6 +1556,21 @@
         <script src="{{ asset('js/admin.js') }}"></script>
     @endif
     
+    <!-- Initialize tooltips -->
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Initialize popovers
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl);
+        });
+    </script>
+    
 
     
     <!-- User Dropdown Enhancement Script -->
@@ -1516,29 +1578,81 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Enhanced dropdown functionality
         const userDropdown = document.getElementById('userDropdown');
-        const dropdownMenu = document.querySelector('.user-dropdown-menu');
+        const dropdownMenu = document.getElementById('userDropdownMenu');
+        
+        // Remove active state from all dropdown items when clicking any item
+        const dropdownItems = document.querySelectorAll('.user-dropdown-menu .dropdown-item');
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                // Remove active class from all dropdown items
+                dropdownItems.forEach(i => i.classList.remove('active'));
+                // Add active class to clicked item
+                this.classList.add('active');
+                // Allow default navigation
+                window.location.href = this.getAttribute('href');
+                e.preventDefault();
+            });
+        });
         
         if (userDropdown && dropdownMenu) {
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!userDropdown.contains(event.target) && !dropdownMenu.contains(event.target)) {
-                    const bsDropdown = bootstrap.Dropdown.getInstance(userDropdown);
-                    if (bsDropdown) {
-                        bsDropdown.hide();
-                    }
-                }
+            // Initialize Bootstrap dropdown
+            const bsDropdown = new bootstrap.Dropdown(userDropdown);
+            
+            // Reset all dropdown items when dropdown closes
+            const resetDropdownItems = () => {
+                const items = dropdownMenu.querySelectorAll('.dropdown-item');
+                items.forEach(item => {
+                    // Remove any inline styles that might be causing issues
+                    item.style.transform = 'none';
+                    item.style.background = 'transparent';
+                    item.style.backgroundColor = 'transparent';
+                    item.style.color = '#374151';
+                    // Remove any classes that might be causing the background
+                    item.classList.remove('active', 'show', 'hover');
+                    // Force a reflow to ensure the style is applied
+                    item.offsetHeight;
+                });
+            };
+            
+            // Add smooth transitions
+            dropdownMenu.addEventListener('show.bs.dropdown', function() {
+                this.style.opacity = '0';
+                this.style.transform = 'translateY(-10px)';
             });
             
-            // Enhanced hover effects for dropdown items
-            const dropdownItems = dropdownMenu.querySelectorAll('.dropdown-item');
-            dropdownItems.forEach(item => {
-                item.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateX(4px)';
-                });
+            dropdownMenu.addEventListener('shown.bs.dropdown', function() {
+                this.style.opacity = '1';
+                this.style.transform = 'translateY(0)';
                 
-                item.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateX(0)';
-                });
+                // Reset all items to ensure clean state when dropdown opens
+                resetDropdownItems();
+            });
+            
+            dropdownMenu.addEventListener('hide.bs.dropdown', function() {
+                this.style.opacity = '0';
+                this.style.transform = 'translateY(-10px)';
+                
+                // Reset all dropdown items to their original position
+                resetDropdownItems();
+            });
+            
+            // Also reset when dropdown is fully hidden
+            dropdownMenu.addEventListener('hidden.bs.dropdown', function() {
+                resetDropdownItems();
+            });
+            
+            // Add a global click handler to reset items when clicking anywhere
+            document.addEventListener('click', function() {
+                setTimeout(() => {
+                    if (!dropdownMenu.classList.contains('show')) {
+                        resetDropdownItems();
+                    }
+                }, 100);
+            });
+            
+            // Reset on any mouse leave from dropdown
+            dropdownMenu.addEventListener('mouseleave', function() {
+                resetDropdownItems();
             });
         }
 

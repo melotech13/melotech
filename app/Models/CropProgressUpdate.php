@@ -235,8 +235,9 @@ class CropProgressUpdate extends Model
         // Calculate days since planting (use absolute value)
         $daysSincePlanting = abs($this->update_date->diffInDays($farm->planting_date));
         
-        // Convert to weeks (7 days per week)
-        $weekNumber = floor($daysSincePlanting / 7) + 1;
+        // Adjust week calculation so that day 7 is still Week 1 (0-7 => Week 1, 8-14 => Week 2, ...)
+        $normalizedDays = max(0, $daysSincePlanting - 1);
+        $weekNumber = intdiv($normalizedDays, 7) + 1;
         
         return max(1, $weekNumber); // Ensure minimum week is 1
     }

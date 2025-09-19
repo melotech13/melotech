@@ -13,6 +13,23 @@ use App\Http\Controllers\AdminController; // Added AdminController
 
 use App\Models\User;
 
+// Favicon routes
+Route::get('/favicon.ico', function () {
+    return response()->file(public_path('favicon.ico'));
+});
+
+Route::get('/favicon-{size}.png', function ($size) {
+    $validSizes = ['16x16', '32x32'];
+    if (in_array($size, $validSizes)) {
+        return response()->file(public_path("favicon-{$size}.png"));
+    }
+    abort(404);
+});
+
+Route::get('/apple-touch-icon.png', function () {
+    return response()->file(public_path('apple-touch-icon.png'));
+});
+
 Route::get('/', function () {
 	if (Auth::check()) {
 		return redirect()->route('dashboard');
@@ -49,7 +66,42 @@ Route::middleware(['auth', 'verified.email'])->group(function () {
 		if (Auth::user() && Auth::user()->role === 'admin') {
 			return redirect()->route('admin.dashboard');
 		}
-		return view('user.dashboard.dashboard');
+		
+		// Get daily farming activity data for the last 7 days
+		$dailyActivity = [];
+		$user = Auth::user();
+		
+		for ($i = 6; $i >= 0; $i--) {
+			$date = \Carbon\Carbon::now()->subDays($i);
+			$startOfDay = $date->copy()->startOfDay();
+			$endOfDay = $date->copy()->endOfDay();
+			
+			// Count user's farms created on this day
+			$newFarms = $user->farms()
+				->whereBetween('created_at', [$startOfDay, $endOfDay])
+				->count();
+			
+			// Count user's photo analyses created on this day
+			$newAnalyses = \App\Models\PhotoAnalysis::where('user_id', $user->id)
+				->whereBetween('created_at', [$startOfDay, $endOfDay])
+				->count();
+			
+			// Count user's progress updates created on this day
+			$newUpdates = \App\Models\CropProgressUpdate::where('user_id', $user->id)
+				->whereBetween('created_at', [$startOfDay, $endOfDay])
+				->count();
+			
+			$dailyActivity[] = [
+				'date' => $date->format('M d'),
+				'date_full' => $date->format('Y-m-d'),
+				'new_farms' => $newFarms,
+				'new_analyses' => $newAnalyses,
+				'new_updates' => $newUpdates,
+				'total_activity' => $newFarms + $newAnalyses + $newUpdates,
+			];
+		}
+		
+		return view('user.dashboard.dashboard', compact('dailyActivity'));
 	})->name('dashboard');
 	
 	
@@ -108,7 +160,11 @@ Route::get('/crop-progress/print-test', function() {
 	Route::get('/photo-diagnosis', [PhotoDiagnosisController::class, 'index'])->name('photo-diagnosis.index');
 	Route::get('/photo-diagnosis/create', [PhotoDiagnosisController::class, 'create'])->name('photo-diagnosis.create');
 	Route::post('/photo-diagnosis', [PhotoDiagnosisController::class, 'store'])->name('photo-diagnosis.store');
+	
+	// Parameterized routes (must come after specific routes)
 	Route::get('/photo-diagnosis/{photoAnalysis}', [PhotoDiagnosisController::class, 'show'])->name('photo-diagnosis.show');
+	Route::delete('/photo-diagnosis/{photoAnalysis}', [PhotoDiagnosisController::class, 'destroy'])->name('photo-diagnosis.destroy');
+	
 	
 	// Debug route for photo upload testing
 	Route::post('/photo-diagnosis/debug', function(Request $request) {

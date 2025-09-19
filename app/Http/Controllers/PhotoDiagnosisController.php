@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use App\Models\PhotoAnalysis;
 use App\Services\Diagnosis\PhotoDiagnosisService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class PhotoDiagnosisController extends Controller
 {
@@ -21,14 +23,29 @@ class PhotoDiagnosisController extends Controller
     /**
      * Show the photo diagnosis page with analysis history.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+
+        // Get all analyses for the user, ordered by most recent
         $analyses = PhotoAnalysis::where('user_id', $user->id)
             ->orderBy('analysis_date', 'desc')
-            ->paginate(10);
+            ->get();
 
-        return view('user.photo-diagnosis.index', compact('analyses'));
+        // Compute stats
+        $totalAnalyses = PhotoAnalysis::where('user_id', $user->id)->count();
+        $leavesCount = PhotoAnalysis::where('user_id', $user->id)->where('analysis_type', 'leaves')->count();
+        $watermelonCount = PhotoAnalysis::where('user_id', $user->id)->where('analysis_type', 'watermelon')->count();
+        $recentAnalyses = PhotoAnalysis::where('user_id', $user->id)->where('created_at', '>=', now()->subDays(30))->count();
+
+        $stats = [
+            'total_analyses' => $totalAnalyses,
+            'leaves_count' => $leavesCount,
+            'watermelon_count' => $watermelonCount,
+            'recent_analyses' => $recentAnalyses,
+        ];
+
+        return view('user.photo-diagnosis.index', compact('analyses', 'stats'));
     }
 
     /**
@@ -105,5 +122,41 @@ class PhotoDiagnosisController extends Controller
 
         return view('user.photo-diagnosis.show', compact('photoAnalysis'));
     }
+
+    /**
+     * Delete a photo analysis.
+     */
+    public function destroy(PhotoAnalysis $photoAnalysis)
+    {
+        // Ensure user can only delete their own analyses
+        if ($photoAnalysis->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Delete the physical photo file if it exists
+        if ($photoAnalysis->photo_path) {
+            $photoPath = public_path($photoAnalysis->photo_path);
+            if (File::exists($photoPath)) {
+                File::delete($photoPath);
+                Log::info('Deleted photo file: ' . $photoPath);
+            }
+        }
+
+        // Delete the database record
+        $photoAnalysis->delete();
+
+        // Return JSON response for AJAX requests
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Analysis deleted successfully.'
+            ]);
+        }
+
+        // Redirect for regular requests
+        return redirect()->route('photo-diagnosis.index')->with('success', 'Analysis deleted successfully.');
+    }
+
+
 
 }

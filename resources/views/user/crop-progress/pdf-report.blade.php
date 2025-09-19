@@ -5,6 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Crop Progress Report - {{ $farm->farm_name }}</title>
     <style>
+        /* Print-specific styles */
+        @media print {
+            @page {
+                size: A4;
+                margin: 1.5cm;
+            }
+            
+            body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            a[href]:after {
+                content: none !important;
+            }
+            
+            /* Ensure tables break properly across pages */
+            table { 
+                page-break-inside: auto;
+                width: 100% !important;
+            }
+            
+            tr { 
+                page-break-inside: avoid; 
+                page-break-after: auto;
+            }
+            
+            thead { 
+                display: table-header-group;
+            }
+            
+            tfoot { 
+                display: table-footer-group;
+            }
+        }
+        
         * {
             box-sizing: border-box;
         }
@@ -298,9 +338,82 @@
     <script>
         // Auto-trigger print dialog when page loads
         window.onload = function() {
-            setTimeout(function() {
-                window.print();
-            }, 500);
+            // Ensure all images are loaded before printing
+            const images = document.getElementsByTagName('img');
+            let imagesToLoad = images.length;
+            
+            if (imagesToLoad === 0) {
+                // If no images, proceed with print immediately
+                triggerPrint();
+            } else {
+                // Otherwise, wait for all images to load
+                [].forEach.call(images, function(img) {
+                    if (img.complete) {
+                        if (--imagesToLoad <= 0) triggerPrint();
+                    } else {
+                        img.addEventListener('load', function() {
+                            if (--imagesToLoad <= 0) triggerPrint();
+                        }, false);
+                    }
+                });
+            }
+            
+            function triggerPrint() {
+                try {
+                    // Focus the window for better compatibility
+                    window.focus();
+                    
+                    // Print the document
+                    if (window.print) {
+                        window.print();
+                    } else {
+                        // Fallback for browsers that don't support window.print()
+                        document.execCommand('print', false, null);
+                    }
+                    
+                    // Close the window after printing (if not in a preview)
+                    window.onafterprint = function() {
+                        try {
+                            window.close();
+                        } catch (e) {
+                            console.log('Could not close window:', e);
+                        }
+                    };
+                    
+                    // For some browsers that don't support onafterprint
+                    setTimeout(function() {
+                        try {
+                            if (!window.closed) {
+                                window.close();
+                            }
+                        } catch (e) {
+                            console.log('Could not close window in timeout:', e);
+                        }
+                    }, 3000); // Increased timeout to ensure print dialog has time to appear
+                } catch (e) {
+                    console.error('Error during print:', e);
+                    // Show a message to the user
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.position = 'fixed';
+                    errorDiv.style.top = '20px';
+                    errorDiv.style.left = '50%';
+                    errorDiv.style.transform = 'translateX(-50%)';
+                    errorDiv.style.backgroundColor = '#fee2e2';
+                    errorDiv.style.color = '#b91c1c';
+                    errorDiv.style.padding = '15px';
+                    errorDiv.style.borderRadius = '5px';
+                    errorDiv.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                    errorDiv.style.zIndex = '9999';
+                    errorDiv.style.maxWidth = '80%';
+                    errorDiv.style.textAlign = 'center';
+                    errorDiv.innerHTML = `
+                        <h4 style="margin: 0 0 10px 0; color: #b91c1c;">Print Error</h4>
+                        <p style="margin: 0;">Could not automatically open the print dialog. Please use your browser's print function (Ctrl+P or Cmd+P).</p>
+                        <button onclick="window.close()" style="margin-top: 10px; padding: 5px 15px; background: #b91c1c; color: white; border: none; border-radius: 4px; cursor: pointer;">Close Window</button>
+                    `;
+                    document.body.appendChild(errorDiv);
+                }
+            }
         };
         
         document.addEventListener('DOMContentLoaded', function() {

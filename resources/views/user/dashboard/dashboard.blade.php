@@ -228,27 +228,10 @@
             <div class="chart-card">
                 <div class="chart-header">
                     <h3 class="chart-title">Farming System Metrics</h3>
-                    <p class="chart-subtitle">Track your farming activities over time</p>
+                    <p class="chart-subtitle">Crop progress updates and photo analyses over the last 7 days</p>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="systemOverviewChart" height="400"></canvas>
-                </div>
-                <div class="chart-legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: #3b82f6;"></div>
-                        <span class="legend-label">Active Farms</span>
-                        <span class="legend-value">1</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: #10b981;"></div>
-                        <span class="legend-label">Photo Analyses</span>
-                        <span class="legend-value">2</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background-color: #f59e0b;"></div>
-                        <span class="legend-label">Progress Updates</span>
-                        <span class="legend-value">1</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -7332,11 +7315,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const photoAnalyses = chartData.photoAnalyses || 0;
     const progressUpdates = chartData.progressUpdates || 0;
 
-    // Simple bar chart data - showing current metrics
-    const labels = ['Active Farms', 'Photo Analyses', 'Progress Updates'];
-    const data = [activeFarms, photoAnalyses, progressUpdates];
-    const colors = ['#3b82f6', '#10b981', '#f59e0b'];
-    const backgroundColors = ['rgba(59, 130, 246, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(245, 158, 11, 0.8)'];
+    // Colors aligned with admin theme
+    const colors = {
+        primary: '#3b82f6',
+        success: '#10b981',
+        warning: '#f59e0b'
+    };
+
+    // Get daily activity data from backend
+    const dailyActivity = {!! json_encode($dailyActivity ?? []) !!};
+    
+    // Extract data for chart - use daily activity if available, otherwise fallback to current totals
+    let labels, analysisData, updateData;
+    
+    if (dailyActivity && dailyActivity.length > 0) {
+        // Use daily activity data for the last 7 days
+        labels = dailyActivity.map(day => day.date);
+        analysisData = dailyActivity.map(day => day.new_analyses);
+        updateData = dailyActivity.map(day => day.new_updates);
+    } else {
+        // Fallback to current totals (single bar)
+        labels = ['Farming System Metrics'];
+        analysisData = [photoAnalyses];
+        updateData = [progressUpdates];
+    }
 
     const chart = new Chart(ctx, {
         type: 'bar',
@@ -7344,13 +7346,24 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: labels,
             datasets: [
                 {
-                    label: 'Count',
-                    data: data,
-                    backgroundColor: backgroundColors,
-                    borderColor: colors,
+                    label: 'Photo Analyses',
+                    data: analysisData,
+                    backgroundColor: colors.success + '80',
+                    borderColor: colors.success,
                     borderWidth: 2,
-                    borderRadius: 8,
+                    borderRadius: 6,
                     borderSkipped: false,
+                    maxBarThickness: 40
+                },
+                {
+                    label: 'Progress Updates',
+                    data: updateData,
+                    backgroundColor: colors.warning + '80',
+                    borderColor: colors.warning,
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    maxBarThickness: 40
                 }
             ]
         },
@@ -7359,55 +7372,59 @@ document.addEventListener('DOMContentLoaded', function() {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: false // We're using custom legend
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: 12
+                        }
+                    }
                 },
                 tooltip: {
+                    mode: 'index',
+                    intersect: false,
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: '#ffffff',
-                    bodyColor: '#ffffff',
+                    titleColor: 'white',
+                    bodyColor: 'white',
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     borderWidth: 1,
-                    cornerRadius: 8,
-                    displayColors: true,
                     callbacks: {
                         title: function(context) {
-                            return context[0].label;
+                            return 'Activity for ' + context[0].label;
                         },
                         label: function(context) {
-                            return context.parsed.y + ' ' + context.label.toLowerCase();
+                            const label = context.dataset.label || '';
+                            const value = context.parsed.y;
+                            return label + ': ' + value + (value === 1 ? ' item' : ' items');
                         }
                     }
                 }
             },
             scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0,
+                        font: {
+                            size: 11
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    }
+                },
                 x: {
                     grid: {
                         display: false
                     },
                     ticks: {
-                        color: '#6b7280',
                         font: {
-                            size: 12,
-                            weight: '500'
+                            size: 11
                         }
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
                     },
-                    ticks: {
-                        color: '#6b7280',
-                        font: {
-                            size: 12,
-                            weight: '500'
-                        },
-                        callback: function(value) {
-                            return Number.isInteger(value) ? value : null;
-                        }
-                    }
+                    stacked: false
                 }
             },
             interaction: {

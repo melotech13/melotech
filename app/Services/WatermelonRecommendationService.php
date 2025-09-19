@@ -189,7 +189,7 @@ class WatermelonRecommendationService
                 return [
                     'id' => 'fruit_development_stage',
                     'title' => 'Fruit Development & Growth',
-                    'icon' => 'fas fa-apple-alt',
+                    'icon' => 'fas fa-seedling',
                     'color' => '#f59e0b',
                     'bg_color' => '#fffbeb',
                     'border_color' => '#f59e0b',
@@ -423,20 +423,20 @@ class WatermelonRecommendationService
             ],
             [
                 'id' => 'watermelon_quality',
-                'title' => 'Fruit Quality Management',
-                'icon' => 'fas fa-apple-alt',
+                'title' => 'Melon Quality Management',
+                'icon' => 'fas fa-seedling',
                 'color' => '#7c3aed',
                 'bg_color' => '#faf5ff',
                 'border_color' => '#7c3aed',
                 'priority' => 'low',
                 'recommendations' => [
-                    'Monitor sugar content development',
-                    'Check for uniform fruit size and shape',
-                    'Ensure proper fruit support to prevent damage',
-                    'Harvest at optimal ripeness for best flavor',
-                    'Store harvested fruits properly'
+                    'Monitor sugar content development closely to ensure optimal melon quality',
+                    'Check for uniform melon size and shape to maintain market standards',
+                    'Ensure proper support for melons to prevent damage and blemishes',
+                    'Harvest at optimal ripeness for best flavor and sweetness',
+                    'Store harvested melons properly to preserve quality and shelf life'
                 ],
-                'reasoning' => 'Quality management throughout the growing season ensures premium watermelon production and market value.'
+                'reasoning' => 'Quality management throughout the growing season ensures premium melon production, optimal quality, and market value.'
             ]
         ];
         

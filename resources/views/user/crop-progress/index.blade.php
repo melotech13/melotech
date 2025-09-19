@@ -254,15 +254,33 @@
     .ph-title { margin: 0; font-size: 1.25rem; font-weight: 700; color: #1f2937; }
     .ph-actions { display: flex; gap: 0.75rem; align-items: center; }
     
+    /* Dropdown menu styling */
+    .dropdown-menu {
+        background-color: #ffffff !important;
+        border: 1px solid rgba(0, 0, 0, 0.15) !important;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .dropdown-item {
+        color: #212529 !important;
+        padding: 0.5rem 1.5rem !important;
+    }
+    
+    .dropdown-item:hover, .dropdown-item:focus {
+        background-color: #f8f9fa !important;
+        color: #0d6efd !important;
+    }
+    
     /* Export dropdown styling */
     .ph-actions .dropdown-toggle {
-        background: #ffffff;
-        border: 1px solid #3b82f6;
-        color: #3b82f6;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
+        background: #ffffff !important;
+        border: 1px solid #3b82f6 !important;
+        color: #3b82f6 !important;
+        font-weight: 500;
+        padding: 0.4rem 1rem;
         border-radius: 8px;
         transition: all 0.2s ease;
+        font-size: 0.875rem;
     }
     
     .ph-actions .dropdown-toggle:hover {
@@ -1131,9 +1149,19 @@
     }
 
     .btn-outline-secondary {
-        background: transparent;
-        color: #6b7280;
-        border: 1px solid #d1d5db;
+        color: #6c757d !important;
+        background-color: #ffffff !important;
+        border-color: #dee2e6 !important;
+        font-size: 0.875rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        color: #fff !important;
+        background-color: #6c757d !important;
+        border-color: #6c757d !important;
     }
 
     /* Week badge styling */

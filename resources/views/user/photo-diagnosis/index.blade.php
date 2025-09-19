@@ -2,6 +2,10 @@
 
 @section('title', 'Photo Diagnosis - MeloTech')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/photo-diagnosis.css') }}">
+@endpush
+
 @section('content')
 <div class="photo-diagnosis-container">
 
@@ -152,20 +156,63 @@
         </div>
     </div>
 
-    <!-- Recent Analyses -->
+    <!-- Analysis Management Section -->
     <div class="analyses-section">
         <div class="section-card">
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="fas fa-history me-2"></i>
-                    Recent Analyses
+                    Analysis Management
                 </h3>
             </div>
             <div class="card-content">
+                <!-- Actions: create new analysis -->
+                <div class="action-bar animate-fade-in-up" style="animation-delay: .2s;">
+                    <div class="action-bar-right d-flex align-items-center gap-2">
+                        <a href="{{ route('photo-diagnosis.create') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            New Analysis
+                        </a>
+                    </div>
+                </div>
+
                 @if($analyses->count() > 0)
                     <div class="analyses-grid">
-                        @foreach($analyses->take(6) as $analysis)
-                            <div class="analysis-card">
+                        @foreach($analyses as $analysis)
+                            @php
+                                $safeRecommendations = '';
+                                if ($analysis->recommendations) {
+                                    if (is_array($analysis->recommendations)) {
+                                        // Handle new structured recommendations format
+                                        if (isset($analysis->recommendations['recommendations']) && is_array($analysis->recommendations['recommendations'])) {
+                                            $safeRecommendations = strtolower(implode(' ', $analysis->recommendations['recommendations']));
+                                        } elseif (isset($analysis->recommendations['overall'])) {
+                                            $safeRecommendations = strtolower($analysis->recommendations['overall']);
+                                        } else {
+                                            // Fallback: try to extract text from the array
+                                            $textParts = [];
+                                            foreach ($analysis->recommendations as $key => $value) {
+                                                if (is_string($value)) {
+                                                    $textParts[] = $value;
+                                                } elseif (is_array($value) && isset($value['action'])) {
+                                                    $textParts[] = $value['action'];
+                                                }
+                                            }
+                                            $safeRecommendations = strtolower(implode(' ', $textParts));
+                                        }
+                                    } else {
+                                        $safeRecommendations = strtolower($analysis->recommendations);
+                                    }
+                                }
+                            @endphp
+                            <div class="analysis-card" 
+                                 data-type="{{ strtolower($analysis->analysis_type ?? '') }}" 
+                                 data-condition="{{ strtolower($analysis->identified_condition ?? '') }}" 
+                                 data-confidence="{{ $analysis->confidence_score ?? 0 }}"
+                                 data-date="{{ $analysis->created_at->format('Y-m-d') }}"
+                                 data-identified-type="{{ strtolower($analysis->identified_type ?? '') }}"
+                                 data-recommendations="{{ $safeRecommendations }}"
+                                 data-created="{{ $analysis->created_at->format('Y-m-d') }}">
                                 <div class="analysis-image">
                                     @if($analysis->photo_url)
                                         <img src="{{ $analysis->photo_url }}" 
@@ -204,22 +251,24 @@
                                     </div>
                                     <div class="analysis-meta">
                                         <span class="analysis-date">{{ $analysis->created_at->format('M d, Y') }}</span>
-                                        <a href="{{ route('photo-diagnosis.show', $analysis->id) }}" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye me-1"></i>View
-                                        </a>
+                                        <div class="analysis-actions">
+                                            <a href="{{ route('photo-diagnosis.show', $analysis->id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye me-1"></i>View
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger delete-analysis-btn" 
+                                                    data-analysis-id="{{ $analysis->id }}" 
+                                                    data-analysis-date="{{ $analysis->created_at->format('M d, Y') }}"
+                                                    title="Delete Analysis">
+                                                <i class="fas fa-trash me-1"></i>Delete
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         @endforeach
                     </div>
                     
-                    @if($analyses->count() > 6)
-                        <div class="view-all-section">
-                            <a href="#" class="btn btn-outline-primary">
-                                <i class="fas fa-list me-2"></i>View All Analyses
-                            </a>
-                        </div>
-                    @endif
+                    
                 @else
                     <div class="no-data-content">
                         <i class="fas fa-camera fa-3x text-muted mb-3"></i>
@@ -237,752 +286,60 @@
 
 </div>
 
-@push('styles')
-<style>
-    /* Basic styling */
-    .photo-diagnosis-container {
-        max-width: 1400px;
-        width: 100%;
-        margin: 0 auto;
-        padding: 0 1.5rem;
-        position: relative;
-        z-index: 1;
-        margin-top: 0 !important;
-        padding-top: 2rem !important;
-    }
 
-    /* Unified Header */
-    .unified-header {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 25%, #1e40af 50%, #1e3a8a 75%, #1e3a8a 100%);
-        border-radius: 20px;
-        padding: 2.5rem 2rem;
-        margin-bottom: 2rem;
-        color: white;
-        box-shadow: 0 15px 30px rgba(59, 130, 246, 0.3);
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-    }
-
-    .unified-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-        opacity: 0.3;
-    }
-
-    .header-main {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 2rem;
-    }
-
-    .header-left {
-        flex: 1;
-    }
-
-    .header-right {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        align-items: flex-end;
-        min-width: 300px;
-    }
-
-    .page-title {
-        font-size: 2.5rem;
-        font-weight: 900;
-        margin: 0 0 0.75rem 0;
-        text-shadow: 0 3px 10px rgba(0,0,0,0.3);
-        color: white !important;
-    }
-
-    .page-subtitle {
-        font-size: 1.1rem;
-        margin: 0;
-        opacity: 0.95;
-        font-weight: 400;
-        color: white !important;
-    }
-
-    .stats-overview {
-        display: flex;
-        gap: 1rem;
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
-        padding: 1.25rem;
-        min-width: 280px;
-    }
-
-    .stat-item {
-        text-align: center;
-        flex: 1;
-    }
-
-    .stat-item .stat-number {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: white;
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-item .stat-label {
-        font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.9);
-        font-weight: 500;
-    }
-
-    .action-status .btn {
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: white;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-    }
-
-    .action-status .btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-    }
-
-    /* Start Analyzing Section */
-    .start-analyzing-section {
-        margin-bottom: 2rem;
-    }
-
-    .start-analyzing-card {
-        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-        border: 2px solid #e5e7eb;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-        margin-bottom: 0;
-    }
-
-    .start-analyzing-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-        border-color: #d1d5db;
-    }
-
-    .start-analyzing-content {
-        display: flex;
-        align-items: center;
-        gap: 3rem;
-        padding: 2.5rem;
-    }
-
-    .start-analyzing-left {
-        flex: 1;
-        display: flex;
-        align-items: flex-start;
-        gap: 2rem;
-    }
-
-    .start-analyzing-icon {
-        width: 80px;
-        height: 80px;
-        border-radius: 20px;
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.5rem;
-        color: white;
-        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
-        flex-shrink: 0;
-    }
-
-    .start-analyzing-text {
-        flex: 1;
-    }
-
-    .start-analyzing-title {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin: 0 0 1rem 0;
-        line-height: 1.2;
-    }
-
-    .start-analyzing-description {
-        font-size: 1rem;
-        color: #6b7280;
-        line-height: 1.6;
-        margin: 0 0 1.5rem 0;
-    }
-
-    .start-analyzing-features {
-        display: flex;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-    }
-
-    .feature-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.875rem;
-        color: #374151;
-        font-weight: 500;
-    }
-
-    .feature-item i {
-        color: #3b82f6;
-        font-size: 1rem;
-    }
-
-    .start-analyzing-right {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1.5rem;
-        flex-shrink: 0;
-        min-width: 280px;
-    }
-
-    .start-analyzing-cta {
-        text-align: center;
-    }
-
-    .btn-start-analyzing {
-        display: inline-block;
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e40af 100%);
-        color: white;
-        text-decoration: none;
-        border-radius: 16px;
-        padding: 1.5rem 2.5rem;
-        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        transform: translateZ(0);
-        margin-bottom: 1rem;
-    }
-
-    .btn-start-analyzing::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 50%, #1e3a8a 100%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .btn-start-analyzing:hover::before {
-        opacity: 1;
-    }
-
-    .btn-start-analyzing:hover {
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5);
-        color: white;
-        text-decoration: none;
-    }
-
-    .btn-start-analyzing:active {
-        transform: translateY(-1px) scale(1.01);
-    }
-
-    .btn-content {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .btn-content i {
-        font-size: 1.5rem;
-    }
-
-    .btn-text {
-        font-size: 1.25rem;
-        font-weight: 700;
-        letter-spacing: 0.025em;
-    }
-
-    .btn-subtext {
-        position: relative;
-        z-index: 1;
-        font-size: 0.875rem;
-        opacity: 0.9;
-        font-weight: 500;
-    }
-
-    .quick-info {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        align-items: center;
-    }
-
-    .info-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.875rem;
-        color: #6b7280;
-        font-weight: 500;
-    }
-
-    .info-item i {
-        color: #10b981;
-        font-size: 1rem;
-    }
-
-    /* Statistics Section */
-    .stats-section {
-        margin-bottom: 2rem;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .stat-card {
-        background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-        border: 1px solid rgba(0,0,0,0.05);
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.12);
-    }
-
-    .stat-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        color: white;
-    }
-
-    .stat-card:nth-child(1) .stat-icon {
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    }
-
-    .stat-card:nth-child(2) .stat-icon {
-        background: linear-gradient(135deg, #10b981, #059669);
-    }
-
-    .stat-card:nth-child(3) .stat-icon {
-        background: linear-gradient(135deg, #06b6d4, #0891b2);
-    }
-
-    .stat-card:nth-child(4) .stat-icon {
-        background: linear-gradient(135deg, #f59e0b, #d97706);
-    }
-
-    .stat-content .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-content .stat-label {
-        font-size: 0.875rem;
-        color: #6b7280;
-        font-weight: 500;
-    }
-
-    /* Section Cards */
-    .section-card {
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-        border: 1px solid rgba(0,0,0,0.05);
-        overflow: hidden;
-        width: 100%;
-        margin-bottom: 2rem;
-    }
-
-    .card-header {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        padding: 1.5rem;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-
-    .card-title {
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin: 0;
-    }
-
-    .card-content {
-        padding: 1.5rem;
-    }
-
-    /* Analyses Grid */
-    .analyses-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .analysis-card {
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .analysis-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        border-color: #d1d5db;
-    }
-
-    .analysis-image {
-        position: relative;
-        height: 200px;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f9fafb;
-    }
-
-    .analysis-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        margin: 0 auto;
-    }
-
-    .no-image-placeholder {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        background: #f8f9fa;
-        border: 2px dashed #dee2e6;
-        border-radius: 12px;
-        color: #6c757d;
-        padding: 1rem;
-    }
-
-    .no-image-placeholder i {
-        margin-bottom: 0.5rem;
-    }
-
-    .no-image-placeholder p {
-        margin: 0;
-        font-size: 0.875rem;
-    }
-
-    .analysis-type-badge {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        background: rgba(0,0,0,0.7);
-        color: white;
-        padding: 0.5rem 0.75rem;
-        border-radius: 8px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        backdrop-filter: blur(10px);
-    }
-
-    .analysis-details {
-        padding: 1.5rem;
-    }
-
-    .analysis-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 1rem;
-    }
-
-    .confidence-score {
-        margin-bottom: 1rem;
-    }
-
-    .progress {
-        height: 8px;
-        border-radius: 4px;
-        background-color: #f3f4f6;
-    }
-
-    .progress-bar {
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .analysis-meta {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .analysis-date {
-        font-size: 0.875rem;
-        color: #6b7280;
-    }
-
-
-
-    /* No Data Content */
-    .no-data-content {
-        text-align: center;
-        padding: 3rem 2rem;
-        color: #9ca3af;
-    }
-
-    .no-data-content i {
-        color: #9ca3af;
-        margin-bottom: 1rem;
-    }
-
-    .no-data-content h5 {
-        color: #6b7280;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-    }
-
-    .no-data-content p {
-        color: #9ca3af;
-        margin-bottom: 1.5rem;
-        font-size: 0.9rem;
-    }
-
-    /* View All Section */
-    .view-all-section {
-        text-align: center;
-        padding-top: 1.5rem;
-        border-top: 1px solid #e5e7eb;
-        margin-top: 1.5rem;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.2s ease;
-    }
-
-    .btn-primary {
-        background: #3b82f6;
-        color: white;
-        border: none;
-    }
-
-    .btn-outline-primary {
-        background: transparent;
-        color: #3b82f6;
-        border: 1px solid #3b82f6;
-    }
-
-    .btn-outline-secondary {
-        background: transparent;
-        color: #6b7280;
-        border: 1px solid #d1d5db;
-    }
-
-    .btn-sm {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-    }
-
-    .btn-lg {
-        padding: 1rem 2rem;
-        font-size: 1.1rem;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 991.98px) {
-        .photo-diagnosis-container {
-            max-width: 100%;
-            padding: 1.5rem 1rem;
-        }
-
-        .unified-header {
-            padding: 2rem 1.5rem;
-        }
-
-        .header-main {
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .header-right {
-            align-items: center;
-            min-width: auto;
-            width: 100%;
-        }
-
-        .stats-overview {
-            min-width: auto;
-            width: 100%;
-        }
-
-        .page-title {
-            font-size: 2rem;
-        }
-
-        .stats-grid {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        }
-
-        .analyses-grid {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        }
-
-        .start-analyzing-content {
-            flex-direction: column;
-            gap: 2rem;
-            padding: 2rem 1.5rem;
-        }
-
-        .start-analyzing-left {
-            gap: 1.5rem;
-            text-align: center;
-        }
-
-        .start-analyzing-right {
-            min-width: auto;
-            width: 100%;
-        }
-
-        .start-analyzing-features {
-            justify-content: center;
-        }
-    }
-
-    @media (max-width: 767.98px) {
-        .photo-diagnosis-container {
-            padding: 1.25rem 0.75rem;
-        }
-
-        .unified-header {
-            padding: 1.5rem 1rem;
-        }
-
-        .page-title {
-            font-size: 1.75rem;
-        }
-
-        .stats-overview {
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .stat-card {
-            padding: 1.5rem;
-        }
-
-        .card-header, .card-content {
-            padding: 1.25rem;
-        }
-
-        .start-analyzing-content {
-            padding: 1.5rem 1rem;
-        }
-
-        .start-analyzing-left {
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .start-analyzing-icon {
-            width: 70px;
-            height: 70px;
-            font-size: 2rem;
-        }
-
-        .start-analyzing-title {
-            font-size: 1.5rem;
-        }
-
-        .start-analyzing-features {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .btn-start-analyzing {
-            padding: 1.25rem 2rem;
-            width: 100%;
-            max-width: 280px;
-        }
-
-        .btn-text {
-            font-size: 1.125rem;
-        }
-    }
-</style>
+@push('scripts')
+<script src="{{ asset('js/photo-diagnosis.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate progress bars
+    document.querySelectorAll('.progress-bar[data-width]').forEach(bar => {
+        const width = bar.getAttribute('data-width');
+        setTimeout(() => {
+            bar.style.width = width + '%';
+        }, 100);
+    });
+
+    
+    // Initialize any tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+
+</script>
 @endpush
 
-@section('scripts')
-<script>
-    // Initialize DataTable for better table handling
-    $(document).ready(function() {
-        if ($('#dataTable').length && $('#dataTable tbody tr').length > 0) {
-            $('#dataTable').DataTable({
-                "pageLength": 10,
-                "ordering": true,
-                "searching": true,
-                "lengthChange": false,
-                "info": false,
-                "order": [[ 4, "desc" ]], // Sort by date descending
-                "columnDefs": [
-                    { "orderable": false, "targets": [0, 5] } // Disable sorting for photo and actions columns
-                ]
-            });
-        }
-
-        // Animate progress bars with smooth transition
-        $('.progress-bar[data-width]').each(function() {
-            const $this = $(this);
-            const width = $this.data('width');
-            
-            // Add transition for smooth animation
-            $this.css('transition', 'width 0.8s ease-in-out');
-            
-            // Animate to the target width
-            setTimeout(() => {
-                $this.css('width', width + '%');
-            }, 100);
-        });
-    });
-</script>
+@include('components.success-modal')
 @endsection
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    Confirm Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Are you sure you want to delete this analysis?</p>
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Analysis Date:</strong> <span id="deleteAnalysisDate"></span><br>
+                    <small>This action cannot be undone. The photo and all analysis data will be permanently removed.</small>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash me-2"></i>Delete Analysis
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+

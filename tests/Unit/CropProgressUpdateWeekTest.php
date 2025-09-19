@@ -16,34 +16,38 @@ class CropProgressUpdateWeekTest extends TestCase
         // Create a mock farm with planting date
         $plantingDate = Carbon::now()->subDays(30);
         
-        // Test Week 1 (0-6 days after planting)
-        $week1Date = $plantingDate->copy()->addDays(3);
+        // Test Week 1 (0-7 days after planting)
+        $week1Date = $plantingDate->copy()->addDays(7);
         $daysSincePlanting = abs($week1Date->diffInDays($plantingDate));
-        $weekNumber = floor($daysSincePlanting / 7) + 1;
+        $normalizedDays = max(0, $daysSincePlanting - 1);
+        $weekNumber = intdiv($normalizedDays, 7) + 1;
         
         $this->assertEquals(1, $weekNumber);
         $this->assertEquals('Week 1', "Week {$weekNumber}");
 
-        // Test Week 2 (7-13 days after planting)
+        // Test Week 2 (8-14 days after planting)
         $week2Date = $plantingDate->copy()->addDays(10);
         $daysSincePlanting = abs($week2Date->diffInDays($plantingDate));
-        $weekNumber = floor($daysSincePlanting / 7) + 1;
+        $normalizedDays = max(0, $daysSincePlanting - 1);
+        $weekNumber = intdiv($normalizedDays, 7) + 1;
         
         $this->assertEquals(2, $weekNumber);
         $this->assertEquals('Week 2', "Week {$weekNumber}");
 
-        // Test Week 3 (14-20 days after planting)
+        // Test Week 3 (15-21 days after planting)
         $week3Date = $plantingDate->copy()->addDays(17);
         $daysSincePlanting = abs($week3Date->diffInDays($plantingDate));
-        $weekNumber = floor($daysSincePlanting / 7) + 1;
+        $normalizedDays = max(0, $daysSincePlanting - 1);
+        $weekNumber = intdiv($normalizedDays, 7) + 1;
         
         $this->assertEquals(3, $weekNumber);
         $this->assertEquals('Week 3', "Week {$weekNumber}");
 
-        // Test Week 4 (21-27 days after planting)
+        // Test Week 4 (22-28 days after planting)
         $week4Date = $plantingDate->copy()->addDays(25);
         $daysSincePlanting = abs($week4Date->diffInDays($plantingDate));
-        $weekNumber = floor($daysSincePlanting / 7) + 1;
+        $normalizedDays = max(0, $daysSincePlanting - 1);
+        $weekNumber = intdiv($normalizedDays, 7) + 1;
         
         $this->assertEquals(4, $weekNumber);
         $this->assertEquals('Week 4', "Week {$weekNumber}");
@@ -53,26 +57,26 @@ class CropProgressUpdateWeekTest extends TestCase
     {
         $plantingDate = Carbon::now()->subDays(30);
         
-        // Test exactly 7 days (should be Week 2)
-        $exactWeekDate = $plantingDate->copy()->addDays(7);
-        $daysSincePlanting = abs($exactWeekDate->diffInDays($plantingDate));
-        $weekNumber = floor($daysSincePlanting / 7) + 1;
-        
-        $this->assertEquals(2, $weekNumber);
-
-        // Test exactly 14 days (should be Week 3)
-        $exactTwoWeeksDate = $plantingDate->copy()->addDays(14);
-        $daysSincePlanting = abs($exactTwoWeeksDate->diffInDays($plantingDate));
-        $weekNumber = floor($daysSincePlanting / 7) + 1;
-        
-        $this->assertEquals(3, $weekNumber);
-
-        // Test exactly 0 days (should be Week 1)
-        $sameDayDate = $plantingDate->copy();
-        $daysSincePlanting = abs($sameDayDate->diffInDays($plantingDate));
-        $weekNumber = floor($daysSincePlanting / 7) + 1;
-        
+        // Day 0 should be Week 1
+        $day0 = $plantingDate->copy();
+        $daysSincePlanting = abs($day0->diffInDays($plantingDate));
+        $normalizedDays = max(0, $daysSincePlanting - 1);
+        $weekNumber = intdiv($normalizedDays, 7) + 1;
         $this->assertEquals(1, $weekNumber);
+
+        // Day 7 should still be Week 1
+        $day7 = $plantingDate->copy()->addDays(7);
+        $daysSincePlanting = abs($day7->diffInDays($plantingDate));
+        $normalizedDays = max(0, $daysSincePlanting - 1);
+        $weekNumber = intdiv($normalizedDays, 7) + 1;
+        $this->assertEquals(1, $weekNumber);
+
+        // Day 8 should be Week 2
+        $day8 = $plantingDate->copy()->addDays(8);
+        $daysSincePlanting = abs($day8->diffInDays($plantingDate));
+        $normalizedDays = max(0, $daysSincePlanting - 1);
+        $weekNumber = intdiv($normalizedDays, 7) + 1;
+        $this->assertEquals(2, $weekNumber);
     }
 
     public function test_week_calculation_with_negative_days()

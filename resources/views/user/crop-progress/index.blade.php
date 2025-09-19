@@ -143,7 +143,7 @@
                                     </div>
                                     <div class="info-item">
                                         <i class="fas fa-info-circle me-2"></i>
-                                        Updates are available every 6 days to maintain accurate tracking
+                                        Updates are available every 7 days to maintain accurate tracking
                                     </div>
                                 </div>
                             </div>

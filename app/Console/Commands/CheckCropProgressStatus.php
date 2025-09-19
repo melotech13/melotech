@@ -64,8 +64,8 @@ class CheckCropProgressStatus extends Command
                     $this->info("  📝 Last Update: {$lastUpdate->update_date->format('Y-m-d H:i:s')}");
                     $this->info("  🆔 Session ID: {$lastUpdate->session_id}");
                     
-                    // Calculate next update date
-                    $nextUpdateDate = $lastUpdate->update_date->startOfDay()->addDays(6);
+                    // Calculate next update date (weekly)
+                    $nextUpdateDate = $lastUpdate->update_date->startOfDay()->addDays(7);
                     $this->info("  📅 Next Update Date: {$nextUpdateDate->format('Y-m-d H:i:s')}");
                     
                     // Check if can access now

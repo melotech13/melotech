@@ -906,15 +906,7 @@
                             refreshNotificationCount();
                             loadNotifications();
                             
-                            // Show success message
-                            const alert = document.createElement('div');
-                            alert.className = 'alert alert-success alert-dismissible fade show';
-                            alert.innerHTML = `
-                                <i class="fas fa-check-circle me-2"></i>
-                                ${data.message}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            `;
-                            document.querySelector('.admin-content').insertBefore(alert, document.querySelector('.admin-content').firstChild);
+                            // Do not show a success alert
                         } else {
                             throw new Error(data.message || 'Failed to mark notifications as read');
                         }

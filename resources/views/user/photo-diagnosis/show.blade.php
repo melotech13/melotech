@@ -236,33 +236,90 @@
                                     </div>
                                 </div>
 
-                                <!-- Specific Recommendations -->
+                                <!-- Specific Recommendations: One UI card per condition percentage -->
+                                @php
+                                    $colorChips = [
+                                        'healthy' => '#10b981',
+                                        'fungal_infection' => '#8b5cf6',
+                                        'nutrient_deficiency' => '#f59e0b',
+                                        'pest_damage' => '#ef4444',
+                                        'viral_infection' => '#6d28d9',
+                                    ];
+                                    $conditionIcons = [
+                                        'healthy' => 'fas fa-leaf',
+                                        'fungal_infection' => 'fas fa-biohazard',
+                                        'nutrient_deficiency' => 'fas fa-flask',
+                                        'pest_damage' => 'fas fa-bug',
+                                        'viral_infection' => 'fas fa-virus',
+                                    ];
+                                @endphp
                                 <div class="recommendations-grid">
-                                    @foreach($photoAnalysis->recommendations['recommendations'] as $index => $recommendation)
-                                    <div class="recommendation-card recommendation-{{ $index + 1 }}">
-                                        <div class="recommendation-icon">
-                                            @if($index === 0)
-                                                <i class="fas fa-exclamation-triangle text-danger"></i>
-                                            @elseif($index === 1)
-                                                <i class="fas fa-medkit text-primary"></i>
-                                            @elseif($index === 2)
-                                                <i class="fas fa-leaf text-success"></i>
-                                            @elseif($index === 3)
-                                                <i class="fas fa-tint text-info"></i>
-                                            @elseif($index === 4)
-                                                <i class="fas fa-shield-alt text-warning"></i>
-                                            @else
-                                                <i class="fas fa-lightbulb text-secondary"></i>
-                                            @endif
-                                        </div>
-                                        <div class="recommendation-content">
-                                            <div class="recommendation-number">{{ $index + 1 }}</div>
-                                            <div class="recommendation-text">
-                                                {!! nl2br(e($recommendation)) !!}
+                                    @if(isset($photoAnalysis->recommendations['per_condition']) && is_array($photoAnalysis->recommendations['per_condition']))
+                                        @foreach($photoAnalysis->recommendations['per_condition'] as $index => $rc)
+                                            @php
+                                                $k = $rc['key'];
+                                                $chip = $colorChips[$k] ?? '#3b82f6';
+                                            @endphp
+                                            <div class="recommendation-card recommendation-{{ $index + 1 }}">
+                                                <div class="recommendation-icon chip-{{ $k }}">
+                                                    <i class="{{ $conditionIcons[$k] ?? 'fas fa-lightbulb' }}" aria-hidden="true"></i>
+                                                </div>
+                                                <div class="recommendation-content">
+                                                    <div class="recommendation-text">
+                                                        <div class="recommendation-header" style="display: flex; align-items: center; gap: 8px;">
+                                                            <div class="recommendation-number">{{ $index + 1 }}</div>
+                                                            <div class="recommendation-title"><strong>{{ $rc['label'] ?? '' }} ({{ (int)($rc['percent'] ?? 0) }}%)</strong></div>
+                                                        </div>
+                                                        <div>{{ $rc['action'] ?? '' }}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                        @php
+                                            $overallLabel = $photoAnalysis->recommendations['condition_label'] ?? 'Overall';
+                                            // Ensure overall looks different from any single condition (e.g., Viral Infection)
+                                            $overallKey = 'overall';
+                                            $overallIcon = 'fas fa-seedling';
+                                            $overallChip = '#14b8a6';
+                                            $overallAction = $photoAnalysis->recommendations['overall'] ?? 'Overall care: combine the above steps. Monitor weekly, maintain even moisture, sanitize tools, apply balanced nutrients, scout for pests, and record observations to catch changes early.';
+                                            $overallPercent = $photoAnalysis->recommendations['overall_percent'] ?? null;
+                                        @endphp
+                                        <div class="recommendation-card recommendation-overall">
+                                            <div class="recommendation-icon chip-{{ $overallKey }}">
+                                                <i class="{{ $overallIcon }}" aria-hidden="true"></i>
+                                            </div>
+                                            <div class="recommendation-content">
+                                                <div class="recommendation-text">
+                                                    <div class="recommendation-header" style="display: flex; align-items: center; gap: 8px;">
+                                                        <div class="recommendation-number">{{ (count($photoAnalysis->recommendations['per_condition']) ?? 0) + 1 }}</div>
+                                                        <div class="recommendation-title"><strong>Overall Recommendation{{ $overallPercent ? ' ('.$overallPercent.'%)' : '' }}</strong></div>
+                                                    </div>
+                                                    <div>{{ $overallAction }}</div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    @endforeach
+                                    @else
+                                        @php
+                                            // Fallback to existing list if new structure missing
+                                            $legacy = $photoAnalysis->recommendations['recommendations'] ?? [];
+                                        @endphp
+                                        @foreach($legacy as $index => $recommendation)
+                                            <div class="recommendation-card recommendation-{{ $index + 1 }}">
+                                                <div class="recommendation-icon">
+                                                    <i class="fas fa-lightbulb text-secondary"></i>
+                                                </div>
+                                                <div class="recommendation-content">
+                                                    <div class="recommendation-text">
+                                                        <div class="recommendation-header" style="display: flex; align-items: center; gap: 8px;">
+                                                            <div class="recommendation-number">{{ $index + 1 }}</div>
+                                                            <div class="recommendation-title"><strong>Recommendation</strong></div>
+                                                        </div>
+                                                        <div>{!! nl2br(e($recommendation)) !!}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @endif
                                 </div>
                                 
                                 <!-- Action Plan Footer -->
@@ -1418,6 +1475,14 @@
         background: linear-gradient(135deg, #06b6d4, #0891b2);
     }
 
+    /* Dynamic color chips for per-condition cards */
+    .recommendation-icon.chip-healthy { background: #10b981; }
+    .recommendation-icon.chip-fungal_infection { background: #8b5cf6; }
+    .recommendation-icon.chip-nutrient_deficiency { background: #f59e0b; }
+    .recommendation-icon.chip-pest_damage { background: #ef4444; }
+    .recommendation-icon.chip-viral_infection { background: #6d28d9; }
+    .recommendation-icon.chip-overall { background: linear-gradient(135deg, #14b8a6, #0ea5a3); }
+
     /* Recommendation Content */
     .recommendation-content {
         flex: 1;
@@ -1478,6 +1543,13 @@
         border-color: #93c5fd;
     }
 
+    /* Overall recommendation number badge */
+    .recommendation-overall .recommendation-number {
+        background: linear-gradient(135deg, #ccfbf1, #99f6e4);
+        color: #0f766e;
+        border-color: #5eead4;
+    }
+
     .recommendation-content p {
         margin: 0;
         color: #374151;
@@ -1524,6 +1596,21 @@
 
     .recommendation-card.recommendation-3 .recommendation-text {
         border-left: 4px solid #10b981;
+        padding-left: 1rem;
+    }
+
+    .recommendation-card.recommendation-4 .recommendation-text {
+        border-left: 4px solid #f59e0b;
+        padding-left: 1rem;
+    }
+
+    .recommendation-card.recommendation-5 .recommendation-text {
+        border-left: 4px solid #8b5cf6;
+        padding-left: 1rem;
+    }
+
+    .recommendation-card.recommendation-6 .recommendation-text {
+        border-left: 4px solid #14b8a6;
         padding-left: 1rem;
     }
 
@@ -2146,13 +2233,13 @@ function shareResults() {
 }
 
 // Show success modal if photo analysis was just completed
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if we're viewing a newly created analysis (you can add URL parameter detection here)
-    // For now, we'll show success modal for any photo analysis view
-    const analysisTitle = document.querySelector('.page-title')?.textContent?.trim() || '';
-    if (analysisTitle.includes('Analysis Results')) {
-        showSuccessModal('Photo Analysis Complete', 'Your crop photo has been analyzed successfully!');
-    }
-});
+// document.addEventListener('DOMContentLoaded', function() {
+//     // Check if we're viewing a newly created analysis (you can add URL parameter detection here)
+//     // For now, we'll show success modal for any photo analysis view
+//     const analysisTitle = document.querySelector('.page-title')?.textContent?.trim() || '';
+//     if (analysisTitle.includes('Analysis Results')) {
+//         showSuccessModal('Photo Analysis Complete', 'Your crop photo has been analyzed successfully!');
+//     }
+// });
 </script>
 @endpush

@@ -926,7 +926,6 @@ class AdminController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'All notifications marked as read'
         ]);
     }
 

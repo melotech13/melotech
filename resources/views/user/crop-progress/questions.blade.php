@@ -76,9 +76,6 @@
                 <a href="#" class="btn btn-primary" id="view-recommendations">
                     <i class="fas fa-lightbulb me-2"></i>View Recommendations
                 </a>
-                <a href="#" class="btn btn-primary" id="print-recommendations">
-                    <i class="fas fa-print me-2"></i>Print Recommendations
-                </a>
             </div>
         </div>
     </div>
@@ -1064,11 +1061,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         recommendationsContainer.innerHTML = html;
     }
-    
-    // Add print functionality
-    document.getElementById('print-recommendations').addEventListener('click', function() {
-        window.print();
-    });
     
     // Add view recommendations functionality
     document.getElementById('view-recommendations').addEventListener('click', function() {

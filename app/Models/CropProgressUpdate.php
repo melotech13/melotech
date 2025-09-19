@@ -125,10 +125,10 @@ class CropProgressUpdate extends Model
             'last_update_date' => $lastUpdateDate->format('Y-m-d H:i:s'),
             'current_date' => $currentDate->format('Y-m-d H:i:s'),
             'days_since_last_update' => $daysSinceLastUpdate,
-            'can_access' => $daysSinceLastUpdate >= 6
+            'can_access' => $daysSinceLastUpdate >= 7
         ]);
         
-        return $daysSinceLastUpdate >= 6;
+        return $daysSinceLastUpdate >= 7;
     }
 
     /**
@@ -143,13 +143,13 @@ class CropProgressUpdate extends Model
             ->first();
 
         if (!$lastUpdate) {
-            // New user - first update available after 6 days
-            return $farm->planting_date->addDays(6)->startOfDay();
+            // New user - first update available after 7 days (weekly)
+            return $farm->planting_date->addDays(7)->startOfDay();
         }
 
-        // Next update available after 6 days from last update
+        // Next update available after 7 days from last update (weekly)
         // Use startOfDay() to ensure consistent date comparison
-        $nextUpdateDate = $lastUpdate->update_date->startOfDay()->addDays(6);
+        $nextUpdateDate = $lastUpdate->update_date->startOfDay()->addDays(7);
         
         // Log for debugging
         Log::info('Next update date calculation', [

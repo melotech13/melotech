@@ -232,7 +232,7 @@
 .recommendation-overall .recommendation-number { background: linear-gradient(135deg, #ccfbf1, #99f6e4); color: #0f766e; border-color: #5eead4; }
 .recommendation-content p, .recommendation-text { margin: 0; color: #374151; font-size: 1rem; line-height: 1.6; font-weight: 500; }
 .recommendation-content strong { color: #1f2937; font-weight: 700; }
-.recommendation-text { white-space: pre-line; word-wrap: break-word; font-size: 1.05rem; line-height: 1.7; }
+.recommendation-text { white-space: pre-line; word-wrap: break-word; font-size: 1.05rem; line-height: 1.7; overflow-wrap: anywhere; word-break: break-word; }
 /* Replace inline flex style for small headers inside recommendation cards */
 .recommendation-header { display: flex; align-items: center; gap: 8px; }
 
@@ -300,6 +300,10 @@
   .page-title { font-size: 2rem; }
   .results-grid { grid-template-columns: 1fr; }
   .actions-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  /* AI Recommendations: switch to 2 columns on tablets */
+  .recommendations-grid { grid-template-columns: repeat(2, 1fr); }
+  .condition-header { flex-direction: column; align-items: flex-start; }
+  .condition-icon { width: 56px; height: 56px; font-size: 1.25rem; }
 }
 @media (max-width: 767.98px) {
   .analysis-results-container { padding: 1.25rem 0.75rem; }
@@ -307,6 +311,10 @@
   .page-title { font-size: 1.75rem; }
   .card-header, .card-content { padding: 1.25rem; }
   .details-grid { grid-template-columns: 1fr; }
+  /* AI Recommendations: single column and compact spacing on mobile */
+  .recommendations-content { padding: 1.25rem; }
+  .recommendations-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .recommendation-card { padding: 1.25rem; }
 }
 
 /* Additional small utilities replacing inline styles */

@@ -1578,6 +1578,20 @@
                 });
             });
             
+            // Helper to reset dropdown items to a clean state
+            function resetDropdownItems() {
+                dropdownItems.forEach((item) => {
+                    item.style.background = 'transparent';
+                    item.style.backgroundColor = 'transparent';
+                    item.style.color = '#374151';
+                    // Remove any classes that might be causing the background
+                    item.classList.remove('active', 'show', 'hover');
+                    // Force a reflow to ensure the style is applied
+                    // eslint-disable-next-line no-unused-expressions
+                    item.offsetHeight;
+                });
+            }
+            
             // Close dropdown when clicking outside
             document.addEventListener('click', function(e) {
                 if (!userMenuButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
@@ -1587,15 +1601,8 @@
             
             // Clean up active states when dropdown is hidden
             dropdownMenu.addEventListener('hidden.bs.dropdown', function() {
-                    item.style.background = 'transparent';
-                    item.style.backgroundColor = 'transparent';
-                    item.style.color = '#374151';
-                    // Remove any classes that might be causing the background
-                    item.classList.remove('active', 'show', 'hover');
-                    // Force a reflow to ensure the style is applied
-                    item.offsetHeight;
-                });
-            };
+                resetDropdownItems();
+            });
             
             // Add smooth transitions
             dropdownMenu.addEventListener('show.bs.dropdown', function() {

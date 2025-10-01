@@ -255,12 +255,13 @@
                                             <a href="{{ route('photo-diagnosis.show', $analysis->id) }}" class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-eye me-1"></i>View
                                             </a>
-                                            <button type="button" class="btn btn-sm btn-outline-danger delete-analysis-btn" 
-                                                    data-analysis-id="{{ $analysis->id }}" 
-                                                    data-analysis-date="{{ $analysis->created_at->format('M d, Y') }}"
-                                                    title="Delete Analysis">
-                                                <i class="fas fa-trash me-1"></i>Delete
-                                            </button>
+                                            <form method="POST" action="{{ route('photo-diagnosis.destroy', $analysis) }}" class="m-0 p-0 d-inline delete-analysis-form">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Analysis">
+                                                    <i class="fas fa-trash me-1"></i>Delete
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -299,47 +300,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     });
 
-    
+    // Simple, reliable deletion with native confirm + normal form submit
+    document.querySelectorAll('.delete-analysis-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const card = this.closest('.analysis-card');
+            const date = card?.querySelector('.analysis-date')?.textContent?.trim() || 'this analysis';
+            const ok = window.confirm(`Delete ${date}? This cannot be undone.`);
+            if (!ok) return;
+            // Show lightweight button spinner while submitting
+            const btn = this.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Deleting...';
+            }
+            this.submit();
+        });
+    });
+
     // Initialize any tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 });
-
-
 </script>
 @endpush
 
 @include('components.success-modal')
 @endsection
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h5 class="modal-title" id="deleteConfirmModalLabel">
-                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                    Confirm Deletion
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="mb-3">Are you sure you want to delete this analysis?</p>
-                <div class="alert alert-warning" role="alert">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>Analysis Date:</strong> <span id="deleteAnalysisDate"></span><br>
-                    <small>This action cannot be undone. The photo and all analysis data will be permanently removed.</small>
-                </div>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                    <i class="fas fa-trash me-2"></i>Delete Analysis
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- (Replaced by admin-style injected modal in scripts) -->
 

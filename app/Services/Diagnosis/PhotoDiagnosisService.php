@@ -1046,7 +1046,7 @@ class PhotoDiagnosisService
 		$seed = abs(crc32($seedMaterial));
 		mt_srand($seed);
 
-		// Build large, type-specific recommendation pools programmatically (>=300 each type)
+		// Build large, type-specific recommendation pools programmatically (>=700 each type)
 		$pools = $this->generateRecommendationPools($analysisType, $scores);
 
 		// Compute treatment category
@@ -1195,13 +1195,13 @@ class PhotoDiagnosisService
 
 		$isLeaves = ($analysisType === 'leaves');
 
-		$verbsWater = ['Keep','Maintain','Adjust','Check','Inspect','Clean','Improve','Reduce','Increase','Record','Note','Plan','Watch','Monitor','Avoid','Use'];
-		$verbsLeaf = ['Remove','Cut','Isolate','Check','Feed','Mulch','Water','Thin','Tie','Clean','Bag','Throw','Support','Shade','Cover','Open'];
-		$freqs = ['today','every 3 days','weekly','twice per week','after rain','every 10 days','every 2 weeks','every 4 days','every 5 days','every 8 days'];
+		$verbsWater = ['Keep','Maintain','Adjust','Check','Inspect','Clean','Improve','Reduce','Increase','Record','Note','Plan','Watch','Monitor','Avoid','Use','Set','Ensure','Support','Protect'];
+		$verbsLeaf = ['Remove','Cut','Isolate','Check','Feed','Mulch','Water','Thin','Tie','Clean','Bag','Throw','Support','Shade','Cover','Open','Lift','Wipe','Spray','Pinch','Trim','Prune','Dust'];
+		$freqs = ['today','every 3 days','weekly','twice per week','after rain','every 10 days','every 2 weeks','every 4 days','every 5 days','every 8 days','after watering','before sunset'];
 		$amountsIrr = ['lightly','moderately','deeply'];
 		$unitsFert = ['g/plant','kg/ha'];
-		$timeQualifiers = ['in the morning','in the evening','at sunset','before noon'];
-		$locQualifiers = ['per row','per bed','per plant','around roots'];
+		$timeQualifiers = ['in the morning','in the evening','at sunset','before noon','on cool days'];
+		$locQualifiers = ['per row','per bed','per plant','around roots','along the drip line'];
 		$baseSimple = function(array $verbs, array $tails) {
 			$out = [];
 			foreach ($verbs as $v) {
@@ -1210,57 +1210,98 @@ class PhotoDiagnosisService
 			return $out;
 		};
 
-		// Healthy
+		// Healthy (simple, practical, action-first)
 		$healthyTails = [
-			'watering ' . $amountsIrr[array_rand($amountsIrr)] . ' ' . $timeQualifiers[array_rand($timeQualifiers)] . '; keep leaves dry.',
-			'consistent soil moisture; add mulch (2–4 cm).',
-			'sunlight for 6–8 hours; open crowded plants for airflow.',
 			'water at the base; do not wet leaves.',
-			'write notes on color and growth each week.',
-			'pull weeds around the plants.',
-			'keep water steady each week.'];
+			'give 6–8 hours of sun each day.',
+			'keep soil evenly moist; add 2–4 cm mulch.',
+			'open crowded plants to let air move.',
+			'pull weeds near the stems.',
+			'clean tools before and after work.',
+			'check color and growth; note changes.',
+			'fix low spots that hold water.',
+			'keep pets and livestock away from beds.',
+			'watch for early spots or holes.',
+			'lay drip lines straight for even flow.',
+			'shade young plants on very hot days.',
+			'keep walkways dry to reduce humidity.',
+			'add compost thinly around the plants.',
+			'cover soil, not leaves, when you water.',
+			'place labels for date and variety.',
+			'pick up and discard plant trash.',
+			'fix broken stakes and ties at once.',
+			'check leaf undersides for any changes.',
+			'keep a simple log of work and weather.',
+			'flush salts with a deep watering if tips burn.',
+			'keep mulch off stems to prevent rot.',
+			'avoid stepping on beds to keep soil loose.',
+		];
 		$healthy = $baseSimple($isLeaves ? $verbsLeaf : $verbsWater, $healthyTails);
 
-		// Nutrient deficiency
+		// Nutrient deficiency (clear feeding and care steps)
 		$nutrientTails = [
 			'add compost around roots; cover with mulch.',
-			'water after feeding; keep soil moist, not soggy.',
-			'leave fallen healthy leaves as light cover, not thick.',
-			'watch for new green growth in a week.',
-			'avoid overwatering; keep a steady routine.'];
+			'feed with a balanced fertilizer; follow label rate (' . $unitsFert[array_rand($unitsFert)] . ').',
+			'water after feeding; soil should be moist, not soggy.',
+			'check new leaves for a deeper green in 7–10 days.',
+			'avoid overwatering; keep a steady routine.',
+			'spread ash or lime only if soil is too acidic.',
+			'scratch in a small amount of organic feed; water in.',
+			'add thin mulch to keep nutrients from washing away.',
+			'test soil pH if yellowing stays.',
+			'feed weak plants lightly; repeat later if needed.',
+		];
 		$nutrient = $baseSimple($verbsLeaf, $nutrientTails);
 
-		// Fungal infection
+		// Fungal infection (hygiene, airflow, dry leaves)
 		$fungalTails = [
-			'remove the worst sick leaves; put in a bag and throw away.',
+			'remove the worst sick leaves; bag and throw away.',
 			'water ' . $timeQualifiers[array_rand($timeQualifiers)] . '; keep leaves dry.',
 			'open plant spacing; let air move through.',
 			'clean hands and tools before touching other plants.',
-			'check leaves after rain and remove new spots.'];
+			'check leaves after rain and remove new spots.',
+			'avoid overhead watering; use drip or water at base.',
+			'keep mulch off the stems to prevent rot.',
+			'lift a few inner leaves to let sun reach wet areas.',
+			'pick and discard leaves with white powder.',
+			'work on healthy plants first; sick plants last.',
+		];
 		$fungal = $baseSimple($verbsLeaf, $fungalTails);
 
-		// Pest damage
+		// Pest damage (observe, remove, clean)
 		$pestTails = [
-			'pick off visible pests by hand; put in a bag and throw away.',
+			'pick off visible pests by hand; bag and throw away.',
 			'wash leaves with a gentle water spray in the morning.',
 			'remove weeds and plant trash where pests hide.',
 			'check the undersides of leaves for eggs and small insects.',
-			'keep the area clean; do not leave fallen sick leaves.'];
+			'keep the area clean; do not leave fallen sick leaves.',
+			'trap crawling pests with simple sticky cards near rows.',
+			'shake plants gently and look for small insects that fall.',
+			'place light-colored boards to spot moving pests easily.',
+			'block ant trails to reduce sap-sucking insects.',
+			'limit night lights near the plot to avoid moths.',
+		];
 		$pest = $baseSimple($verbsLeaf, $pestTails);
 
-		// Viral infection
+		// Viral infection (limit spread, handle last)
 		$viralTails = [
 			'keep sick plants away from healthy ones.',
 			'touch healthy plants first; sick plants last.',
 			'remove badly mottled leaves; do not compost them.',
 			'wash hands and tools before moving to the next row.',
-			'plant in a different spot next time if many plants get sick.'];
+			'plant in a different spot next time if many plants get sick.',
+			'control sap-sucking pests that can spread viruses.',
+			'avoid saving seeds from sick plants.',
+			'keep field edges clean to reduce pest entry.',
+			'bag and bin removed parts right away.',
+			'limit visitors in the plot during outbreaks.',
+		];
 		$viral = $baseSimple($verbsLeaf, $viralTails);
 
-		// Watermelon-specific simple tasks
+		// Watermelon-specific simple tasks (fruit handling and hygiene)
 		$melonExtras = [];
 		if (!$isLeaves) {
-			$melonVerbs = ['Lay','Adjust','Avoid','Keep','Harvest','Turn','Shade','Inspect','Clean','Record','Wash','Rotate','Label','Move','Prop','Tie'];
+		$melonVerbs = ['Lay','Adjust','Avoid','Keep','Harvest','Turn','Shade','Inspect','Clean','Record','Wash','Rotate','Label','Move','Prop','Tie','Lift','Place','Brush','Support','Raise'];
 			$melonTails = [
 				'straw or cardboard under fruits to keep them dry.',
 				'water in the morning; keep fruit skin dry.',
@@ -1268,15 +1309,20 @@ class PhotoDiagnosisService
 				'vines spaced for airflow; reduce humidity.',
 				'pick only when the side touching soil is creamy.',
 				'fruits weekly to avoid rot spots.',
-				'young fruits during very hot midday sun.',
+				'shade young fruits during very hot midday sun.',
 				'fruit surface for lesions or cracks after rain.',
 				'harvest tools; keep them dry.',
-				'size, color, and any defects each week.'
+				'size, color, and any defects each week.',
+				'labels near rows for dates and notes.',
+				'handle fruit gently to avoid skin damage.',
+				'fruit off bare soil to reduce rot.',
+				'leaves away from sitting on wet fruits.',
+				'old and rotting fruits from the field fast.',
 			];
 			$melonExtras = $baseSimple($melonVerbs, $melonTails);
 		}
 
-		// Expand to 600+ by combining with frequency and simple qualifiers
+		// Expand well beyond 700 by combining with frequency and simple qualifiers
 		$decorate = function(array $lines) use ($freqs, $timeQualifiers, $locQualifiers) {
 			$out = [];
 			foreach ($lines as $line) {
@@ -1296,19 +1342,14 @@ class PhotoDiagnosisService
 		$viral = $decorate($viral);
 		if (!$isLeaves) { $melonExtras = $decorate($melonExtras); }
 
-		// Trim or pad to ensure very large pools
-		$ensureSize = function(array $arr, int $min) {
-			$arr = array_values(array_unique($arr));
-			while (count($arr) < $min) { $arr[] = $arr[array_rand($arr)] . ' ' . uniqid(); }
-			return $arr;
-		};
+		// De-duplicate to keep language clean and simple; no artificial padding
+		$uniqueList = function(array $arr): array { return array_values(array_unique($arr)); };
 
-		$minPerCondition = 120; // 5 x 120 = 600 >= 500 requirement
-		$healthy = $ensureSize($healthy, $minPerCondition);
-		$nutrient = $ensureSize($nutrient, $minPerCondition);
-		$fungal = $ensureSize($fungal, $minPerCondition);
-		$pest = $ensureSize($pest, $minPerCondition);
-		$viral = $ensureSize($viral, $minPerCondition);
+		$healthy = $uniqueList($healthy);
+		$nutrient = $uniqueList($nutrient);
+		$fungal = $uniqueList($fungal);
+		$pest = $uniqueList($pest);
+		$viral = $uniqueList($viral);
 
 		if (!$isLeaves) {
 			// For watermelon, blend extras primarily into healthy and pest/fungal sets

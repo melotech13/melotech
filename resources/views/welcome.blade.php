@@ -541,7 +541,7 @@
                     <svg class="custom-icon" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
-                    100% FREE FOR FARMERS
+                    CONNECT TO MELOTECH
                     <span class="badge-watermelon right">🍉</span>
                 </div>
                 <h1 class="hero-title">
@@ -549,15 +549,14 @@
                 </h1>
                 <p class="hero-subtitle">
                     Revolutionize your watermelon farming with AI-powered analysis, 
-                    photo-based crop monitoring, and data-driven insights for maximum yield and sustainable practices. 
-                    <strong>Completely free - no hidden costs, no subscriptions, no fees.</strong>
+                    photo-based crop monitoring, and data-driven insights for maximum yield and sustainable practices.
                 </p>
                 <div class="hero-buttons">
                     <a href="{{ route('register') }}" class="btn-hero-primary">
                         <svg class="custom-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                         </svg>
-                        Start Free Today
+                        Connect to MeloTech
                     </a>
                     <a href="#features" class="btn-hero-secondary">
                         <svg class="custom-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -607,7 +606,7 @@
                     </svg>
                     Why Choose MeloTech?
                 </h2>
-                <p class="section-subtitle">Advanced AI technology meets traditional farming wisdom - <strong>100% free for farmers</strong></p>
+                <p class="section-subtitle">Advanced AI technology meets traditional farming wisdom</p>
             </div>
         </div>
         
@@ -699,7 +698,7 @@
                     </svg>
                     How It Works
                 </h2>
-                <p class="section-subtitle">Get started in three simple steps - <strong>completely free</strong></p>
+                <p class="section-subtitle">Get started in three simple steps</p>
             </div>
         </div>
         
@@ -742,7 +741,7 @@
                     </svg>
                     Three Core AI Technologies
                 </h2>
-                <p class="section-subtitle" style="color: rgba(255,255,255,0.8);">Powering the future of smart farming - <strong>free for all farmers</strong></p>
+                <p class="section-subtitle" style="color: rgba(255,255,255,0.8);">Powering the future of smart farming</p>
             </div>
         </div>
         
@@ -796,7 +795,7 @@
                     <svg class="custom-icon" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
-                    NO COST • NO FEES • NO SUBSCRIPTIONS
+                    CONNECT TO MELOTECH
                 </div>
                 <h2 class="cta-title">
                     <svg class="custom-icon icon-large" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 1rem;">
@@ -805,16 +804,15 @@
                     Ready to Transform Your Farming?
                 </h2>
                 <p class="cta-description">
-                    Join thousands of farmers who are already using MeloTech's AI-powered insights to increase their yields, reduce costs, and implement sustainable farming practices. 
-                    <strong>Start today - it's completely free!</strong>
+                    Join thousands of farmers who are already using MeloTech's AI-powered insights to increase their yields, reduce costs, and implement sustainable farming practices.
                 </p>
                 <a href="{{ route('register') }}" class="btn-cta">
                     <svg class="custom-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
-                    Start Free Today
+                    Connect to MeloTech
                 </a>
-                <p class="cta-note">100% Free for Farmers • No Credit Card Required • No Hidden Costs • No Trial Period</p>
+                
                 
 
             </div>

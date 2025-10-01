@@ -138,11 +138,11 @@ class WatermelonRecommendationService
                     'border_color' => '#10b981',
                     'priority' => 'high',
                     'recommendations' => [
-                        'Maintain soil temperature between 24-30°C for optimal germination',
-                        'Keep soil consistently moist but not waterlogged',
-                        'Protect young seedlings from strong winds and heavy rain',
-                        'Apply light mulch to retain soil moisture and warmth',
-                        'Monitor for damping-off disease in humid conditions'
+                        'Keep soil temperature between 24-30°C for best germination',
+                        'Keep soil moist but not waterlogged',
+                        'Protect seedlings from strong winds and heavy rain',
+                        'Apply light mulch to keep soil moist and warm',
+                        'Check for damping-off disease in humid conditions'
                     ],
                     'reasoning' => 'Watermelon seeds require warm, moist conditions for successful germination. Proper temperature and moisture management are critical during this stage.'
                 ];
@@ -157,11 +157,11 @@ class WatermelonRecommendationService
                     'border_color' => '#059669',
                     'priority' => 'medium',
                     'recommendations' => [
-                        'Ensure adequate spacing (2-3 feet between plants)',
+                        'Space plants 2-3 feet apart',
                         'Apply balanced fertilizer (N-P-K 10-10-10) every 2 weeks',
-                        'Train vines to grow in desired direction',
-                        'Remove early flowers to promote vegetative growth',
-                        'Monitor for powdery mildew in humid conditions'
+                        'Guide vines to grow in desired direction',
+                        'Remove early flowers to promote leaf growth',
+                        'Check for powdery mildew in humid conditions'
                     ],
                     'reasoning' => 'Strong vegetative growth is essential for healthy watermelon plants. Proper nutrition and vine management during this stage determine future fruit production.'
                 ];
@@ -176,7 +176,7 @@ class WatermelonRecommendationService
                     'border_color' => '#ec4899',
                     'priority' => 'high',
                     'recommendations' => [
-                        'Ensure adequate bee activity for pollination',
+                        'Check for bee activity for pollination',
                         'Avoid overhead watering during flowering',
                         'Apply phosphorus-rich fertilizer to promote flowering',
                         'Protect flowers from heavy rain and strong winds',
@@ -195,11 +195,11 @@ class WatermelonRecommendationService
                     'border_color' => '#f59e0b',
                     'priority' => 'high',
                     'recommendations' => [
-                        'Maintain consistent soil moisture (1-2 inches per week)',
+                        'Keep soil moist (1-2 inches per week)',
                         'Apply potassium-rich fertilizer for fruit development',
                         'Support heavy fruits with slings or supports',
-                        'Rotate fruits regularly to prevent sunburn',
-                        'Monitor for fruit rot in humid conditions'
+                        'Turn fruits regularly to prevent sunburn',
+                        'Check for fruit rot in humid conditions'
                     ],
                     'reasoning' => 'Fruit development requires consistent moisture and nutrition. Weather stress during this stage can cause fruit cracking or poor quality.'
                 ];
@@ -248,11 +248,11 @@ class WatermelonRecommendationService
                 'border_color' => '#f59e0b',
                 'priority' => 'high',
                 'recommendations' => [
-                    'Increase irrigation frequency to prevent heat stress',
-                    'Apply mulch to keep soil cool and retain moisture',
-                    'Provide temporary shade for young plants',
-                    'Water early morning (5-7 AM) for maximum absorption',
-                    'Monitor for blossom drop and fruit abortion'
+                    'Water more often to prevent heat stress',
+                    'Apply mulch to keep soil cool and moist',
+                    'Provide shade for young plants',
+                    'Water early morning (5-7 AM) for best absorption',
+                    'Check for blossom drop and fruit abortion'
                 ],
                 'reasoning' => 'Watermelons are sensitive to extreme heat. Temperatures above 35°C can cause flower drop, poor fruit set, and reduced sugar content.'
             ];
@@ -268,9 +268,9 @@ class WatermelonRecommendationService
                 'recommendations' => [
                     'Cover plants with row covers or frost cloth',
                     'Use black plastic mulch to warm soil',
-                    'Avoid planting until soil temperature reaches 18°C',
-                    'Consider using hot caps for individual plants',
-                    'Monitor for cold damage and adjust protection'
+                    'Wait to plant until soil temperature reaches 18°C',
+                    'Use hot caps for individual plants',
+                    'Check for cold damage and adjust protection'
                 ],
                 'reasoning' => 'Watermelons are warm-season crops that cannot tolerate frost. Cold temperatures below 15°C can stunt growth or kill plants.'
             ];
@@ -310,12 +310,12 @@ class WatermelonRecommendationService
         
         // Powdery mildew risk
         if ($humidity > 70 && $temp > 20) {
-            $recommendations[] = 'Apply sulfur-based fungicide for powdery mildew prevention';
+            $recommendations[] = 'Apply sulfur-based fungicide to prevent powdery mildew';
         }
         
         // Anthracnose risk
         if ($humidity > 80 && strpos($description, 'rain') !== false) {
-            $recommendations[] = 'Monitor for anthracnose and apply copper-based fungicide';
+            $recommendations[] = 'Check for anthracnose and apply copper-based fungicide';
         }
         
         // Aphid risk
@@ -325,7 +325,7 @@ class WatermelonRecommendationService
         
         // Cucumber beetle risk
         if ($temp > 20 && $growthStage === 'vegetative') {
-            $recommendations[] = 'Monitor for cucumber beetles and use row covers';
+            $recommendations[] = 'Check for cucumber beetles and use row covers';
         }
         
         if (empty($recommendations)) {
@@ -370,7 +370,7 @@ class WatermelonRecommendationService
                     'Reduce or stop irrigation during rainy periods',
                     'Ensure proper drainage to prevent waterlogging',
                     'Apply nitrogen fertilizer after heavy rain',
-                    'Monitor for root rot in waterlogged conditions',
+                    'Check for root rot in waterlogged conditions',
                     'Resume normal irrigation when rain stops'
                 ],
                 'reasoning' => 'Excessive moisture can cause root rot and reduce fruit quality. Proper drainage and irrigation management are essential during rainy periods.'
@@ -385,10 +385,10 @@ class WatermelonRecommendationService
                 'border_color' => '#0891b2',
                 'priority' => 'high',
                 'recommendations' => [
-                    'Increase irrigation frequency to 2-3 times per week',
+                    'Water 2-3 times per week',
                     'Water deeply to encourage deep root growth',
                     'Apply mulch to retain soil moisture',
-                    'Monitor soil moisture levels daily',
+                    'Check soil moisture levels daily',
                     'Consider drip irrigation for efficiency'
                 ],
                 'reasoning' => 'Hot, dry conditions require increased irrigation to maintain healthy watermelon growth and prevent fruit cracking.'
@@ -413,9 +413,9 @@ class WatermelonRecommendationService
                 'border_color' => '#059669',
                 'priority' => 'low',
                 'recommendations' => [
-                    'Maintain soil pH between 6.0-6.8',
-                    'Ensure adequate spacing for vine growth',
-                    'Regularly check for signs of stress or disease',
+                    'Keep soil pH between 6.0-6.8',
+                    'Space plants properly for vine growth',
+                    'Check regularly for signs of stress or disease',
                     'Keep detailed records of weather and crop response',
                     'Plan for next season based on current results'
                 ],
@@ -430,11 +430,11 @@ class WatermelonRecommendationService
                 'border_color' => '#7c3aed',
                 'priority' => 'low',
                 'recommendations' => [
-                    'Monitor sugar content development closely to ensure optimal melon quality',
-                    'Check for uniform melon size and shape to maintain market standards',
-                    'Ensure proper support for melons to prevent damage and blemishes',
-                    'Harvest at optimal ripeness for best flavor and sweetness',
-                    'Store harvested melons properly to preserve quality and shelf life'
+                    'Check sugar content development for optimal melon quality',
+                    'Check for uniform melon size and shape',
+                    'Support melons properly to prevent damage',
+                    'Harvest at optimal ripeness for best flavor',
+                    'Store harvested melons properly'
                 ],
                 'reasoning' => 'Quality management throughout the growing season ensures premium melon production, optimal quality, and market value.'
             ]

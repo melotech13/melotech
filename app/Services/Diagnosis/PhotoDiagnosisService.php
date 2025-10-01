@@ -1121,7 +1121,6 @@ class PhotoDiagnosisService
 		if (!empty($snippets)) {
 			$overallText = 'Overall: ' . $snippets[0];
 			if (isset($snippets[1])) { $overallText .= ' Also, ' . $snippets[1]; }
-			if (isset($snippets[2])) { $overallText .= ' Plus, ' . $snippets[2]; }
 		}
 
 		// Build a varied, non-repeating mixed list weighted by condition percentages
@@ -1212,90 +1211,93 @@ class PhotoDiagnosisService
 
 		// Healthy (simple, practical, action-first)
 		$healthyTails = [
-			'water at the base; do not wet leaves.',
-			'give 6–8 hours of sun each day.',
-			'keep soil evenly moist; add 2–4 cm mulch.',
-			'open crowded plants to let air move.',
-			'pull weeds near the stems.',
-			'clean tools before and after work.',
-			'check color and growth; note changes.',
-			'fix low spots that hold water.',
-			'keep pets and livestock away from beds.',
-			'watch for early spots or holes.',
-			'lay drip lines straight for even flow.',
-			'shade young plants on very hot days.',
-			'keep walkways dry to reduce humidity.',
-			'add compost thinly around the plants.',
-			'cover soil, not leaves, when you water.',
-			'place labels for date and variety.',
-			'pick up and discard plant trash.',
-			'fix broken stakes and ties at once.',
-			'check leaf undersides for any changes.',
-			'keep a simple log of work and weather.',
-			'flush salts with a deep watering if tips burn.',
-			'keep mulch off stems to prevent rot.',
-			'avoid stepping on beds to keep soil loose.',
+			'water at the base; do not wet leaves',
+			'give 6–8 hours of sun each day',
+			'keep soil evenly moist; add 2–4 cm mulch',
+			'open crowded plants to let air move',
+			'pull weeds near the stems',
+			'clean tools before and after work',
+			'check color and growth; note changes',
+			'fix low spots that hold water',
+			'keep pets and livestock away from beds',
+			'watch for early spots or holes',
+			'lay drip lines straight for even flow',
+			'shade young plants on very hot days',
+			'keep walkways dry to reduce humidity',
+			'add compost thinly around the plants',
+			'cover soil, not leaves, when you water',
+			'place labels for date and variety',
+			'pick up and discard plant trash',
+			'fix broken stakes and ties at once',
+			'check leaf undersides for any changes',
+			'keep a simple log of work and weather',
+			'flush salts with a deep watering if tips burn',
+			'keep mulch off stems to prevent rot',
+			'avoid stepping on beds to keep soil loose',
 		];
 		$healthy = $baseSimple($isLeaves ? $verbsLeaf : $verbsWater, $healthyTails);
 
 		// Nutrient deficiency (clear feeding and care steps)
-		$nutrientTails = [
-			'add compost around roots; cover with mulch.',
-			'feed with a balanced fertilizer; follow label rate (' . $unitsFert[array_rand($unitsFert)] . ').',
-			'water after feeding; soil should be moist, not soggy.',
-			'check new leaves for a deeper green in 7–10 days.',
-			'avoid overwatering; keep a steady routine.',
-			'spread ash or lime only if soil is too acidic.',
-			'scratch in a small amount of organic feed; water in.',
-			'add thin mulch to keep nutrients from washing away.',
-			'test soil pH if yellowing stays.',
-			'feed weak plants lightly; repeat later if needed.',
-		];
+        $nutrientTails = [
+            'Put compost around roots and cover with leaves or straw',
+            'Give balanced plant food as instructed',
+            'Water after feeding; keep soil slightly wet',
+            'Look at new leaves; should be greener in a week',
+            'Do not water too much; keep routine',
+            'Add ash or lime only if soil is too sour',
+            'Mix a little organic feed into soil and water',
+            'Cover soil lightly to keep nutrients from washing away',
+            'Check soil if leaves stay yellow',
+            'Feed weak plants a little; do again if needed',
+        ];
+        
+
 		$nutrient = $baseSimple($verbsLeaf, $nutrientTails);
 
 		// Fungal infection (hygiene, airflow, dry leaves)
 		$fungalTails = [
-			'remove the worst sick leaves; bag and throw away.',
-			'water ' . $timeQualifiers[array_rand($timeQualifiers)] . '; keep leaves dry.',
-			'open plant spacing; let air move through.',
-			'clean hands and tools before touching other plants.',
-			'check leaves after rain and remove new spots.',
-			'avoid overhead watering; use drip or water at base.',
-			'keep mulch off the stems to prevent rot.',
-			'lift a few inner leaves to let sun reach wet areas.',
-			'pick and discard leaves with white powder.',
-			'work on healthy plants first; sick plants last.',
+			'remove the worst sick leaves; bag and throw away',
+			'water in the morning; keep leaves dry',
+			'open plant spacing; let air move through',
+			'clean hands and tools before touching other plants',
+			'check leaves after rain and remove new spots',
+			'avoid overhead watering; use drip or water at base',
+			'keep mulch off the stems to prevent rot',
+			'lift a few inner leaves to let sun reach wet areas',
+			'pick and discard leaves with white powder',
+			'work on healthy plants first; sick plants last',
 		];
 		$fungal = $baseSimple($verbsLeaf, $fungalTails);
 
 		// Pest damage (observe, remove, clean)
 		$pestTails = [
-			'pick off visible pests by hand; bag and throw away.',
-			'wash leaves with a gentle water spray in the morning.',
-			'remove weeds and plant trash where pests hide.',
-			'check the undersides of leaves for eggs and small insects.',
-			'keep the area clean; do not leave fallen sick leaves.',
-			'trap crawling pests with simple sticky cards near rows.',
-			'shake plants gently and look for small insects that fall.',
-			'place light-colored boards to spot moving pests easily.',
-			'block ant trails to reduce sap-sucking insects.',
-			'limit night lights near the plot to avoid moths.',
+			'pick off visible pests by hand; bag and throw away',
+			'wash leaves with a gentle water spray in the morning',
+			'remove weeds and plant trash where pests hide',
+			'check the undersides of leaves for eggs and small insects',
+			'keep the area clean; do not leave fallen sick leaves',
+			'trap crawling pests with simple sticky cards near rows',
+			'shake plants gently and look for small insects that fall',
+			'place light-colored boards to spot moving pests easily',
+			'block ant trails to reduce sap-sucking insects',
+			'limit night lights near the plot to avoid moths',
 		];
 		$pest = $baseSimple($verbsLeaf, $pestTails);
 
 		// Viral infection (limit spread, handle last)
-		$viralTails = [
-			'keep sick plants away from healthy ones.',
-			'touch healthy plants first; sick plants last.',
-			'remove badly mottled leaves; do not compost them.',
-			'wash hands and tools before moving to the next row.',
-			'plant in a different spot next time if many plants get sick.',
-			'control sap-sucking pests that can spread viruses.',
-			'avoid saving seeds from sick plants.',
-			'keep field edges clean to reduce pest entry.',
-			'bag and bin removed parts right away.',
-			'limit visitors in the plot during outbreaks.',
-		];
+        $viralTails = [
+            'Keep sick plants away from healthy ones',
+            'Touch healthy plants first, sick plants last',
+            'Remove badly spotted leaves; do not compost',
+            'Wash hands and tools before moving to next row',
+            'Plant in a new spot if many get sick',
+            'Control pests that suck plant sap',
+            'Do not save seeds from sick plants',
+            'Keep field edges clean to stop pests',
+            'Bag and throw away removed plant parts',
+            'Limit visitors during sickness outbreaks',
+        ];
+        
 		$viral = $baseSimple($verbsLeaf, $viralTails);
 
 		// Watermelon-specific simple tasks (fruit handling and hygiene)
@@ -1303,21 +1305,21 @@ class PhotoDiagnosisService
 		if (!$isLeaves) {
 		$melonVerbs = ['Lay','Adjust','Avoid','Keep','Harvest','Turn','Shade','Inspect','Clean','Record','Wash','Rotate','Label','Move','Prop','Tie','Lift','Place','Brush','Support','Raise'];
 			$melonTails = [
-				'straw or cardboard under fruits to keep them dry.',
-				'water in the morning; keep fruit skin dry.',
-				'bruising fruits; handle gently during weeding.',
-				'vines spaced for airflow; reduce humidity.',
-				'pick only when the side touching soil is creamy.',
-				'fruits weekly to avoid rot spots.',
-				'shade young fruits during very hot midday sun.',
-				'fruit surface for lesions or cracks after rain.',
-				'harvest tools; keep them dry.',
-				'size, color, and any defects each week.',
-				'labels near rows for dates and notes.',
-				'handle fruit gently to avoid skin damage.',
-				'fruit off bare soil to reduce rot.',
-				'leaves away from sitting on wet fruits.',
-				'old and rotting fruits from the field fast.',
+				'straw or cardboard under fruits to keep them dry',
+				'water in the morning; keep fruit skin dry',
+				'bruising fruits; handle gently during weeding',
+				'vines spaced for airflow; reduce humidity',
+				'pick only when the side touching soil is creamy',
+				'fruits weekly to avoid rot spots',
+				'shade young fruits during very hot midday sun',
+				'fruit surface for lesions or cracks after rain',
+				'harvest tools; keep them dry',
+				'size, color, and any defects each week',
+				'labels near rows for dates and notes',
+				'handle fruit gently to avoid skin damage',
+				'fruit off bare soil to reduce rot',
+				'leaves away from sitting on wet fruits',
+				'old and rotting fruits from the field fast',
 			];
 			$melonExtras = $baseSimple($melonVerbs, $melonTails);
 		}

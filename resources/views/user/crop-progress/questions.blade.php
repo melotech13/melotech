@@ -69,6 +69,17 @@
                 <!-- Recommendations will be populated here by JavaScript -->
             </div>
             
+            <!-- Research Evidence Section -->
+            <div id="research-evidence" class="research-evidence" style="display: none;">
+                <h3 class="research-title">
+                    <i class="fas fa-book"></i> 📚 Research Evidence (AI-Generated References)
+                </h3>
+                <p class="research-intro">These research-backed sources support the recommendations above and provide scientific validation for agricultural best practices.</p>
+                <div id="research-papers-container" class="research-papers-container">
+                    <!-- Research papers will be populated here by JavaScript -->
+                </div>
+            </div>
+            
             <div class="success-actions">
                 <a href="{{ route('crop-progress.index') }}" class="btn btn-primary">
                     <i class="fas fa-chart-line me-2"></i>View Progress
@@ -87,18 +98,97 @@
             @foreach($questions as $questionId => $question)
                 <div class="question-card" id="question-{{ $questionId }}" @if($loop->first) style="display: block;" @else style="display: none;" @endif>
                     <div class="question-content">
-                        <h3 class="question-title">{{ $question['question'] }}</h3>
+                        <div class="question-header">
+                            <h3 class="question-title">{{ $question['question'] }}</h3>
+                            @if(isset($question['category']))
+                                <span class="question-category {{ $question['category'] }}">
+                                    @if($question['category'] === 'leaf')
+                                        <i class="fas fa-leaf"></i> Leaf Assessment
+                                    @else
+                                        <i class="fas fa-chart-line"></i> Crop Progress
+                                    @endif
+                                </span>
+                            @endif
+                        </div>
                         
                         <div class="answer-options">
-                            @foreach($question['options'] as $value => $label)
-                                <label class="option-item">
-                                    <input type="radio" 
+                            @if($question['type'] === 'rating')
+                                {{-- Rating Scale (1-5 stars) --}}
+                                <div class="rating-container">
+                                    @foreach($question['options'] as $value => $label)
+                                        <label class="rating-option">
+                                            <input type="radio" 
+                                                   name="answers[{{ $questionId }}]" 
+                                                   value="{{ $value }}" 
+                                                   required>
+                                            <div class="rating-box">
+                                                <div class="rating-stars">
+                                                    @for($i = 1; $i <= 5; $i++)
+                                                        <i class="fas fa-star {{ $i <= $value ? 'active' : '' }}"></i>
+                                                    @endfor
+                                                </div>
+                                                <span class="rating-label">{{ $label }}</span>
+                                            </div>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            
+                            @elseif($question['type'] === 'yesno')
+                                {{-- Yes/No Toggle --}}
+                                <div class="yesno-container">
+                                    @foreach($question['options'] as $value => $label)
+                                        <label class="yesno-option {{ $value }}">
+                                            <input type="radio" 
+                                                   name="answers[{{ $questionId }}]" 
+                                                   value="{{ $value }}" 
+                                                   required>
+                                            <div class="yesno-box">
+                                                <i class="fas {{ $value === 'yes' ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
+                                                <span class="yesno-label">{{ $label }}</span>
+                                            </div>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            
+                            @elseif($question['type'] === 'slider')
+                                {{-- Slider Input --}}
+                                <div class="slider-container">
+                                    <div class="slider-info">
+                                        <span class="slider-value-display">
+                                            <span id="slider-value-{{ $questionId }}">{{ isset($question['min']) ? $question['min'] : 0 }}</span>
+                                            {{ $question['unit'] ?? '' }}
+                                        </span>
+                                        @if(isset($question['optimal']))
+                                            <span class="slider-optimal">Optimal: {{ $question['optimal'] }}</span>
+                                        @endif
+                                    </div>
+                                    <input type="range" 
+                                           class="slider-input" 
                                            name="answers[{{ $questionId }}]" 
-                                           value="{{ $value }}" 
+                                           id="slider-{{ $questionId }}"
+                                           min="{{ $question['min'] ?? 0 }}" 
+                                           max="{{ $question['max'] ?? 100 }}" 
+                                           value="{{ $question['min'] ?? 0 }}"
+                                           step="1"
                                            required>
-                                    <span class="option-text">{{ $label }}</span>
-                                </label>
-                            @endforeach
+                                    <div class="slider-labels">
+                                        <span>{{ $question['min'] ?? 0 }}</span>
+                                        <span>{{ $question['max'] ?? 100 }}</span>
+                                    </div>
+                                </div>
+                            
+                            @else
+                                {{-- Default: Radio buttons --}}
+                                @foreach($question['options'] as $value => $label)
+                                    <label class="option-item">
+                                        <input type="radio" 
+                                               name="answers[{{ $questionId }}]" 
+                                               value="{{ $value }}" 
+                                               required>
+                                        <span class="option-text">{{ $label }}</span>
+                                    </label>
+                                @endforeach
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -315,12 +405,39 @@
         padding: 2.5rem;
     }
 
+    .question-header {
+        margin-bottom: 2rem;
+    }
+
     .question-title {
         font-size: 1.3rem;
         color: #1f2937;
-        margin: 0 0 2rem 0;
+        margin: 0 0 1rem 0;
         line-height: 1.6;
         font-weight: 600;
+    }
+
+    .question-category {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    .question-category.leaf {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+        color: #166534;
+        border: 1px solid #86efac;
+    }
+
+    .question-category.progress {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+        border: 1px solid #93c5fd;
     }
 
     .answer-options {
@@ -571,8 +688,153 @@
 
     /* AI Recommendations Styles */
     .ai-recommendations {
-        margin: 3rem 0;
+        margin: 3rem 0 2rem 0;
         text-align: left;
+    }
+
+    /* Decorative section heading */
+    .ai-recommendations .research-title {
+        position: relative;
+    }
+    .ai-recommendations .research-title:after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: -8px;
+        width: 90px;
+        height: 4px;
+        background: linear-gradient(90deg, #10b981, #3b82f6);
+        border-radius: 4px;
+        transform: translateX(-50%);
+    }
+    
+    /* Research Evidence Styles */
+    .research-evidence {
+        margin: 2rem 0 3rem 0;
+        text-align: left;
+    }
+    
+    .research-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    .research-intro {
+        text-align: center;
+        color: #6b7280;
+        font-size: 1rem;
+        margin-bottom: 2rem;
+        font-style: italic;
+    }
+    
+    .research-papers-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .research-paper {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        border-left: 6px solid #3b82f6;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .research-paper:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+    }
+    
+    .paper-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 1rem 0;
+        line-height: 1.4;
+    }
+    
+    .paper-authors {
+        font-size: 0.95rem;
+        color: #6b7280;
+        margin: 0 0 0.5rem 0;
+        font-style: italic;
+    }
+    
+    .paper-year {
+        display: inline-block;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .paper-abstract {
+        font-size: 1rem;
+        color: #374151;
+        line-height: 1.7;
+        margin: 1rem 0;
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 8px;
+        border-left: 3px solid #93c5fd;
+    }
+    
+    .paper-citation {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin: 1rem 0;
+        padding: 0.75rem;
+        background: #f3f4f6;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .paper-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background: rgba(59, 130, 246, 0.1);
+        transition: all 0.3s ease;
+        margin-top: 0.5rem;
+    }
+    
+    .paper-link:hover {
+        background: rgba(59, 130, 246, 0.2);
+        transform: translateX(3px);
+    }
+    
+    .paper-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 1rem;
+        margin-right: 1rem;
+        flex-shrink: 0;
     }
 
     .recommendation-category {
@@ -589,6 +851,28 @@
     .recommendation-category:hover {
         transform: translateY(-2px);
         box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+    }
+
+    /* Animated gradient borders per section */
+    .recommendation-category.alert { border-left-color: #ef4444; }
+    .recommendation-category.planning { border-left-color: #3b82f6; }
+    .recommendation-category.tips { border-left-color: #f59e0b; }
+
+    /* Title embellishments */
+    .category-title {
+        position: relative;
+        padding-left: 0.5rem;
+    }
+    .category-title:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -6px;
+        width: 48px;
+        height: 3px;
+        background: currentColor;
+        opacity: 0.25;
+        border-radius: 3px;
     }
 
     .recommendation-category.alert {
@@ -628,15 +912,18 @@
     }
 
     .recommendation-item {
-        padding: 1rem 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.85rem 0.25rem 0.85rem 0.25rem;
         border-bottom: 1px solid #f3f4f6;
         font-size: 1.1rem;
         line-height: 1.7;
         color: #374151;
         font-weight: 500;
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
+        opacity: 0;
+        transform: translateY(8px);
+        animation: rec-item-in 0.6s ease forwards;
     }
 
     .recommendation-item:last-child {
@@ -661,6 +948,50 @@
         margin: 0.5rem 0;
     }
 
+    /* Number chip for steps */
+    .step-chip {
+        flex: 0 0 auto;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.9rem;
+        color: white;
+        background: linear-gradient(135deg, #10b981, #059669);
+        box-shadow: 0 4px 10px rgba(16,185,129,0.25);
+        transform: translateY(2px);
+    }
+
+    .planning .step-chip { background: linear-gradient(135deg, #3b82f6, #1d4ed8); box-shadow: 0 4px 10px rgba(59,130,246,0.25); }
+    .tips .step-chip { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 10px rgba(245,158,11,0.25); }
+
+    /* Item content wraps nicely */
+    .recommendation-item .item-text {
+        flex: 1 1 auto;
+    }
+
+    /* Entrance animations */
+    @keyframes rec-item-in {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes card-pop {
+        0% { transform: scale(0.98); opacity: 0; }
+        60% { transform: scale(1.01); opacity: 1; }
+        100% { transform: scale(1); }
+    }
+
+    .recommendation-category { animation: card-pop 0.5s ease both; }
+
+    /* Glow on hover for emphasis */
+    .recommendation-category:hover { box-shadow: 0 16px 40px rgba(16,185,129,0.15), 0 0 0 1px rgba(16,185,129,0.08) inset; }
+    .recommendation-category.planning:hover { box-shadow: 0 16px 40px rgba(59,130,246,0.15), 0 0 0 1px rgba(59,130,246,0.08) inset; }
+    .recommendation-category.tips:hover { box-shadow: 0 16px 40px rgba(245,158,11,0.15), 0 0 0 1px rgba(245,158,11,0.08) inset; }
+
     .recommendation-summary {
         background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
         border-radius: 16px;
@@ -677,6 +1008,230 @@
         font-weight: 700;
         margin: 0;
         line-height: 1.6;
+    }
+
+    /* Rating Scale Styles */
+    .rating-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .rating-option {
+        cursor: pointer;
+    }
+
+    .rating-option input[type="radio"] {
+        display: none;
+    }
+
+    .rating-box {
+        padding: 1.25rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        background: #fafafa;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .rating-box:hover {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.05);
+        transform: translateY(-1px);
+    }
+
+    .rating-option input[type="radio"]:checked + .rating-box {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
+    }
+
+    .rating-stars {
+        display: flex;
+        gap: 0.25rem;
+        font-size: 1.2rem;
+    }
+
+    .rating-stars .fa-star {
+        color: #d1d5db;
+        transition: color 0.2s ease;
+    }
+
+    .rating-stars .fa-star.active {
+        color: #fbbf24;
+    }
+
+    .rating-option input[type="radio"]:checked + .rating-box .fa-star.active {
+        color: #f59e0b;
+    }
+
+    .rating-label {
+        font-size: 1.05rem;
+        color: #374151;
+        font-weight: 500;
+        flex: 1;
+    }
+
+    /* Yes/No Toggle Styles */
+    .yesno-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .yesno-option {
+        cursor: pointer;
+    }
+
+    .yesno-option input[type="radio"] {
+        display: none;
+    }
+
+    .yesno-box {
+        padding: 1.5rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        background: #fafafa;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        text-align: center;
+        min-height: 120px;
+        justify-content: center;
+    }
+
+    .yesno-box i {
+        font-size: 2.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .yesno-option.yes .yesno-box i {
+        color: #9ca3af;
+    }
+
+    .yesno-option.no .yesno-box i {
+        color: #9ca3af;
+    }
+
+    .yesno-box:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .yesno-option.yes input[type="radio"]:checked + .yesno-box {
+        border-color: #10b981;
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+    }
+
+    .yesno-option.yes input[type="radio"]:checked + .yesno-box i {
+        color: #059669;
+        transform: scale(1.1);
+    }
+
+    .yesno-option.no input[type="radio"]:checked + .yesno-box {
+        border-color: #ef4444;
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+    }
+
+    .yesno-option.no input[type="radio"]:checked + .yesno-box i {
+        color: #dc2626;
+        transform: scale(1.1);
+    }
+
+    .yesno-label {
+        font-size: 1.05rem;
+        color: #374151;
+        font-weight: 600;
+    }
+
+    /* Slider Styles */
+    .slider-container {
+        padding: 1rem 0;
+    }
+
+    .slider-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .slider-value-display {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #10b981;
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        border: 2px solid #10b981;
+    }
+
+    .slider-optimal {
+        font-size: 0.9rem;
+        color: #6b7280;
+        background: #f3f4f6;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .slider-input {
+        width: 100%;
+        height: 12px;
+        border-radius: 10px;
+        background: linear-gradient(to right, #d1fae5 0%, #10b981 50%, #059669 100%);
+        outline: none;
+        -webkit-appearance: none;
+        margin: 1rem 0;
+    }
+
+    .slider-input::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #10b981;
+        cursor: pointer;
+        border: 4px solid white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        transition: all 0.2s ease;
+    }
+
+    .slider-input::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
+    }
+
+    .slider-input::-moz-range-thumb {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #10b981;
+        cursor: pointer;
+        border: 4px solid white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        transition: all 0.2s ease;
+    }
+
+    .slider-input::-moz-range-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
+    }
+
+    .slider-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        color: #6b7280;
+        font-weight: 600;
+        margin-top: 0.5rem;
     }
 
     /* Responsive Design */
@@ -757,6 +1312,35 @@
         }
 
         .option-text {
+            font-size: 1rem;
+        }
+
+        .yesno-container {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .yesno-box {
+            min-height: 100px;
+        }
+
+        .slider-value-display {
+            font-size: 1.5rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .slider-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .rating-box {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .rating-stars {
             font-size: 1rem;
         }
 
@@ -864,6 +1448,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressFill = document.getElementById('progress-fill');
     const progressText = document.getElementById('progress-text');
     
+    // Initialize slider listeners
+    document.querySelectorAll('.slider-input').forEach(slider => {
+        const questionId = slider.id.replace('slider-', '');
+        const valueDisplay = document.getElementById(`slider-value-${questionId}`);
+        
+        slider.addEventListener('input', function() {
+            valueDisplay.textContent = this.value;
+        });
+    });
+    
     updateProgress();
     updateNavigation();
     
@@ -918,11 +1512,23 @@ document.addEventListener('DOMContentLoaded', function() {
         let allAnswered = true;
         
         questionIds.forEach(id => {
-            const selected = document.querySelector(`input[name="answers[${id}]"]:checked`);
-            if (selected) {
-                answers[id] = selected.value;
+            const q = questions[id];
+            if (!q) { allAnswered = false; return; }
+
+            if (q.type === 'slider') {
+                const slider = document.querySelector(`input[name="answers[${id}]"]`);
+                if (slider && slider.value !== undefined && slider.value !== null && slider.value !== '') {
+                    answers[id] = slider.value;
+                } else {
+                    allAnswered = false;
+                }
             } else {
-                allAnswered = false;
+                const selected = document.querySelector(`input[name="answers[${id}]"]:checked`);
+                if (selected) {
+                    answers[id] = selected.value;
+                } else {
+                    allAnswered = false;
+                }
             }
         });
         
@@ -961,6 +1567,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     displayRecommendations(data.recommendations, data.recommendation_summary);
                 }
                 
+                // Display research papers if available
+                if (data.research_papers && data.research_papers.length > 0) {
+                    displayResearchPapers(data.research_papers);
+                }
+                
                 // Scroll to top to show the success message
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
@@ -980,13 +1591,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function displayRecommendations(recommendations, summary) {
         const recommendationsContainer = document.getElementById('ai-recommendations');
         
-        let html = '';
+        let html = '<h3 class="research-title"><i class="fas fa-brain"></i> 🌿 AI Recommendation Summary</h3>';
         
-        // Add summary
-        if (summary) {
+        // Add general status
+        if (recommendations.general_status) {
             html += `
-                <div class="recommendation-summary">
-                    <p class="summary-text">${summary}</p>
+                <div class="recommendation-category">
+                    <h4 class="category-title">
+                        <i class="fas fa-info-circle"></i>
+                        General Status
+                    </h4>
+                    <p class="recommendation-item positive" style="border: none; padding: 1rem;">${recommendations.general_status}</p>
                 </div>
             `;
         }
@@ -1008,6 +1623,16 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
         
+        // Helper to render list with numbered chips and staggered animation
+        const renderList = (items) => {
+            return items.map((item, idx) => `
+                <li class="recommendation-item" style="animation-delay: ${Math.min(idx * 90, 600)}ms;">
+                    <span class="step-chip">${idx + 1}</span>
+                    <span class="item-text">${item}</span>
+                </li>
+            `).join('');
+        };
+
         // Add immediate actions
         if (recommendations.immediate_actions && recommendations.immediate_actions.length > 0) {
             html += `
@@ -1017,9 +1642,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         Immediate Actions
                     </h4>
                     <ul class="recommendation-list">
-                        ${recommendations.immediate_actions.map(item => `
-                            <li class="recommendation-item ${item.includes('✅') ? 'positive' : ''}">${item}</li>
-                        `).join('')}
+                        ${renderList(recommendations.immediate_actions)}
                     </ul>
                 </div>
             `;
@@ -1034,9 +1657,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         Weekly Plan
                     </h4>
                     <ul class="recommendation-list">
-                        ${recommendations.weekly_plan.map(item => `
-                            <li class="recommendation-item">${item}</li>
-                        `).join('')}
+                        ${renderList(recommendations.weekly_plan)}
                     </ul>
                 </div>
             `;
@@ -1051,15 +1672,80 @@ document.addEventListener('DOMContentLoaded', function() {
                         Long-term Tips
                     </h4>
                     <ul class="recommendation-list">
-                        ${recommendations.long_term_tips.map(item => `
-                            <li class="recommendation-item">${item}</li>
-                        `).join('')}
+                        ${renderList(recommendations.long_term_tips)}
                     </ul>
                 </div>
             `;
         }
         
         recommendationsContainer.innerHTML = html;
+
+        // Reveal on scroll using IntersectionObserver
+        try {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        // Unobserve after reveal
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+
+            document.querySelectorAll('.recommendation-category').forEach(card => {
+                observer.observe(card);
+            });
+        } catch (e) {
+            // Fallback: add in-view immediately
+            document.querySelectorAll('.recommendation-category').forEach(card => card.classList.add('in-view'));
+        }
+    }
+    
+    function displayResearchPapers(papers) {
+        const researchContainer = document.getElementById('research-evidence');
+        const papersContainer = document.getElementById('research-papers-container');
+        
+        if (!papers || papers.length === 0) {
+            return;
+        }
+        
+        let html = '';
+        
+        papers.forEach((paper, index) => {
+            html += `
+                <div class="research-paper">
+                    <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                        <div class="paper-number">${index + 1}</div>
+                        <div style="flex: 1;">
+                            <h5 class="paper-title">${escapeHtml(paper.title)}</h5>
+                            <p class="paper-authors"><strong>Authors:</strong> ${escapeHtml(paper.authors)}</p>
+                            <span class="paper-year"><i class="fas fa-calendar"></i> ${escapeHtml(paper.year)}</span>
+                            <div class="paper-abstract">
+                                <strong>Abstract:</strong><br>
+                                ${escapeHtml(paper.abstract)}
+                            </div>
+                            ${paper.citation ? `<div class="paper-citation"><strong>Citation:</strong> ${escapeHtml(paper.citation)}</div>` : ''}
+                            ${paper.url && paper.url !== '#' ? `
+                                <a href="${escapeHtml(paper.url)}" target="_blank" rel="noopener noreferrer" class="paper-link">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    View Full Research Paper
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        papersContainer.innerHTML = html;
+        researchContainer.style.display = 'block';
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
     
     // Add view recommendations functionality

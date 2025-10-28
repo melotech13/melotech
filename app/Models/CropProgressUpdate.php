@@ -171,54 +171,43 @@ class CropProgressUpdate extends Model
 
     /**
      * Calculate progress based on question answers
-     * Returns 100% if all questions are answered, regardless of answer quality
+     * Returns 100% if all questions are answered for the session (10 questions),
+     * regardless of answer values. Computes percentage based on how many were answered.
      */
     public static function calculateProgressFromQuestions(array $answers): int
     {
-        // Count total questions answered
-        $totalQuestions = count($answers);
-        
-        // If no questions answered, return 0%
-        if ($totalQuestions === 0) {
+        // Count non-empty answers
+        $answeredQuestions = 0;
+        foreach ($answers as $key => $value) {
+            // Treat '0' (string) as valid for slider; only null/empty string unset count as unanswered
+            if ($value === null) continue;
+            if (is_string($value) && trim($value) === '') continue;
+            $answeredQuestions++;
+        }
+
+        // Each session presents 10 questions; compute percentage accordingly
+        $totalPerSession = 10;
+
+        if ($answeredQuestions <= 0) {
             return 0;
         }
-        
-        // Define expected question IDs for validation
-        $expectedQuestions = [
-            'plant_health',
-            'leaf_condition', 
-            'growth_rate',
-            'water_availability',
-            'pest_pressure',
-            'disease_issues',
-            'nutrient_deficiency',
-            'weather_impact',
-            'stage_progression',
-            'overall_satisfaction'
-        ];
-        
-        // Count how many expected questions were answered
-        $answeredQuestions = 0;
-        foreach ($expectedQuestions as $questionId) {
-            if (isset($answers[$questionId]) && !empty($answers[$questionId])) {
-                $answeredQuestions++;
-            }
+
+        if ($answeredQuestions >= $totalPerSession) {
+            return 100;
         }
-        
-        // Calculate progress as percentage of questions answered
-        $progress = round(($answeredQuestions / count($expectedQuestions)) * 100);
-        
+
+        $progress = (int) round(($answeredQuestions / $totalPerSession) * 100);
+
         // Log the calculation for debugging (only in Laravel context)
         if (app()->bound('log')) {
-            Log::info("Progress calculation", [
-                'total_questions_answered' => $totalQuestions,
-                'expected_questions' => count($expectedQuestions),
-                'answered_expected_questions' => $answeredQuestions,
+            Log::info('Progress calculation (new logic)', [
+                'answered_questions' => $answeredQuestions,
+                'total_per_session' => $totalPerSession,
                 'progress' => $progress
             ]);
         }
 
-        return $progress;
+        return max(0, min(100, $progress));
     }
 
 

@@ -23,20 +23,14 @@
                         <option value="">Select variety</option>
                         @php
                             $emojiMap = [
-                                'Cantaloupe / Muskmelon' => '🍈',
-                                'Honeydew Melon' => '🍈',
                                 'Watermelon' => '🍉',
-                                'Winter Melon' => '🥒',
-                                'Bitter Melon' => '🥒',
-                                'Snake Melon' => '🥒',
+                                'Cantaloupe / Muskmelon' => '🍈',
+                                'Bitter Melon - Ampalaya' => '🥒',
                             ];
                             $defaultVarieties = [
-                                'Cantaloupe / Muskmelon',
-                                'Honeydew Melon',
                                 'Watermelon',
-                                'Winter Melon',
-                                'Bitter Melon',
-                                'Snake Melon',
+                                'Cantaloupe / Muskmelon',
+                                'Bitter Melon - Ampalaya',
                             ];
                             
                             // Get varieties from database

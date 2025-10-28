@@ -42,4 +42,5 @@ return [
         'model' => env('HUGGINGFACE_MODEL', 'facebook/detr-resnet-50'),
     ],
 
+
 ];

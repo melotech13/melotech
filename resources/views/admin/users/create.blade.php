@@ -108,12 +108,9 @@
                                     <option value="">Select variety</option>
                                     @php
                                         $emojiMap = [
-                                            'Cantaloupe / Muskmelon' => '🍈',
-                                            'Honeydew Melon' => '🍈',
                                             'Watermelon' => '🍉',
-                                            'Winter Melon' => '🥒',
-                                            'Bitter Melon' => '🥒',
-                                            'Snake Melon' => '🥒',
+                                            'Cantaloupe / Muskmelon' => '🍈',
+                                            'Bitter Melon - Ampalaya' => '🥒',
                                         ];
                                     @endphp
                                     @foreach(($defaultVarieties ?? []) as $variety)

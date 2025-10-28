@@ -326,12 +326,9 @@ class AdminController extends Controller
     {
         // Default varieties mirroring the registration page (values used as submitted values)
         $defaultVarieties = [
-            'Cantaloupe / Muskmelon',
-            'Honeydew Melon',
             'Watermelon',
-            'Winter Melon',
-            'Bitter Melon',
-            'Snake Melon',
+            'Cantaloupe / Muskmelon',
+            'Bitter Melon - Ampalaya',
         ];
 
         // Pull distinct varieties from existing farms as DB-backed extras

@@ -98,7 +98,7 @@
             color: white !important;
             text-decoration: none;
             transition: all 0.3s ease;
-            margin-right: 2rem;
+            margin-right: 3.5rem;
         }
 
         .navbar-brand:hover {
@@ -386,7 +386,8 @@
         }
 
         /* Responsive Design - Bootstrap Breakpoints */
-        @media (max-width: 991.98px) {
+        /* Updated to xl breakpoint to accommodate Nest Hub (1024px) and Nest Hub Max (1280px) */
+        @media (max-width: 1199.98px) {
             .navbar-brand {
                 margin-right: 1rem;
                 font-size: 1.25rem;
@@ -426,6 +427,13 @@
                 justify-content: center;
                 width: 100%;
                 min-width: auto !important;
+            }
+            
+            /* Ensure avatar is visible in collapsed menu */
+            .user-dropdown-btn .user-avatar {
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
             }
 
             /* Responsive auth buttons on mobile */
@@ -1344,7 +1352,7 @@
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
+    <nav class="navbar navbar-expand-xl fixed-top">
         <div class="container">
             <!-- Brand/Logo -->
             <a class="navbar-brand" href="{{ Auth::check() ? route('dashboard') : route('home') }}">
@@ -1423,6 +1431,13 @@
                                     Photo Diagnosis
                                 </a>
                             </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('nutrient-calculator.*') ? 'active' : '' }}" href="{{ route('nutrient-calculator.index') }}">
+                                    <i class="fas fa-flask"></i>
+                                    Nutrient Analyzer
+                                </a>
+                            </li>
                         @endif
                     </ul>
                 @endif
@@ -1458,6 +1473,7 @@
                                     <li><a class="dropdown-item" href="{{ route('admin.statistics') }}"><i class="fas fa-chart-bar me-2"></i> Statistics</a></li>
                                 @else
                                     <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('nutrient-calculator.index') }}"><i class="fas fa-flask me-2"></i> Nutrient Analyzer</a></li>
                                 @endif
                                 <li><a class="dropdown-item" href="{{ route('profile.settings') }}"><i class="fas fa-user me-2"></i> Profile Settings</a></li>
                                 <li><hr class="dropdown-divider my-2"></li>
@@ -1490,8 +1506,6 @@
                     </div>
                 </div>
             @endif
-                </div>
-            </div>
 
 
         </div>

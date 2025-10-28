@@ -2619,7 +2619,7 @@ function displayHistoricalWeather(container, data) {
     position: relative;
     z-index: 1;
     margin-top: 0 !important;
-    padding-top: 1.5rem !important;
+    padding-top: 2rem !important; /* Increased padding to account for navbar */
 }
 
 /* Responsive container padding for balanced spacing */

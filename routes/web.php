@@ -10,6 +10,8 @@ use App\Http\Controllers\CropGrowthController;
 use App\Http\Controllers\PhotoDiagnosisController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController; // Added AdminController
+use App\Http\Controllers\NutrientCalculatorController;
+ 
 
 use App\Models\User;
 
@@ -164,6 +166,17 @@ Route::get('/crop-progress/print-test', function() {
 	// Parameterized routes (must come after specific routes)
 	Route::get('/photo-diagnosis/{photoAnalysis}', [PhotoDiagnosisController::class, 'show'])->name('photo-diagnosis.show');
 	Route::delete('/photo-diagnosis/{photoAnalysis}', [PhotoDiagnosisController::class, 'destroy'])->name('photo-diagnosis.destroy');
+	
+	// Nutrient Calculator routes
+	Route::get('/nutrient-calculator', [NutrientCalculatorController::class, 'index'])->name('nutrient-calculator.index');
+	Route::post('/nutrient-calculator/analyze', [NutrientCalculatorController::class, 'analyze'])->name('nutrient-calculator.analyze');
+	Route::get('/nutrient-calculator/history/all', [NutrientCalculatorController::class, 'history'])->name('nutrient-calculator.history');
+	
+	// Nutrient Calculator parameterized routes (must come after specific routes)
+	Route::get('/nutrient-calculator/{id}', [NutrientCalculatorController::class, 'show'])->name('nutrient-calculator.show');
+	Route::delete('/nutrient-calculator/{id}', [NutrientCalculatorController::class, 'destroy'])->name('nutrient-calculator.destroy');
+
+	
 	
 	
 	// Debug route for photo upload testing

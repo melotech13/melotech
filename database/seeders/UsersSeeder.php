@@ -29,7 +29,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Laguna',
 					'city_municipality_name' => 'Calamba',
 					'barangay_name' => 'Pansol',
-					'watermelon_variety' => 'Sugar Baby',
+					'watermelon_variety' => 'Watermelon',
 					'planting_date' => '2024-01-15',
 					'land_size' => 2.5,
 					'land_size_unit' => 'ha'
@@ -47,7 +47,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Batangas',
 					'city_municipality_name' => 'Tanauan',
 					'barangay_name' => 'Altura Matanda',
-					'watermelon_variety' => 'Crimson Sweet',
+					'watermelon_variety' => 'Cantaloupe / Muskmelon',
 					'planting_date' => '2024-02-01',
 					'land_size' => 1.8,
 					'land_size_unit' => 'ha'
@@ -65,7 +65,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Quezon',
 					'city_municipality_name' => 'Lucena',
 					'barangay_name' => 'Iyam',
-					'watermelon_variety' => 'Charleston Gray',
+					'watermelon_variety' => 'Bitter Melon - Ampalaya',
 					'planting_date' => '2024-01-20',
 					'land_size' => 3.2,
 					'land_size_unit' => 'ha'
@@ -83,7 +83,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Cavite',
 					'city_municipality_name' => 'Silang',
 					'barangay_name' => 'Pulong Bunga',
-					'watermelon_variety' => 'Sugar Baby',
+					'watermelon_variety' => 'Watermelon',
 					'planting_date' => '2024-02-10',
 					'land_size' => 2.0,
 					'land_size_unit' => 'ha'
@@ -101,7 +101,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Rizal',
 					'city_municipality_name' => 'Antipolo',
 					'barangay_name' => 'Cupang',
-					'watermelon_variety' => 'Crimson Sweet',
+					'watermelon_variety' => 'Cantaloupe / Muskmelon',
 					'planting_date' => '2024-01-25',
 					'land_size' => 1.5,
 					'land_size_unit' => 'ha'
@@ -119,7 +119,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Laguna',
 					'city_municipality_name' => 'San Pablo',
 					'barangay_name' => 'San Rafael',
-					'watermelon_variety' => 'Charleston Gray',
+					'watermelon_variety' => 'Bitter Melon - Ampalaya',
 					'planting_date' => '2024-02-05',
 					'land_size' => 2.8,
 					'land_size_unit' => 'ha'
@@ -137,7 +137,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Batangas',
 					'city_municipality_name' => 'Lipa',
 					'barangay_name' => 'Mataas na Lupa',
-					'watermelon_variety' => 'Sugar Baby',
+					'watermelon_variety' => 'Watermelon',
 					'planting_date' => '2024-01-30',
 					'land_size' => 1.2,
 					'land_size_unit' => 'ha'
@@ -155,7 +155,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Quezon',
 					'city_municipality_name' => 'Tayabas',
 					'barangay_name' => 'Ibas',
-					'watermelon_variety' => 'Crimson Sweet',
+					'watermelon_variety' => 'Cantaloupe / Muskmelon',
 					'planting_date' => '2024-02-15',
 					'land_size' => 3.5,
 					'land_size_unit' => 'ha'
@@ -173,7 +173,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Cavite',
 					'city_municipality_name' => 'Trece Martires',
 					'barangay_name' => 'Osorio',
-					'watermelon_variety' => 'Charleston Gray',
+					'watermelon_variety' => 'Bitter Melon - Ampalaya',
 					'planting_date' => '2024-01-18',
 					'land_size' => 2.3,
 					'land_size_unit' => 'ha'
@@ -191,7 +191,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Rizal',
 					'city_municipality_name' => 'Taytay',
 					'barangay_name' => 'San Juan',
-					'watermelon_variety' => 'Sugar Baby',
+					'watermelon_variety' => 'Watermelon',
 					'planting_date' => '2024-02-20',
 					'land_size' => 1.8,
 					'land_size_unit' => 'ha'
@@ -209,7 +209,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Laguna',
 					'city_municipality_name' => 'Los Baños',
 					'barangay_name' => 'Putho',
-					'watermelon_variety' => 'Crimson Sweet',
+					'watermelon_variety' => 'Cantaloupe / Muskmelon',
 					'planting_date' => '2024-01-12',
 					'land_size' => 2.7,
 					'land_size_unit' => 'ha'
@@ -227,7 +227,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Batangas',
 					'city_municipality_name' => 'Bauan',
 					'barangay_name' => 'San Andres',
-					'watermelon_variety' => 'Charleston Gray',
+					'watermelon_variety' => 'Bitter Melon - Ampalaya',
 					'planting_date' => '2024-02-08',
 					'land_size' => 1.9,
 					'land_size_unit' => 'ha'
@@ -245,7 +245,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Quezon',
 					'city_municipality_name' => 'Lucban',
 					'barangay_name' => 'Ibabang Dupay',
-					'watermelon_variety' => 'Sugar Baby',
+					'watermelon_variety' => 'Watermelon',
 					'planting_date' => '2024-01-22',
 					'land_size' => 2.1,
 					'land_size_unit' => 'ha'
@@ -263,7 +263,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Cavite',
 					'city_municipality_name' => 'General Trias',
 					'barangay_name' => 'San Francisco',
-					'watermelon_variety' => 'Crimson Sweet',
+					'watermelon_variety' => 'Cantaloupe / Muskmelon',
 					'planting_date' => '2024-02-12',
 					'land_size' => 3.0,
 					'land_size_unit' => 'ha'
@@ -281,7 +281,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Rizal',
 					'city_municipality_name' => 'Cainta',
 					'barangay_name' => 'San Juan',
-					'watermelon_variety' => 'Charleston Gray',
+					'watermelon_variety' => 'Bitter Melon - Ampalaya',
 					'planting_date' => '2024-01-28',
 					'land_size' => 1.6,
 					'land_size_unit' => 'ha'
@@ -299,7 +299,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Laguna',
 					'city_municipality_name' => 'Santa Cruz',
 					'barangay_name' => 'Pagsawitan',
-					'watermelon_variety' => 'Sugar Baby',
+					'watermelon_variety' => 'Watermelon',
 					'planting_date' => '2024-02-18',
 					'land_size' => 2.4,
 					'land_size_unit' => 'ha'
@@ -317,7 +317,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Batangas',
 					'city_municipality_name' => 'Santo Tomas',
 					'barangay_name' => 'San Agustin',
-					'watermelon_variety' => 'Crimson Sweet',
+					'watermelon_variety' => 'Cantaloupe / Muskmelon',
 					'planting_date' => '2024-01-14',
 					'land_size' => 1.7,
 					'land_size_unit' => 'ha'
@@ -335,7 +335,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Quezon',
 					'city_municipality_name' => 'Sariaya',
 					'barangay_name' => 'Castañas',
-					'watermelon_variety' => 'Charleston Gray',
+					'watermelon_variety' => 'Bitter Melon - Ampalaya',
 					'planting_date' => '2024-02-03',
 					'land_size' => 2.9,
 					'land_size_unit' => 'ha'
@@ -353,7 +353,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Cavite',
 					'city_municipality_name' => 'Imus',
 					'barangay_name' => 'Bucandala',
-					'watermelon_variety' => 'Sugar Baby',
+					'watermelon_variety' => 'Watermelon',
 					'planting_date' => '2024-01-26',
 					'land_size' => 2.2,
 					'land_size_unit' => 'ha'
@@ -371,7 +371,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Rizal',
 					'city_municipality_name' => 'Rodriguez',
 					'barangay_name' => 'San Jose',
-					'watermelon_variety' => 'Crimson Sweet',
+					'watermelon_variety' => 'Cantaloupe / Muskmelon',
 					'planting_date' => '2024-02-14',
 					'land_size' => 1.4,
 					'land_size_unit' => 'ha'
@@ -389,7 +389,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Laguna',
 					'city_municipality_name' => 'Biñan',
 					'barangay_name' => 'Malamig',
-					'watermelon_variety' => 'Charleston Gray',
+					'watermelon_variety' => 'Bitter Melon - Ampalaya',
 					'planting_date' => '2024-01-19',
 					'land_size' => 3.1,
 					'land_size_unit' => 'ha'
@@ -407,7 +407,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Batangas',
 					'city_municipality_name' => 'Calaca',
 					'barangay_name' => 'Lalayat',
-					'watermelon_variety' => 'Sugar Baby',
+					'watermelon_variety' => 'Watermelon',
 					'planting_date' => '2024-02-07',
 					'land_size' => 2.6,
 					'land_size_unit' => 'ha'
@@ -425,7 +425,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Quezon',
 					'city_municipality_name' => 'Candelaria',
 					'barangay_name' => 'Malabanban Norte',
-					'watermelon_variety' => 'Crimson Sweet',
+					'watermelon_variety' => 'Cantaloupe / Muskmelon',
 					'planting_date' => '2024-01-24',
 					'land_size' => 1.9,
 					'land_size_unit' => 'ha'
@@ -443,7 +443,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Cavite',
 					'city_municipality_name' => 'Kawit',
 					'barangay_name' => 'Magdalo',
-					'watermelon_variety' => 'Charleston Gray',
+					'watermelon_variety' => 'Bitter Melon - Ampalaya',
 					'planting_date' => '2024-02-11',
 					'land_size' => 2.8,
 					'land_size_unit' => 'ha'
@@ -461,7 +461,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Rizal',
 					'city_municipality_name' => 'San Mateo',
 					'barangay_name' => 'Ampid',
-					'watermelon_variety' => 'Sugar Baby',
+					'watermelon_variety' => 'Watermelon',
 					'planting_date' => '2024-01-17',
 					'land_size' => 1.3,
 					'land_size_unit' => 'ha'
@@ -479,7 +479,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Laguna',
 					'city_municipality_name' => 'Alaminos',
 					'barangay_name' => 'San Gregorio',
-					'watermelon_variety' => 'Crimson Sweet',
+					'watermelon_variety' => 'Cantaloupe / Muskmelon',
 					'planting_date' => '2024-02-16',
 					'land_size' => 3.3,
 					'land_size_unit' => 'ha'
@@ -497,7 +497,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Batangas',
 					'city_municipality_name' => 'Nasugbu',
 					'barangay_name' => 'Aguado',
-					'watermelon_variety' => 'Charleston Gray',
+					'watermelon_variety' => 'Bitter Melon - Ampalaya',
 					'planting_date' => '2024-01-21',
 					'land_size' => 2.5,
 					'land_size_unit' => 'ha'
@@ -515,7 +515,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Quezon',
 					'city_municipality_name' => 'Tiaong',
 					'barangay_name' => 'Lalig',
-					'watermelon_variety' => 'Sugar Baby',
+					'watermelon_variety' => 'Watermelon',
 					'planting_date' => '2024-02-09',
 					'land_size' => 1.8,
 					'land_size_unit' => 'ha'
@@ -533,7 +533,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Cavite',
 					'city_municipality_name' => 'Bacoor',
 					'barangay_name' => 'Molino',
-					'watermelon_variety' => 'Crimson Sweet',
+					'watermelon_variety' => 'Cantaloupe / Muskmelon',
 					'planting_date' => '2024-01-23',
 					'land_size' => 2.7,
 					'land_size_unit' => 'ha'
@@ -551,7 +551,7 @@ class UsersSeeder extends Seeder
 					'province_name' => 'Rizal',
 					'city_municipality_name' => 'Angono',
 					'barangay_name' => 'Bagong Barrio',
-					'watermelon_variety' => 'Charleston Gray',
+					'watermelon_variety' => 'Bitter Melon - Ampalaya',
 					'planting_date' => '2024-02-13',
 					'land_size' => 1.6,
 					'land_size_unit' => 'ha'

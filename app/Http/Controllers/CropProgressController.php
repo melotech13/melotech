@@ -10,6 +10,7 @@ use App\Models\CropProgressUpdate;
 use App\Models\CropGrowth;
 use App\Models\User;
 use App\Services\CropRecommendationService;
+use App\Services\ResearchPaperService;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -143,9 +144,24 @@ class CropProgressController extends Controller
         // Update crop growth progress
         $this->updateCropGrowthProgress($farm, $calculatedProgress);
 
-        // Generate AI recommendations based on answers
+        // Fetch relevant research papers FIRST
+        $researchService = new ResearchPaperService();
+        $cropStage = $farm->cropGrowth->current_stage ?? 'seedling';
+        // Generate initial concerns from answers for research search
+        $initialConcerns = $this->extractConcernsFromAnswers($answers);
+        $researchPapers = $researchService->fetchRelevantResearch(
+            $farm->watermelon_variety ?? 'watermelon',
+            $cropStage,
+            $initialConcerns
+        );
+
+        // Generate AI recommendations based on answers AND research papers
         $recommendationService = new CropRecommendationService();
-        $recommendations = $recommendationService->generateRecommendations($answers, $farm->watermelon_variety);
+        $recommendations = $recommendationService->generateRecommendations(
+            $answers, 
+            $farm->watermelon_variety,
+            $researchPapers
+        );
         $recommendationSummary = $recommendationService->getRecommendationSummary($recommendations);
 
         return response()->json([
@@ -154,7 +170,8 @@ class CropProgressController extends Controller
             'calculated_progress' => $calculatedProgress,
             'next_update_date' => $progressUpdate->next_update_date->format('M d, Y'),
             'recommendations' => $recommendations,
-            'recommendation_summary' => $recommendationSummary
+            'recommendation_summary' => $recommendationSummary,
+            'research_papers' => $researchPapers
         ]);
     }
 
@@ -240,564 +257,584 @@ class CropProgressController extends Controller
         $currentStage = $farm->cropGrowth->current_stage ?? 'seedling';
         
         // Stage-specific questions aligned with crop growth stages
+        // 10 questions per stage: 5 focused on leaves, 5 on general crop progress
         $questions = [
             'seedling' => [
-                'plant_health' => [
-                    'id' => 'plant_health',
-                    'question' => 'How would you rate the overall health of your watermelon seedlings?',
-                    'type' => 'select',
+                // LEAF-FOCUSED QUESTIONS (5)
+                'leaf_color' => [
+                    'id' => 'leaf_color',
+                    'question' => 'What is the predominant color of your seedling leaves?',
+                    'category' => 'leaf',
+                    'type' => 'rating',
                     'options' => [
-                        'excellent' => 'Excellent - Seedlings look very healthy and vigorous',
-                        'good' => 'Good - Seedlings look healthy with minor issues',
-                        'fair' => 'Fair - Seedlings have some problems but are growing',
-                        'poor' => 'Poor - Seedlings have significant health issues'
+                        '5' => 'Dark green (healthy)',
+                        '4' => 'Medium green',
+                        '3' => 'Light green',
+                        '2' => 'Yellowish green',
+                        '1' => 'Yellow or pale'
                     ]
                 ],
-                'leaf_condition' => [
-                    'id' => 'leaf_condition',
-                    'question' => 'What is the condition of the seedling leaves?',
-                    'type' => 'select',
+                'leaf_size' => [
+                    'id' => 'leaf_size',
+                    'question' => 'How would you describe the size of the first true leaves?',
+                    'category' => 'leaf',
+                    'type' => 'rating',
                     'options' => [
-                        'excellent' => 'Excellent - Dark green, no spots or damage',
-                        'good' => 'Good - Green with minor spots or slight yellowing',
-                        'fair' => 'Fair - Some yellowing or spots, but mostly healthy',
-                        'poor' => 'Poor - Significant yellowing, spots, or damage'
+                        '5' => 'Large and well-developed (5-8 cm)',
+                        '4' => 'Good size (4-5 cm)',
+                        '3' => 'Average size (3-4 cm)',
+                        '2' => 'Small (2-3 cm)',
+                        '1' => 'Very small or stunted (<2 cm)'
                     ]
                 ],
-                'growth_rate' => [
-                    'id' => 'growth_rate',
-                    'question' => 'How fast are your seedlings growing compared to expected?',
-                    'type' => 'select',
+                'leaf_spots' => [
+                    'id' => 'leaf_spots',
+                    'question' => 'Are there any spots, holes, or discoloration on the leaves?',
+                    'category' => 'leaf',
+                    'type' => 'yesno',
                     'options' => [
-                        'faster' => 'Faster than expected',
-                        'normal' => 'Normal growth rate',
-                        'slower' => 'Slower than expected',
-                        'stunted' => 'Growth seems stunted'
+                        'no' => 'No - Leaves are clean and uniform',
+                        'yes' => 'Yes - I see spots or damage'
                     ]
                 ],
-                'water_availability' => [
-                    'id' => 'water_availability',
-                    'question' => 'How is the soil moisture for your seedlings?',
-                    'type' => 'select',
+                'leaf_texture' => [
+                    'id' => 'leaf_texture',
+                    'question' => 'How do the leaves feel when you gently touch them?',
+                    'category' => 'leaf',
+                    'type' => 'rating',
                     'options' => [
-                        'excellent' => 'Excellent - Consistent moisture, no drought stress',
-                        'good' => 'Good - Adequate moisture with minor fluctuations',
-                        'fair' => 'Fair - Some drought stress or overwatering',
-                        'poor' => 'Poor - Significant water issues'
+                        '5' => 'Firm and turgid (well-hydrated)',
+                        '4' => 'Slightly firm',
+                        '3' => 'Normal texture',
+                        '2' => 'Slightly wilted or soft',
+                        '1' => 'Wilted or drooping'
                     ]
                 ],
-                'pest_pressure' => [
-                    'id' => 'pest_pressure',
-                    'question' => 'How much pest pressure are your seedlings experiencing?',
-                    'type' => 'select',
+                'leaf_count' => [
+                    'id' => 'leaf_count',
+                    'question' => 'How many true leaves have developed per seedling?',
+                    'category' => 'leaf',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 10,
+                    'unit' => 'leaves',
+                    'optimal' => '4-6'
+                ],
+                
+                // GENERAL CROP PROGRESS QUESTIONS (5)
+                'stem_strength' => [
+                    'id' => 'stem_strength',
+                    'question' => 'How strong and sturdy are the seedling stems?',
+                    'category' => 'progress',
+                    'type' => 'rating',
                     'options' => [
-                        'none' => 'None - No visible pests',
-                        'low' => 'Low - Occasional pests, easily controlled',
-                        'moderate' => 'Moderate - Regular pest activity, requires attention',
-                        'high' => 'High - Significant pest problems'
+                        '5' => 'Very strong - thick and upright',
+                        '4' => 'Strong - standing well',
+                        '3' => 'Moderate - some bending',
+                        '2' => 'Weak - thin and bending',
+                        '1' => 'Very weak - falling over'
                     ]
                 ],
-                'disease_issues' => [
-                    'id' => 'disease_issues',
-                    'question' => 'Are there any visible disease symptoms on seedlings?',
-                    'type' => 'select',
+                'root_development' => [
+                    'id' => 'root_development',
+                    'question' => 'Can you see roots emerging from drainage holes or soil surface?',
+                    'category' => 'progress',
+                    'type' => 'yesno',
                     'options' => [
-                        'none' => 'None - No visible disease symptoms',
-                        'minor' => 'Minor - Some symptoms but not affecting growth',
-                        'moderate' => 'Moderate - Symptoms affecting some seedlings',
-                        'severe' => 'Severe - Widespread disease issues'
+                        'yes' => 'Yes - Good root development visible',
+                        'no' => 'No - Roots not yet visible'
                     ]
                 ],
-                'nutrient_deficiency' => [
-                    'id' => 'nutrient_deficiency',
-                    'question' => 'Do you see signs of nutrient deficiency in seedlings?',
-                    'type' => 'select',
+                'growth_speed' => [
+                    'id' => 'growth_speed',
+                    'question' => 'Rate the daily growth rate you observe (10-15 days after planting)',
+                    'category' => 'progress',
+                    'type' => 'rating',
                     'options' => [
-                        'none' => 'None - Seedlings show good nutrient status',
-                        'slight' => 'Slight - Minor yellowing or color changes',
-                        'moderate' => 'Moderate - Clear signs of deficiency',
-                        'severe' => 'Severe - Significant nutrient problems'
+                        '5' => 'Very fast - noticeable daily changes',
+                        '4' => 'Fast - clear growth every 2 days',
+                        '3' => 'Moderate - growth visible weekly',
+                        '2' => 'Slow - minimal changes',
+                        '1' => 'Very slow or no growth'
                     ]
                 ],
-                'weather_impact' => [
-                    'id' => 'weather_impact',
-                    'question' => 'How has recent weather affected your seedlings?',
-                    'type' => 'select',
-                    'options' => [
-                        'positive' => 'Positive - Weather has been beneficial',
-                        'neutral' => 'Neutral - Weather has had minimal impact',
-                        'negative' => 'Negative - Weather has caused some stress',
-                        'damaging' => 'Damaging - Weather has caused significant damage'
-                    ]
+                'pest_damage' => [
+                    'id' => 'pest_damage',
+                    'question' => 'What percentage of seedlings show pest damage?',
+                    'category' => 'progress',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 100,
+                    'unit' => '%',
+                    'optimal' => '0-5%'
                 ],
-                'stage_progression' => [
-                    'id' => 'stage_progression',
-                    'question' => 'How well are your seedlings progressing toward vegetative growth?',
-                    'type' => 'select',
+                'seedling_uniformity' => [
+                    'id' => 'seedling_uniformity',
+                    'question' => 'How uniform is the growth across all seedlings?',
+                    'category' => 'progress',
+                    'type' => 'rating',
                     'options' => [
-                        'ahead' => 'Ahead of schedule',
-                        'on_track' => 'On track with expected timeline',
-                        'slightly_behind' => 'Slightly behind schedule',
-                        'significantly_behind' => 'Significantly behind schedule'
-                    ]
-                ],
-                'overall_satisfaction' => [
-                    'id' => 'overall_satisfaction',
-                    'question' => 'Overall, how satisfied are you with your seedling progress?',
-                    'type' => 'select',
-                    'options' => [
-                        'very_satisfied' => 'Very satisfied - Exceeding expectations',
-                        'satisfied' => 'Satisfied - Meeting expectations',
-                        'somewhat_satisfied' => 'Somewhat satisfied - Below expectations',
-                        'dissatisfied' => 'Dissatisfied - Significantly below expectations'
+                        '5' => 'Very uniform - all similar size',
+                        '4' => 'Mostly uniform - minor variations',
+                        '3' => 'Moderate - some size differences',
+                        '2' => 'Uneven - significant variations',
+                        '1' => 'Very uneven - large disparities'
                     ]
                 ]
             ],
             'vegetative' => [
-                'plant_health' => [
-                    'id' => 'plant_health',
-                    'question' => 'How would you rate the overall health of your vegetative watermelon plants?',
-                    'type' => 'select',
+                // LEAF-FOCUSED QUESTIONS (5)
+                'leaf_color' => [
+                    'id' => 'leaf_color',
+                    'question' => 'What is the predominant color of your vine leaves?',
+                    'category' => 'leaf',
+                    'type' => 'rating',
                     'options' => [
-                        'excellent' => 'Excellent - Plants look very healthy and vigorous',
-                        'good' => 'Good - Plants look healthy with minor issues',
-                        'fair' => 'Fair - Plants have some problems but are growing',
-                        'poor' => 'Poor - Plants have significant health issues'
+                        '5' => 'Deep dark green (optimal)',
+                        '4' => 'Dark green',
+                        '3' => 'Medium green',
+                        '2' => 'Light green or yellowing',
+                        '1' => 'Yellow or brown edges'
                     ]
                 ],
-                'leaf_condition' => [
-                    'id' => 'leaf_condition',
-                    'question' => 'What is the condition of the vegetative leaves?',
-                    'type' => 'select',
+                'leaf_size' => [
+                    'id' => 'leaf_size',
+                    'question' => 'What is the average size of mature leaves on the vines?',
+                    'category' => 'leaf',
+                    'type' => 'rating',
                     'options' => [
-                        'excellent' => 'Excellent - Dark green, no spots or damage',
-                        'good' => 'Good - Green with minor spots or slight yellowing',
-                        'fair' => 'Fair - Some yellowing or spots, but mostly healthy',
-                        'poor' => 'Poor - Significant yellowing, spots, or damage'
+                        '5' => 'Very large (15-20 cm wide)',
+                        '4' => 'Large (12-15 cm)',
+                        '3' => 'Medium (10-12 cm)',
+                        '2' => 'Small (7-10 cm)',
+                        '1' => 'Very small (<7 cm)'
                     ]
                 ],
-                'growth_rate' => [
-                    'id' => 'growth_rate',
-                    'question' => 'How fast are your vines growing compared to expected?',
-                    'type' => 'select',
+                'leaf_disease' => [
+                    'id' => 'leaf_disease',
+                    'question' => 'Do you see any powdery mildew, downy mildew, or fungal spots on leaves?',
+                    'category' => 'leaf',
+                    'type' => 'yesno',
                     'options' => [
-                        'faster' => 'Faster than expected',
-                        'normal' => 'Normal growth rate',
-                        'slower' => 'Slower than expected',
-                        'stunted' => 'Growth seems stunted'
+                        'no' => 'No - Leaves are disease-free',
+                        'yes' => 'Yes - I see disease symptoms'
                     ]
                 ],
-                'water_availability' => [
-                    'id' => 'water_availability',
-                    'question' => 'How is the water availability for your vegetative plants?',
-                    'type' => 'select',
+                'leaf_density' => [
+                    'id' => 'leaf_density',
+                    'question' => 'How dense is the leaf canopy coverage?',
+                    'category' => 'leaf',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 100,
+                    'unit' => '% coverage',
+                    'optimal' => '60-80%'
+                ],
+                'leaf_damage' => [
+                    'id' => 'leaf_damage',
+                    'question' => 'What percentage of leaves show insect damage or chewing marks?',
+                    'category' => 'leaf',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 100,
+                    'unit' => '%',
+                    'optimal' => '0-10%'
+                ],
+                
+                // GENERAL CROP PROGRESS QUESTIONS (5)
+                'vine_length' => [
+                    'id' => 'vine_length',
+                    'question' => 'What is the approximate length of the longest vines?',
+                    'category' => 'progress',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 300,
+                    'unit' => 'cm',
+                    'optimal' => '100-200 cm'
+                ],
+                'lateral_branches' => [
+                    'id' => 'lateral_branches',
+                    'question' => 'How many lateral branches have developed per plant?',
+                    'category' => 'progress',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 15,
+                    'unit' => 'branches',
+                    'optimal' => '4-8'
+                ],
+                'flower_buds' => [
+                    'id' => 'flower_buds',
+                    'question' => 'Can you see flower buds starting to form?',
+                    'category' => 'progress',
+                    'type' => 'yesno',
                     'options' => [
-                        'excellent' => 'Excellent - Consistent moisture, no drought stress',
-                        'good' => 'Good - Adequate moisture with minor fluctuations',
-                        'fair' => 'Fair - Some drought stress or overwatering',
-                        'poor' => 'Poor - Significant water issues'
+                        'yes' => 'Yes - Flower buds are visible',
+                        'no' => 'No - No flower buds yet'
                     ]
                 ],
-                'pest_pressure' => [
-                    'id' => 'pest_pressure',
-                    'question' => 'How much pest pressure are your vegetative plants experiencing?',
-                    'type' => 'select',
+                'water_stress' => [
+                    'id' => 'water_stress',
+                    'question' => 'Rate the water stress level during hottest part of day',
+                    'category' => 'progress',
+                    'type' => 'rating',
                     'options' => [
-                        'none' => 'None - No visible pests',
-                        'low' => 'Low - Occasional pests, easily controlled',
-                        'moderate' => 'Moderate - Regular pest activity, requires attention',
-                        'high' => 'High - Significant pest problems'
+                        '5' => 'No stress - leaves stay turgid',
+                        '4' => 'Minimal - slight wilting',
+                        '3' => 'Moderate - visible wilting',
+                        '2' => 'High - significant wilting',
+                        '1' => 'Severe - extreme wilting'
                     ]
                 ],
-                'disease_issues' => [
-                    'id' => 'disease_issues',
-                    'question' => 'Are there any visible disease symptoms on vegetative plants?',
-                    'type' => 'select',
+                'overall_vigor' => [
+                    'id' => 'overall_vigor',
+                    'question' => 'Rate the overall plant vigor and growth rate',
+                    'category' => 'progress',
+                    'type' => 'rating',
                     'options' => [
-                        'none' => 'None - No visible disease symptoms',
-                        'minor' => 'Minor - Some symptoms but not affecting growth',
-                        'moderate' => 'Moderate - Symptoms affecting some plants',
-                        'severe' => 'Severe - Widespread disease issues'
-                    ]
-                ],
-                'nutrient_deficiency' => [
-                    'id' => 'nutrient_deficiency',
-                    'question' => 'Do you see signs of nutrient deficiency in vegetative plants?',
-                    'type' => 'select',
-                    'options' => [
-                        'none' => 'None - Plants show good nutrient status',
-                        'slight' => 'Slight - Minor yellowing or color changes',
-                        'moderate' => 'Moderate - Clear signs of deficiency',
-                        'severe' => 'Severe - Significant nutrient problems'
-                    ]
-                ],
-                'weather_impact' => [
-                    'id' => 'weather_impact',
-                    'question' => 'How has recent weather affected your vegetative plants?',
-                    'type' => 'select',
-                    'options' => [
-                        'positive' => 'Positive - Weather has been beneficial',
-                        'neutral' => 'Neutral - Weather has had minimal impact',
-                        'negative' => 'Negative - Weather has caused some stress',
-                        'damaging' => 'Damaging - Weather has caused significant damage'
-                    ]
-                ],
-                'stage_progression' => [
-                    'id' => 'stage_progression',
-                    'question' => 'How well are your plants progressing toward flowering stage?',
-                    'type' => 'select',
-                    'options' => [
-                        'ahead' => 'Ahead of schedule',
-                        'on_track' => 'On track with expected timeline',
-                        'slightly_behind' => 'Slightly behind schedule',
-                        'significantly_behind' => 'Significantly behind schedule'
-                    ]
-                ],
-                'overall_satisfaction' => [
-                    'id' => 'overall_satisfaction',
-                    'question' => 'Overall, how satisfied are you with your vegetative growth progress?',
-                    'type' => 'select',
-                    'options' => [
-                        'very_satisfied' => 'Very satisfied - Exceeding expectations',
-                        'satisfied' => 'Satisfied - Meeting expectations',
-                        'somewhat_satisfied' => 'Somewhat satisfied - Below expectations',
-                        'dissatisfied' => 'Dissatisfied - Significantly below expectations'
+                        '5' => 'Excellent - rapid vigorous growth',
+                        '4' => 'Good - steady healthy growth',
+                        '3' => 'Fair - moderate growth',
+                        '2' => 'Poor - slow growth',
+                        '1' => 'Very poor - stunted'
                     ]
                 ]
             ],
             'flowering' => [
-                'plant_health' => [
-                    'id' => 'plant_health',
-                    'question' => 'How would you rate the overall health of your flowering watermelon plants?',
-                    'type' => 'select',
+                // LEAF-FOCUSED QUESTIONS (5)
+                'leaf_health' => [
+                    'id' => 'leaf_health',
+                    'question' => 'What is the overall health status of leaves during flowering?',
+                    'category' => 'leaf',
+                    'type' => 'rating',
                     'options' => [
-                        'excellent' => 'Excellent - Plants look very healthy and vigorous',
-                        'good' => 'Good - Plants look healthy with minor issues',
-                        'fair' => 'Fair - Plants have some problems but are growing',
-                        'poor' => 'Poor - Plants have significant health issues'
+                        '5' => 'Excellent - vibrant and healthy',
+                        '4' => 'Good - mostly healthy',
+                        '3' => 'Fair - some yellowing',
+                        '2' => 'Poor - significant yellowing',
+                        '1' => 'Very poor - dying leaves'
                     ]
                 ],
-                'leaf_condition' => [
-                    'id' => 'leaf_condition',
-                    'question' => 'What is the condition of the flowering plant leaves?',
-                    'type' => 'select',
+                'older_leaf_condition' => [
+                    'id' => 'older_leaf_condition',
+                    'question' => 'Are the older (lower) leaves starting to yellow or die back?',
+                    'category' => 'leaf',
+                    'type' => 'yesno',
                     'options' => [
-                        'excellent' => 'Excellent - Dark green, no spots or damage',
-                        'good' => 'Good - Green with minor spots or slight yellowing',
-                        'fair' => 'Fair - Some yellowing or spots, but mostly healthy',
-                        'poor' => 'Poor - Significant yellowing, spots, or damage'
+                        'no' => 'No - All leaves remain green',
+                        'yes' => 'Yes - Natural senescence occurring'
                     ]
                 ],
-                'growth_rate' => [
-                    'id' => 'growth_rate',
-                    'question' => 'How well are your flowers developing compared to expected?',
-                    'type' => 'select',
+                'leaf_curl' => [
+                    'id' => 'leaf_curl',
+                    'question' => 'Do you observe any leaf curling or distortion?',
+                    'category' => 'leaf',
+                    'type' => 'yesno',
                     'options' => [
-                        'faster' => 'Faster than expected',
-                        'normal' => 'Normal development rate',
-                        'slower' => 'Slower than expected',
-                        'stunted' => 'Development seems stunted'
+                        'no' => 'No - Leaves are flat and normal',
+                        'yes' => 'Yes - Leaves show curling'
                     ]
                 ],
-                'water_availability' => [
-                    'id' => 'water_availability',
-                    'question' => 'How is the water availability for your flowering plants?',
-                    'type' => 'select',
+                'leaf_nutrient_signs' => [
+                    'id' => 'leaf_nutrient_signs',
+                    'question' => 'What percentage of leaves show nutrient deficiency symptoms (yellowing between veins, purple tints)?',
+                    'category' => 'leaf',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 100,
+                    'unit' => '%',
+                    'optimal' => '0-15%'
+                ],
+                'leaf_photosynthesis' => [
+                    'id' => 'leaf_photosynthesis',
+                    'question' => 'Rate the photosynthetic capacity based on leaf appearance',
+                    'category' => 'leaf',
+                    'type' => 'rating',
                     'options' => [
-                        'excellent' => 'Excellent - Consistent moisture, no drought stress',
-                        'good' => 'Good - Adequate moisture with minor fluctuations',
-                        'fair' => 'Fair - Some drought stress or overwatering',
-                        'poor' => 'Poor - Significant water issues'
+                        '5' => 'Excellent - dark green, full canopy',
+                        '4' => 'Good - healthy green color',
+                        '3' => 'Fair - adequate but pale',
+                        '2' => 'Poor - yellowing, sparse',
+                        '1' => 'Very poor - severe yellowing'
                     ]
                 ],
-                'pest_pressure' => [
-                    'id' => 'pest_pressure',
-                    'question' => 'How much pest pressure are your flowering plants experiencing?',
-                    'type' => 'select',
+                
+                // GENERAL CROP PROGRESS QUESTIONS (5)
+                'male_flowers' => [
+                    'id' => 'male_flowers',
+                    'question' => 'How many male flowers are open per plant?',
+                    'category' => 'progress',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 50,
+                    'unit' => 'flowers',
+                    'optimal' => '10-30'
+                ],
+                'female_flowers' => [
+                    'id' => 'female_flowers',
+                    'question' => 'How many female flowers (with small fruit behind) are visible per plant?',
+                    'category' => 'progress',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 20,
+                    'unit' => 'flowers',
+                    'optimal' => '5-15'
+                ],
+                'pollinator_activity' => [
+                    'id' => 'pollinator_activity',
+                    'question' => 'Do you observe bees or other pollinators visiting the flowers?',
+                    'category' => 'progress',
+                    'type' => 'yesno',
                     'options' => [
-                        'none' => 'None - No visible pests',
-                        'low' => 'Low - Occasional pests, easily controlled',
-                        'moderate' => 'Moderate - Regular pest activity, requires attention',
-                        'high' => 'High - Significant pest problems'
+                        'yes' => 'Yes - Good pollinator activity',
+                        'no' => 'No - Few or no pollinators'
                     ]
                 ],
-                'disease_issues' => [
-                    'id' => 'disease_issues',
-                    'question' => 'Are there any visible disease symptoms on flowering plants?',
-                    'type' => 'select',
-                    'options' => [
-                        'none' => 'None - No visible disease symptoms',
-                        'minor' => 'Minor - Some symptoms but not affecting growth',
-                        'moderate' => 'Moderate - Symptoms affecting some plants',
-                        'severe' => 'Severe - Widespread disease issues'
-                    ]
+                'fruit_set' => [
+                    'id' => 'fruit_set',
+                    'question' => 'What percentage of female flowers are successfully setting fruit?',
+                    'category' => 'progress',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 100,
+                    'unit' => '%',
+                    'optimal' => '40-70%'
                 ],
-                'nutrient_deficiency' => [
-                    'id' => 'nutrient_deficiency',
-                    'question' => 'Do you see signs of nutrient deficiency in flowering plants?',
-                    'type' => 'select',
-                    'options' => [
-                        'none' => 'None - Plants show good nutrient status',
-                        'slight' => 'Slight - Minor yellowing or color changes',
-                        'moderate' => 'Moderate - Clear signs of deficiency',
-                        'severe' => 'Severe - Significant nutrient problems'
-                    ]
-                ],
-                'weather_impact' => [
-                    'id' => 'weather_impact',
-                    'question' => 'How has recent weather affected your flowering plants?',
-                    'type' => 'select',
-                    'options' => [
-                        'positive' => 'Positive - Weather has been beneficial',
-                        'neutral' => 'Neutral - Weather has had minimal impact',
-                        'negative' => 'Negative - Weather has caused some stress',
-                        'damaging' => 'Damaging - Weather has caused significant damage'
-                    ]
-                ],
-                'stage_progression' => [
-                    'id' => 'stage_progression',
-                    'question' => 'How well are your plants progressing toward fruiting stage?',
-                    'type' => 'select',
-                    'options' => [
-                        'ahead' => 'Ahead of schedule',
-                        'on_track' => 'On track with expected timeline',
-                        'slightly_behind' => 'Slightly behind schedule',
-                        'significantly_behind' => 'Significantly behind schedule'
-                    ]
-                ],
-                'overall_satisfaction' => [
-                    'id' => 'overall_satisfaction',
-                    'question' => 'Overall, how satisfied are you with your flowering progress?',
-                    'type' => 'select',
-                    'options' => [
-                        'very_satisfied' => 'Very satisfied - Exceeding expectations',
-                        'satisfied' => 'Satisfied - Meeting expectations',
-                        'somewhat_satisfied' => 'Somewhat satisfied - Below expectations',
-                        'dissatisfied' => 'Dissatisfied - Significantly below expectations'
-                    ]
+                'flowering_duration' => [
+                    'id' => 'flowering_duration',
+                    'question' => 'How many days has the plant been flowering?',
+                    'category' => 'progress',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 30,
+                    'unit' => 'days',
+                    'optimal' => '10-20'
                 ]
             ],
             'fruiting' => [
-                'plant_health' => [
-                    'id' => 'plant_health',
-                    'question' => 'How would you rate the overall health of your fruiting watermelon plants?',
-                    'type' => 'select',
+                // LEAF-FOCUSED QUESTIONS (5)
+                'leaf_color' => [
+                    'id' => 'leaf_color',
+                    'question' => 'What is the color of leaves near the developing fruits?',
+                    'category' => 'leaf',
+                    'type' => 'rating',
                     'options' => [
-                        'excellent' => 'Excellent - Plants look very healthy and vigorous',
-                        'good' => 'Good - Plants look healthy with minor issues',
-                        'fair' => 'Fair - Plants have some problems but are growing',
-                        'poor' => 'Poor - Plants have significant health issues'
+                        '5' => 'Dark green and healthy',
+                        '4' => 'Green with good color',
+                        '3' => 'Light green',
+                        '2' => 'Yellowing',
+                        '1' => 'Yellow or brown'
                     ]
                 ],
-                'leaf_condition' => [
-                    'id' => 'leaf_condition',
-                    'question' => 'What is the condition of the fruiting plant leaves?',
-                    'type' => 'select',
+                'leaf_retention' => [
+                    'id' => 'leaf_retention',
+                    'question' => 'What percentage of the original leaf canopy is still intact?',
+                    'category' => 'leaf',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 100,
+                    'unit' => '%',
+                    'optimal' => '70-90%'
+                ],
+                'leaf_disease_spread' => [
+                    'id' => 'leaf_disease_spread',
+                    'question' => 'Is disease spreading on the leaves?',
+                    'category' => 'leaf',
+                    'type' => 'yesno',
                     'options' => [
-                        'excellent' => 'Excellent - Dark green, no spots or damage',
-                        'good' => 'Good - Green with minor spots or slight yellowing',
-                        'fair' => 'Fair - Some yellowing or spots, but mostly healthy',
-                        'poor' => 'Poor - Significant yellowing, spots, or damage'
+                        'no' => 'No - Disease is controlled',
+                        'yes' => 'Yes - Disease is spreading'
                     ]
                 ],
-                'growth_rate' => [
-                    'id' => 'growth_rate',
-                    'question' => 'How fast are your fruits growing compared to expected?',
-                    'type' => 'select',
+                'leaf_shading' => [
+                    'id' => 'leaf_shading',
+                    'question' => 'Are the leaves providing adequate shade for developing fruits?',
+                    'category' => 'leaf',
+                    'type' => 'yesno',
                     'options' => [
-                        'faster' => 'Faster than expected',
-                        'normal' => 'Normal growth rate',
-                        'slower' => 'Slower than expected',
-                        'stunted' => 'Growth seems stunted'
+                        'yes' => 'Yes - Fruits are well-shaded',
+                        'no' => 'No - Fruits exposed to sun'
                     ]
                 ],
-                'water_availability' => [
-                    'id' => 'water_availability',
-                    'question' => 'How is the water availability for your fruiting plants?',
-                    'type' => 'select',
+                'leaf_senescence' => [
+                    'id' => 'leaf_senescence',
+                    'question' => 'Rate the natural aging/yellowing of older leaves',
+                    'category' => 'leaf',
+                    'type' => 'rating',
                     'options' => [
-                        'excellent' => 'Excellent - Consistent moisture, no drought stress',
-                        'good' => 'Good - Adequate moisture with minor fluctuations',
-                        'fair' => 'Fair - Some drought stress or overwatering',
-                        'poor' => 'Poor - Significant water issues'
+                        '5' => 'Normal - only oldest leaves yellowing',
+                        '4' => 'Slight - some lower leaves yellow',
+                        '3' => 'Moderate - many lower leaves yellow',
+                        '2' => 'High - yellowing spreading upward',
+                        '1' => 'Severe - most leaves yellowing'
                     ]
                 ],
-                'pest_pressure' => [
-                    'id' => 'pest_pressure',
-                    'question' => 'How much pest pressure are your fruiting plants experiencing?',
-                    'type' => 'select',
+                
+                // GENERAL CROP PROGRESS QUESTIONS (5)
+                'fruit_count' => [
+                    'id' => 'fruit_count',
+                    'question' => 'How many fruits are developing per plant?',
+                    'category' => 'progress',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 10,
+                    'unit' => 'fruits',
+                    'optimal' => '2-4'
+                ],
+                'fruit_size' => [
+                    'id' => 'fruit_size',
+                    'question' => 'What is the diameter of the largest fruit?',
+                    'category' => 'progress',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 40,
+                    'unit' => 'cm',
+                    'optimal' => '15-30 cm'
+                ],
+                'fruit_color' => [
+                    'id' => 'fruit_color',
+                    'question' => 'Rate the fruit skin color development',
+                    'category' => 'progress',
+                    'type' => 'rating',
                     'options' => [
-                        'none' => 'None - No visible pests',
-                        'low' => 'Low - Occasional pests, easily controlled',
-                        'moderate' => 'Moderate - Regular pest activity, requires attention',
-                        'high' => 'High - Significant pest problems'
+                        '5' => 'Excellent - vibrant pattern developing',
+                        '4' => 'Good - clear color pattern',
+                        '3' => 'Fair - color starting to show',
+                        '2' => 'Poor - minimal color change',
+                        '1' => 'Very poor - still very pale'
                     ]
                 ],
-                'disease_issues' => [
-                    'id' => 'disease_issues',
-                    'question' => 'Are there any visible disease symptoms on fruiting plants?',
-                    'type' => 'select',
-                    'options' => [
-                        'none' => 'None - No visible disease symptoms',
-                        'minor' => 'Minor - Some symptoms but not affecting growth',
-                        'moderate' => 'Moderate - Symptoms affecting some plants',
-                        'severe' => 'Severe - Widespread disease issues'
-                    ]
+                'fruit_growth_rate' => [
+                    'id' => 'fruit_growth_rate',
+                    'question' => 'How much are fruits growing per week?',
+                    'category' => 'progress',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 10,
+                    'unit' => 'cm/week',
+                    'optimal' => '3-7 cm/week'
                 ],
-                'nutrient_deficiency' => [
-                    'id' => 'nutrient_deficiency',
-                    'question' => 'Do you see signs of nutrient deficiency in fruiting plants?',
-                    'type' => 'select',
+                'fruit_health' => [
+                    'id' => 'fruit_health',
+                    'question' => 'Rate the overall health and appearance of developing fruits',
+                    'category' => 'progress',
+                    'type' => 'rating',
                     'options' => [
-                        'none' => 'None - Plants show good nutrient status',
-                        'slight' => 'Slight - Minor yellowing or color changes',
-                        'moderate' => 'Moderate - Clear signs of deficiency',
-                        'severe' => 'Severe - Significant nutrient problems'
-                    ]
-                ],
-                'weather_impact' => [
-                    'id' => 'weather_impact',
-                    'question' => 'How has recent weather affected your fruiting plants?',
-                    'type' => 'select',
-                    'options' => [
-                        'positive' => 'Positive - Weather has been beneficial',
-                        'neutral' => 'Neutral - Weather has had minimal impact',
-                        'negative' => 'Negative - Weather has caused some stress',
-                        'damaging' => 'Damaging - Weather has caused significant damage'
-                    ]
-                ],
-                'stage_progression' => [
-                    'id' => 'stage_progression',
-                    'question' => 'How well are your plants progressing toward harvest stage?',
-                    'type' => 'select',
-                    'options' => [
-                        'ahead' => 'Ahead of schedule',
-                        'on_track' => 'On track with expected timeline',
-                        'slightly_behind' => 'Slightly behind schedule',
-                        'significantly_behind' => 'Significantly behind schedule'
-                    ]
-                ],
-                'overall_satisfaction' => [
-                    'id' => 'overall_satisfaction',
-                    'question' => 'Overall, how satisfied are you with your fruiting progress?',
-                    'type' => 'select',
-                    'options' => [
-                        'very_satisfied' => 'Very satisfied - Exceeding expectations',
-                        'satisfied' => 'Satisfied - Meeting expectations',
-                        'somewhat_satisfied' => 'Somewhat satisfied - Below expectations',
-                        'dissatisfied' => 'Dissatisfied - Significantly below expectations'
+                        '5' => 'Excellent - uniform, no blemishes',
+                        '4' => 'Good - healthy with minor marks',
+                        '3' => 'Fair - some imperfections',
+                        '2' => 'Poor - visible damage or rot',
+                        '1' => 'Very poor - severe problems'
                     ]
                 ]
             ],
             'harvest' => [
-                'plant_health' => [
-                    'id' => 'plant_health',
-                    'question' => 'How would you rate the overall health of your harvest-ready watermelon plants?',
-                    'type' => 'select',
-                    'options' => [
-                        'excellent' => 'Excellent - Plants look very healthy and vigorous',
-                        'good' => 'Good - Plants look healthy with minor issues',
-                        'fair' => 'Fair - Plants have some problems but are growing',
-                        'poor' => 'Poor - Plants have significant health issues'
-                    ]
-                ],
+                // LEAF-FOCUSED QUESTIONS (5)
                 'leaf_condition' => [
                     'id' => 'leaf_condition',
-                    'question' => 'What is the condition of the harvest-ready plant leaves?',
-                    'type' => 'select',
+                    'question' => 'What percentage of leaves are still green and functional?',
+                    'category' => 'leaf',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 100,
+                    'unit' => '%',
+                    'optimal' => '40-70%'
+                ],
+                'leaf_drying' => [
+                    'id' => 'leaf_drying',
+                    'question' => 'Are the leaves naturally drying and dying back?',
+                    'category' => 'leaf',
+                    'type' => 'yesno',
                     'options' => [
-                        'excellent' => 'Excellent - Dark green, no spots or damage',
-                        'good' => 'Good - Green with minor spots or slight yellowing',
-                        'fair' => 'Fair - Some yellowing or spots, but mostly healthy',
-                        'poor' => 'Poor - Significant yellowing, spots, or damage'
+                        'yes' => 'Yes - Natural senescence (normal)',
+                        'no' => 'No - Leaves still mostly green'
                     ]
                 ],
-                'growth_rate' => [
-                    'id' => 'growth_rate',
-                    'question' => 'How well have your fruits developed for harvest?',
-                    'type' => 'select',
+                'leaf_disease_final' => [
+                    'id' => 'leaf_disease_final',
+                    'question' => 'Is leaf disease affecting fruit quality at harvest?',
+                    'category' => 'leaf',
+                    'type' => 'yesno',
                     'options' => [
-                        'faster' => 'Faster than expected',
-                        'normal' => 'Normal development rate',
-                        'slower' => 'Slower than expected',
-                        'stunted' => 'Development seems stunted'
+                        'no' => 'No - Fruits remain healthy',
+                        'yes' => 'Yes - Disease impacting fruits'
                     ]
                 ],
-                'water_availability' => [
-                    'id' => 'water_availability',
-                    'question' => 'How is the water availability for your harvest-ready plants?',
-                    'type' => 'select',
+                'leaf_coverage_harvest' => [
+                    'id' => 'leaf_coverage_harvest',
+                    'question' => 'Rate the remaining leaf canopy coverage',
+                    'category' => 'leaf',
+                    'type' => 'rating',
                     'options' => [
-                        'excellent' => 'Excellent - Consistent moisture, no drought stress',
-                        'good' => 'Good - Adequate moisture with minor fluctuations',
-                        'fair' => 'Fair - Some drought stress or overwatering',
-                        'poor' => 'Poor - Significant water issues'
+                        '5' => 'High - 70-100% coverage',
+                        '4' => 'Good - 50-70% coverage',
+                        '3' => 'Moderate - 30-50% coverage',
+                        '2' => 'Low - 10-30% coverage',
+                        '1' => 'Very low - <10% coverage'
                     ]
                 ],
-                'pest_pressure' => [
-                    'id' => 'pest_pressure',
-                    'question' => 'How much pest pressure are your harvest-ready plants experiencing?',
-                    'type' => 'select',
+                'leaf_pest_final' => [
+                    'id' => 'leaf_pest_final',
+                    'question' => 'Are pests still actively damaging leaves?',
+                    'category' => 'leaf',
+                    'type' => 'yesno',
                     'options' => [
-                        'none' => 'None - No visible pests',
-                        'low' => 'Low - Occasional pests, easily controlled',
-                        'moderate' => 'Moderate - Regular pest activity, requires attention',
-                        'high' => 'High - Significant pest problems'
+                        'no' => 'No - Pest pressure has decreased',
+                        'yes' => 'Yes - Pests still active'
                     ]
                 ],
-                'disease_issues' => [
-                    'id' => 'disease_issues',
-                    'question' => 'Are there any visible disease symptoms on harvest-ready plants?',
-                    'type' => 'select',
+                
+                // GENERAL CROP PROGRESS QUESTIONS (5)
+                'fruit_maturity' => [
+                    'id' => 'fruit_maturity',
+                    'question' => 'What percentage of fruits show harvest maturity signs?',
+                    'category' => 'progress',
+                    'type' => 'slider',
+                    'min' => 0,
+                    'max' => 100,
+                    'unit' => '%',
+                    'optimal' => '80-100%'
+                ],
+                'ground_spot' => [
+                    'id' => 'ground_spot',
+                    'question' => 'Has the ground spot (where fruit touches soil) turned creamy yellow?',
+                    'category' => 'progress',
+                    'type' => 'yesno',
                     'options' => [
-                        'none' => 'None - No visible disease symptoms',
-                        'minor' => 'Minor - Some symptoms but not affecting growth',
-                        'moderate' => 'Moderate - Symptoms affecting some plants',
-                        'severe' => 'Severe - Widespread disease issues'
+                        'yes' => 'Yes - Ground spot is yellow (ready)',
+                        'no' => 'No - Still white or pale'
                     ]
                 ],
-                'nutrient_deficiency' => [
-                    'id' => 'nutrient_deficiency',
-                    'question' => 'Do you see signs of nutrient deficiency in harvest-ready plants?',
-                    'type' => 'select',
+                'tendril_drying' => [
+                    'id' => 'tendril_drying',
+                    'question' => 'Are the tendrils near the fruit stem dried and brown?',
+                    'category' => 'progress',
+                    'type' => 'yesno',
                     'options' => [
-                        'none' => 'None - Plants show good nutrient status',
-                        'slight' => 'Slight - Minor yellowing or color changes',
-                        'moderate' => 'Moderate - Clear signs of deficiency',
-                        'severe' => 'Severe - Significant nutrient problems'
+                        'yes' => 'Yes - Tendrils are dry (harvest ready)',
+                        'no' => 'No - Tendrils still green'
                     ]
                 ],
-                'weather_impact' => [
-                    'id' => 'weather_impact',
-                    'question' => 'How has recent weather affected your harvest-ready plants?',
-                    'type' => 'select',
+                'hollow_sound' => [
+                    'id' => 'hollow_sound',
+                    'question' => 'When you tap the fruit, does it sound hollow/deep?',
+                    'category' => 'progress',
+                    'type' => 'yesno',
                     'options' => [
-                        'positive' => 'Positive - Weather has been beneficial',
-                        'neutral' => 'Neutral - Weather has had minimal impact',
-                        'negative' => 'Negative - Weather has caused some stress',
-                        'damaging' => 'Damaging - Weather has caused significant damage'
+                        'yes' => 'Yes - Hollow sound (ripe)',
+                        'no' => 'No - Dull/flat sound (not ready)'
                     ]
                 ],
-                'stage_progression' => [
-                    'id' => 'stage_progression',
-                    'question' => 'How well are your plants progressing toward harvest readiness?',
-                    'type' => 'select',
+                'harvest_readiness' => [
+                    'id' => 'harvest_readiness',
+                    'question' => 'Based on all indicators, rate harvest readiness',
+                    'category' => 'progress',
+                    'type' => 'rating',
                     'options' => [
-                        'ahead' => 'Ahead of schedule',
-                        'on_track' => 'On track with expected timeline',
-                        'slightly_behind' => 'Slightly behind schedule',
-                        'significantly_behind' => 'Significantly behind schedule'
-                    ]
-                ],
-                'overall_satisfaction' => [
-                    'id' => 'overall_satisfaction',
-                    'question' => 'Overall, how satisfied are you with your harvest readiness?',
-                    'type' => 'select',
-                    'options' => [
-                        'very_satisfied' => 'Very satisfied - Exceeding expectations',
-                        'satisfied' => 'Satisfied - Meeting expectations',
-                        'somewhat_satisfied' => 'Somewhat satisfied - Below expectations',
-                        'dissatisfied' => 'Dissatisfied - Significantly below expectations'
+                        '5' => 'Fully ready - harvest now',
+                        '4' => 'Nearly ready - harvest in 2-3 days',
+                        '3' => 'Getting close - wait 5-7 days',
+                        '2' => 'Not ready - wait 10-14 days',
+                        '1' => 'Far from ready - wait 2+ weeks'
                     ]
                 ]
             ]
@@ -826,7 +863,6 @@ class CropProgressController extends Controller
         // Update overall progress (average of existing and new)
         $existingProgress = $cropGrowth->overall_progress ?? 0;
         $newOverallProgress = round(($existingProgress + $calculatedProgress) / 2);
-        
         $cropGrowth->overall_progress = min(100, $newOverallProgress);
         $cropGrowth->last_updated = Carbon::now();
         
@@ -1226,5 +1262,61 @@ class CropProgressController extends Controller
 
         $questionExplanations = $explanations[$questionId] ?? [];
         return $questionExplanations[$answer] ?? 'Assessment completed for this category';
+    }
+
+    /**
+     * Extract concerns from user answers for research paper search
+     */
+    private function extractConcernsFromAnswers(array $answers): array
+    {
+        $concerns = [];
+        
+        foreach ($answers as $key => $value) {
+            // Check for leaf issues
+            if (str_contains($key, 'leaf_color')) {
+                if (is_numeric($value) && $value <= 3) {
+                    $concerns[] = 'nutrient deficiency';
+                    $concerns[] = 'leaf health';
+                }
+            }
+            
+            // Check for water/texture issues
+            if (str_contains($key, 'water') || str_contains($key, 'texture')) {
+                if (is_numeric($value) && $value <= 2) {
+                    $concerns[] = 'water management';
+                    $concerns[] = 'irrigation';
+                }
+            }
+            
+            // Check for disease
+            if (str_contains($key, 'disease') || str_contains($key, 'spots')) {
+                if ($value === 'yes') {
+                    $concerns[] = 'disease management';
+                    $concerns[] = 'fungal control';
+                }
+            }
+            
+            // Check for pollination
+            if (str_contains($key, 'pollinator') || str_contains($key, 'flower')) {
+                if ($value === 'no' || (is_numeric($value) && $value < 5)) {
+                    $concerns[] = 'pollination';
+                    $concerns[] = 'fruit set';
+                }
+            }
+            
+            // Check for pest issues
+            if (str_contains($key, 'pest') || str_contains($key, 'damage')) {
+                if (is_numeric($value) && $value > 10) {
+                    $concerns[] = 'pest management';
+                }
+            }
+        }
+        
+        // If no specific concerns, use general keywords
+        if (empty($concerns)) {
+            $concerns = ['crop management', 'best practices'];
+        }
+        
+        return array_unique($concerns);
     }
 }

@@ -1,0 +1,360 @@
+@extends('layouts.app')
+
+@section('title', 'Recent Analyses - Nutrient Calculator')
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/nutrient-calculator.css') }}">
+
+<style>
+.history-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #e8f5e9 100%);
+    padding: 2rem 0 4rem 0;
+}
+
+.history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.history-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-left: 5px solid #10b981;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.history-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.history-date i {
+    color: #3b82f6;
+}
+
+.history-stage {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.npk-values {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin: 1.25rem 0;
+    width: 100%;
+}
+
+.npk-item {
+    text-align: center;
+    padding: 0.75rem 0.5rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.npk-label {
+    display: block;
+    font-size: 0.7rem;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.npk-value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.npk-value.nitrogen { color: #3b82f6; }
+.npk-value.phosphorus { color: #10b981; }
+.npk-value.potassium { color: #f59e0b; }
+
+.npk-status {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.25rem;
+    font-weight: 600;
+}
+
+.status-good {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-bad {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.history-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.recommendation-box {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border-left: 5px solid #10b981;
+    margin-top: 1rem;
+}
+
+.recommendation-box h5 {
+    margin: 0 0 0.75rem 0;
+    color: #065f46;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recommendation-box p {
+    margin: 0;
+    color: #065f46;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.recommendation-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0 0;
+}
+
+.recommendation-box li {
+    padding: 0.25rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #065f46;
+}
+
+.recommendation-box li:before {
+    content: '•';
+    color: #10b981;
+    font-weight: bold;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #9ca3af;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    color: #1f2937;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-analyze {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-analyze:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    color: white;
+}
+
+.btn-analyze i {
+    font-size: 1rem;
+}
+</style>
+@endpush
+
+@section('content')
+<div class="history-page">
+    <div class="container main-container">
+        <!-- Unified Header -->
+        <div class="unified-header">
+            <div class="header-main">
+                <div class="header-left">
+                    <h1>Analysis History</h1>
+                    <p>View and manage your previous soil analysis results</p>
+                </div>
+                <div class="header-actions">
+                    <a href="{{ route('nutrient-calculator.index') }}" class="btn btn-analyze">
+                        <i class="fas fa-plus"></i>
+                        <span>New Analysis</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @if($analyses->count() > 0)
+        <div class="history-grid">
+            @foreach($analyses as $analysis)
+            <div class="history-card">
+                <div class="history-header">
+                    <div class="history-date">
+                        <i class="fas fa-calendar-day"></i>
+                        {{ \Carbon\Carbon::parse($analysis->analysis_date)->format('M d, Y') }}
+                    </div>
+                    <div class="history-stage">
+                        {{ ucfirst($analysis->growth_stage) }} Stage
+                    </div>
+                </div>
+
+                <div class="npk-values">
+                    <div class="npk-item">
+                        <span class="npk-label">Nitrogen (N)</span>
+                        <span class="npk-value nitrogen">{{ $analysis->nitrogen }} ppm</span>
+                        <span class="npk-status {{ $analysis->nitrogen >= 50 && $analysis->nitrogen <= 150 ? 'status-good' : ($analysis->nitrogen >= 30 && $analysis->nitrogen < 50 || $analysis->nitrogen > 150 && $analysis->nitrogen <= 200 ? 'status-warning' : 'status-bad') }}">
+                            {{ $analysis->nitrogen >= 50 && $analysis->nitrogen <= 150 ? 'Optimal' : ($analysis->nitrogen < 50 ? 'Low' : 'High') }}
+                        </span>
+                    </div>
+                    <div class="npk-item">
+                        <span class="npk-label">Phosphorus (P)</span>
+                        <span class="npk-value phosphorus">{{ $analysis->phosphorus }} ppm</span>
+                        <span class="npk-status {{ $analysis->phosphorus >= 30 && $analysis->phosphorus <= 80 ? 'status-good' : ($analysis->phosphorus >= 15 && $analysis->phosphorus < 30 || $analysis->phosphorus > 80 && $analysis->phosphorus <= 100 ? 'status-warning' : 'status-bad') }}">
+                            {{ $analysis->phosphorus >= 30 && $analysis->phosphorus <= 80 ? 'Optimal' : ($analysis->phosphorus < 30 ? 'Low' : 'High') }}
+                        </span>
+                    </div>
+                    <div class="npk-item">
+                        <span class="npk-label">Potassium (K)</span>
+                        <span class="npk-value potassium">{{ $analysis->potassium }} ppm</span>
+                        <span class="npk-status {{ $analysis->potassium >= 150 && $analysis->potassium <= 300 ? 'status-good' : ($analysis->potassium >= 100 && $analysis->potassium < 150 || $analysis->potassium > 300 && $analysis->potassium <= 350 ? 'status-warning' : 'status-bad') }}">
+                            {{ $analysis->potassium >= 150 && $analysis->potassium <= 300 ? 'Optimal' : ($analysis->potassium < 150 ? 'Low' : 'High') }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="recommendation-box">
+                    <h5><i class="fas fa-lightbulb"></i> Key Recommendations</h5>
+                    @if(!empty($analysis->ai_recommendations))
+                        @if(is_array($analysis->ai_recommendations))
+                            <ul>
+                                @foreach(array_slice($analysis->ai_recommendations, 0, 3) as $recommendation)
+                                    <li>{{ $recommendation }}</li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p>{{ \Illuminate\Support\Str::limit($analysis->ai_recommendations, 150, '...') }}</p>
+                        @endif
+                    @else
+                        <p>No specific recommendations available for this analysis.</p>
+                    @endif
+                </div>
+
+                <div class="history-actions">
+                    <a href="{{ route('nutrient-calculator.show', $analysis->id) }}" class="btn btn-outline-primary btn-sm view-analysis-btn">
+                        <i class="fas fa-eye me-1"></i> View Details
+                    </a>
+                    <form action="{{ route('nutrient-calculator.destroy', $analysis->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this analysis? This action cannot be undone.');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-trash-alt me-1"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        <div class="mt-4">
+            {{ $analyses->links() }}
+        </div>
+        @else
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>No Analysis History</h3>
+            <p>You haven't performed any soil analysis yet. Start by creating your first analysis to see the results here.</p>
+            <a href="{{ route('nutrient-calculator.index') }}" class="btn btn-analyze">
+                <i class="fas fa-plus"></i>
+                <span>Create First Analysis</span>
+            </a>
+        </div>
+        @endif
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Simple click handler for view buttons - let the link handle navigation
+    document.querySelectorAll('.view-analysis-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Default link behavior will handle the navigation
+        });
+    });
+});
+</script>
+@endpush

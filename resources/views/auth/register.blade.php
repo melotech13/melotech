@@ -1084,12 +1084,9 @@
                             <select class="form-select @error('watermelon_variety') is-invalid @enderror"
                                 id="watermelon_variety" name="watermelon_variety" required>
                                 <option value="">Select variety</option>
-                                <option value="Cantaloupe / Muskmelon" {{ old('watermelon_variety') == 'Cantaloupe / Muskmelon' ? 'selected' : '' }}>🍈 Cantaloupe / Muskmelon (Melon)</option>
-                                <option value="Honeydew Melon" {{ old('watermelon_variety') == 'Honeydew Melon' ? 'selected' : '' }}>🍈 Honeydew Melon (Melon Verde)</option>
                                 <option value="Watermelon" {{ old('watermelon_variety') == 'Watermelon' ? 'selected' : '' }}>🍉 Watermelon (Pakwan)</option>
-                                <option value="Winter Melon" {{ old('watermelon_variety') == 'Winter Melon' ? 'selected' : '' }}>🥒 Winter Melon (Kundol)</option>
-                                <option value="Bitter Melon" {{ old('watermelon_variety') == 'Bitter Melon' ? 'selected' : '' }}>🥒 Bitter Melon (Ampalaya)</option>
-                                <option value="Snake Melon" {{ old('watermelon_variety') == 'Snake Melon' ? 'selected' : '' }}>🥒 Snake Melon (Kundol-haba)</option>
+                                <option value="Cantaloupe / Muskmelon" {{ old('watermelon_variety') == 'Cantaloupe / Muskmelon' ? 'selected' : '' }}>🍈 Cantaloupe / Muskmelon (Melon)</option>
+                                <option value="Bitter Melon - Ampalaya" {{ old('watermelon_variety') == 'Bitter Melon - Ampalaya' ? 'selected' : '' }}>🥒 Bitter Melon - Ampalaya</option>
                             </select>
                             @error('watermelon_variety')
                             <div class="invalid-feedback">{{ $message }}</div>
